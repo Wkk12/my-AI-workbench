@@ -1,0 +1,16 @@
+{
+  // ── 终端环境变量 ──
+  // 让 VSCode 集成终端能拿到 Claude/Anthropic 相关变量
+  "terminal.integrated.env.osx": {
+    "ANTHROPIC_BASE_URL": "http://localhost:8080",
+    "ANTHROPIC_API_KEY": "any-string-works",
+    "ANTHROPIC_MODEL": "claude-sonnet-4-6",
+    "QWAPI_API_KEY": "${env:QWAPI_API_KEY}"
+  },
+  // ── 编辑器 ──
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  // ── TypeScript ──
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}
