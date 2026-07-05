@@ -149,6 +149,48 @@ export interface Settings {
   platforms: PlatformSettings;
 }
 
+// --- 我的钱包（订阅管理）---
+
+export type SubCategory =
+  | "video"      // 视频会员
+  | "music"      // 音乐/音频
+  | "vpn"        // VPN/梯子
+  | "cloud"      // 云存储/iCloud
+  | "insurance"  // 保险
+  | "shopping"   // 购物会员（京东/淘宝等）
+  | "software"   // 软件订阅
+  | "other";     // 其他
+
+export type SubCycle = "month" | "quarter" | "year" | "once";
+
+export interface Subscription {
+  id: string;
+  name: string;           // 订阅名称
+  category: SubCategory;  // 分类
+  cycle: SubCycle;        // 周期
+  amount: number;         // 金额
+  startDate: string;      // 开始日期 YYYY-MM-DD
+  expireDate: string;     // 到期日
+  autoRenew: boolean;     // 是否自动续费
+  provider: string;       // 平台/服务商
+  notes: string;          // 备注
+  history: SubHistory[];  // 续费记录
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SubHistory {
+  action: string;         // "开通" | "续费" | "升级" | "取消"
+  plan?: string;
+  amount: number;
+  date: string;
+  expireDate: string;
+}
+
+export interface SubIndex {
+  subscriptions: Subscription[];
+}
+
 // --- AI ---
 
 export interface AIInsightRequest {

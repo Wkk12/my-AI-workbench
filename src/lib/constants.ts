@@ -16,6 +16,7 @@ import {
   Bot,
   Settings,
   Wrench,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -62,6 +63,13 @@ export const NAV_ITEMS: NavGroup[] = [
     items: [
       { title: "AI 分析", href: "/insights", icon: Bot },
       // { title: "AI 对话", href: "/insights/chat", icon: MessageCircle },
+    ],
+  },
+  {
+    title: "生活",
+    icon: Wallet,
+    items: [
+      { title: "我的钱包", href: "/wallet", icon: Wallet },
     ],
   },
   {
