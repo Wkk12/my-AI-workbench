@@ -191,7 +191,90 @@ export interface SubIndex {
   subscriptions: Subscription[];
 }
 
-// --- AI ---
+// --- AI Chat ---
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  timestamp: string; // ISO
+}
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChatSessionMeta {
+  id: string;
+  title: string;
+  messageCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChatSessionIndex {
+  sessions: ChatSessionMeta[];
+}
+
+// --- AI Memory ---
+
+export interface UserProfile {
+  identity: UserIdentity;
+  personality: UserPersonality;
+  expertise: UserExpertise;
+  usage: UserUsage;
+  context: UserContext;
+  lastUpdated: string;
+  totalConversations: number;
+}
+
+export interface UserIdentity {
+  name: string;
+  preferredName: string;
+  role: string;
+  occupation: string;
+}
+
+export interface UserPersonality {
+  traits: string[];
+  communicationStyle: string;
+  preferences: string[];
+}
+
+export interface UserExpertise {
+  domains: string[];
+  techStack: string[];
+  level: string;
+}
+
+export interface UserUsage {
+  favoriteFeatures: FeatureUsage[];
+  commonTopics: TopicFrequency[];
+  frequentQuestions: string[];
+}
+
+export interface FeatureUsage {
+  feature: string;
+  useCount: number;
+  lastUsed: string;
+}
+
+export interface TopicFrequency {
+  topic: string;
+  mentionCount: number;
+  lastMentioned: string;
+}
+
+export interface UserContext {
+  currentProjects: string[];
+  goals: string[];
+  notes: string[];
+}
+
+// --- Legacy AI types ---
 
 export interface AIInsightRequest {
   type: "polish_report" | "weekly_summary" | "brainstorm" | "copywriting" | "chat";

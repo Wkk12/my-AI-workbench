@@ -1,0 +1,36 @@
+{
+  "identity": {
+    "name": "",
+    "preferredName": "",
+    "role": "",
+    "occupation": ""
+  },
+  "personality": {
+    "traits": [],
+    "communicationStyle": "",
+    "preferences": [
+      "爱吃榴莲"
+    ]
+  },
+  "expertise": {
+    "domains": [],
+    "techStack": [],
+    "level": ""
+  },
+  "usage": {
+    "favoriteFeatures": [],
+    "commonTopics": [],
+    "frequentQuestions": [
+      "身份确认"
+    ]
+  },
+  "context": {
+    "currentProjects": [],
+    "goals": [],
+    "notes": [
+      "共青团员"
+    ]
+  },
+  "lastUpdated": "2026-07-06T16:10:53.912Z",
+  "totalConversations": 0
+}

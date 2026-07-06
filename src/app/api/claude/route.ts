@@ -1,111 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { callClaudeNative, callOpenAICompat, getQwapiKey } from "@/lib/llm";
 import { getSettings } from "@/lib/data/settings";
-import { execSync } from "child_process";
-import fs from "fs";
-import path from "path";
-import os from "os";
+import { getUserProfile, buildProfileContext, getMemoryRules } from "@/lib/data/memory";
 
 /**
  * AI 对话代理 — 自动选择后端：Anthropic > QWAPI (DeepSeek)
- * POST /api/claude  { messages, system? }
+ * POST /api/claude  { messages, system?, sessionId? }
  */
-
-function getQwapiKey(): string {
-  if (process.env.QWAPI_API_KEY) return process.env.QWAPI_API_KEY;
-  try {
-    const p = path.join(os.homedir(), ".hermes", ".env");
-    if (fs.existsSync(p)) {
-      const m = fs.readFileSync(p, "utf-8").match(/QWAPI_API_KEY=(.+)/);
-      if (m?.[1]) return m[1].trim();
-    }
-  } catch {}
-  return "";
-}
-
-async function callClaudeNative(
-  apiKey: string,
-  model: string,
-  system: string,
-  messages: { role: string; content: string }[]
-) {
-  const anthropic = new Anthropic({ apiKey });
-  const clean = messages.map((m) => ({
-    role: m.role as "user" | "assistant",
-    content: m.content,
-  }));
-
-  const resp = await anthropic.messages.create({
-    model,
-    max_tokens: 4096,
-    system,
-    messages: clean,
-  });
-
-  const text = resp.content
-    .filter((b) => b.type === "text")
-    .map((b) => (b as { type: "text"; text: string }).text)
-    .join("\n");
-
-  return { content: text, model: resp.model, backend: "anthropic" };
-}
-
-async function callOpenAICompat(
-  apiKey: string,
-  model: string,
-  system: string,
-  messages: { role: string; content: string }[]
-) {
-  const openaiMessages = [
-    { role: "system", content: system },
-    ...messages.map((m) => ({ role: m.role, content: m.content })),
-  ];
-
-  // Model fallback list for QWAPI
-  const models = [model, "deepseek-v3.2", "deepseek-chat", "gpt-4o-mini"];
-  let lastErr: Error | null = null;
-
-  for (const m of models) {
-    try {
-      const resp = await fetch("https://qweapi.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: m,
-          messages: openaiMessages,
-          temperature: 0.8,
-          max_tokens: 4096,
-        }),
-        signal: AbortSignal.timeout(60000),
-      });
-
-      if (!resp.ok) {
-        const err = await resp.text();
-        if (resp.status === 404 || err.includes("model")) {
-          lastErr = new Error(`Model ${m} not found`);
-          continue;
-        }
-        throw new Error(`API ${resp.status}: ${err.slice(0, 200)}`);
-      }
-
-      const data = await resp.json();
-      return {
-        content: data.choices[0].message.content,
-        model: m,
-        backend: "qweapi",
-      };
-    } catch (e) {
-      if (e instanceof Error && e.message.startsWith("API ")) throw e;
-      lastErr = e instanceof Error ? e : new Error(String(e));
-      continue;
-    }
-  }
-
-  throw lastErr || new Error("All QWAPI models failed");
-}
 
 /** 健康检查：是否有可用 AI 后端 */
 export async function GET() {
@@ -124,7 +25,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { messages, system } = body;
+    const { messages, system, sessionId } = body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
@@ -135,7 +36,27 @@ export async function POST(request: NextRequest) {
 
     const defaultSystem =
       "你是喵站工作台的 AI 助手，帮助用户提升工作效率。用中文回复，风格活泼但专业。";
-    const sysPrompt = system || defaultSystem;
+    let sysPrompt = system || defaultSystem;
+
+    // 注入用户画像 + 记忆规则
+    if (sessionId) {
+      try {
+        const profile = getUserProfile();
+        const profileCtx = buildProfileContext(profile);
+        if (profileCtx) {
+          sysPrompt += "\n\n" + profileCtx;
+        }
+        const rules = getMemoryRules();
+        if (rules) {
+          sysPrompt +=
+            "\n\n## 记忆规则\n" +
+            rules +
+            "\n\n请在对话中自然地记住用户提及的个人信息、偏好和习惯，但不要生硬地复述档案内容。";
+        }
+      } catch (e) {
+        console.warn("Failed to inject memory context:", e);
+      }
+    }
 
     // 1. 尝试 Anthropic/Claude（如果配置了 Key）
     const settings = getSettings();
