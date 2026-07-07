@@ -23,8 +23,11 @@ function getPublisherDir(): string {
   return path.join(os.homedir(), ".openclaw", "workspace", "skills", "social-publisher");
 }
 
-function getHermesEnvPath(): string {
-  return path.join(os.homedir(), ".hermes", ".env");
+function getBrowserActBin(): string | null {
+  const base = path.join(os.homedir(), ".local", "bin", "browser-act");
+  if (fs.existsSync(base + ".exe")) return base + ".exe";
+  if (fs.existsSync(base)) return base;
+  return null;
 }
 
 /** 从内容自动生成生图 prompt */
@@ -118,6 +121,7 @@ async function publishToPlatform(
     try { browserId = JSON.parse(fs.readFileSync(idFile, "utf8")).browserId || ""; } catch {}
   }
   if (!browserId) browserId = "chrome_local_104622926254309377";
+  const publisherDir = getPublisherDir();
   const env = {
     ...process.env,
     HOME: homePath,
@@ -174,9 +178,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 检查 browser-act（使用绝对路径）
-    const baBin = `${os.homedir()}/.local/bin/browser-act`;
-    if (!fs.existsSync(baBin)) {
+    // 检查 browser-act
+    const baBin = getBrowserActBin();
+    if (!baBin) {
       return NextResponse.json(
         { error: "browser-act 未安装。请运行: bash scripts/setup.sh" },
         { status: 500 }

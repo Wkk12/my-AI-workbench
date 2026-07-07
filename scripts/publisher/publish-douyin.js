@@ -205,7 +205,7 @@ async function publishDY(title, content, tags, imagePath) {
   console.log('  图片: ' + imagePath + '\n');
 
   console.log('📂 打开发布页...');
-  bc('browser open ' + CONFIG.browserId + ' "' + CONFIG.publishUrl + '"');
+  bc('browser open ' + CONFIG.browserId + ' "' + CONFIG.publishUrl + '" --headed');
   sleep(5000);
   bc('wait stable');
 

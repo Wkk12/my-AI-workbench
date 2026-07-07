@@ -3,37 +3,37 @@
     {
       "id": "314ba291-380f-4325-8af7-07e4b3f0d4b9",
       "name": "每日早安",
-      "enabled": true,
+      "enabled": false,
       "actionType": "ai_morning",
       "schedule": "11:45",
       "daysOfWeek": [],
       "config": {
         "city": "北京"
       },
-      "lastRun": "2026-07-07T04:35:14.760Z",
-      "lastResult": "早安呀，美少女珂！☀️ 今天北京的天气晴朗，微风轻拂，气温大约在18-25度，是个适合出门的好日子呢～  \n\n穿搭建议：可以穿一件薄外套搭配连衣裙或长裤，既舒适又时尚，记得带上一件小外套，早晚温差有点大哦！  \n\n今天也要元气满满地迎接新的一天，相信自己，你是最棒的！💖 加油～",
+      "lastRun": "2026-07-07T05:36:13.663Z",
+      "lastResult": "早安呀美少女珂！☀️ 今天北京的天气晴朗，温度大概在15-25度之间，早晚温差有点大哦～建议你穿一件薄外套搭配长裤或裙子，既舒适又好看！记得带上小包包，装点小零食和水，保持活力满满！今天也要加油哦，你是最棒的！💪",
       "createdAt": "2026-07-06T02:55:53.880Z",
-      "updatedAt": "2026-07-07T03:42:04.381Z"
+      "updatedAt": "2026-07-07T05:36:55.396Z"
     },
     {
       "id": "cb410b0e-c6c3-43c9-9206-a14d7e98e8b5",
       "name": "下午生成日报",
-      "enabled": true,
+      "enabled": false,
       "actionType": "generate_report",
       "schedule": "11:47",
       "daysOfWeek": [],
       "config": {
         "city": "北京"
       },
-      "lastRun": "2026-07-07T04:47:55.649Z",
+      "lastRun": "2026-07-07T05:18:00.676Z",
       "lastResult": "日报已生成 (0 commits)",
       "createdAt": "2026-07-06T02:56:24.224Z",
-      "updatedAt": "2026-07-07T03:45:46.178Z"
+      "updatedAt": "2026-07-07T05:36:56.805Z"
     },
     {
       "id": "df25fab7-7fe2-492b-9982-48f96dd59887",
       "name": "晚上发抖音",
-      "enabled": true,
+      "enabled": false,
       "actionType": "publish_douyin",
       "schedule": "20:00",
       "daysOfWeek": [],
@@ -41,24 +41,24 @@
         "city": "北京"
       },
       "createdAt": "2026-07-06T02:56:37.392Z",
-      "updatedAt": "2026-07-06T02:56:37.392Z",
+      "updatedAt": "2026-07-07T05:36:42.974Z",
       "lastRun": "2026-07-07T01:54:49.485Z",
       "lastResult": "🎵 发布脚本未安装。请将 social-publisher 脚本放到 ~/.openclaw/workspace/skills/social-publisher/"
     },
     {
       "id": "7bc111c5-4e81-45ad-b8e7-d98565fde4f1",
       "name": "喝水提醒",
-      "enabled": true,
+      "enabled": false,
       "actionType": "custom",
       "schedule": "11:43",
       "daysOfWeek": [],
       "config": {
         "city": "北京"
       },
-      "lastRun": "2026-07-07T04:35:14.764Z",
+      "lastRun": "2026-07-07T05:36:13.665Z",
       "lastResult": "自定义任务（待实现脚本调用）",
       "createdAt": "2026-07-07T01:56:42.224Z",
-      "updatedAt": "2026-07-07T03:41:52.811Z"
+      "updatedAt": "2026-07-07T05:36:41.820Z"
     }
   ]
 }

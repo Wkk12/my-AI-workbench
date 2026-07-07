@@ -194,7 +194,7 @@ async function publishXHS(title, content, tags, imagePath) {
 
   // Step 1+2: 打开 + 登录
   console.log('📂 打开发布页...');
-  bc('browser open ' + CONFIG.browserId + ' "' + CONFIG.publishUrl + '"');
+  bc('browser open ' + CONFIG.browserId + ' "' + CONFIG.publishUrl + '" --headed');
   sleep(5000);
   bc('wait stable');
 
