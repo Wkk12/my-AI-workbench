@@ -23,10 +23,18 @@ const path = require('path');
 const os = require('os');
 const { generateCover } = require('./generate-cover');
 
+function getBrowserId() {
+  if (process.env.BROWSER_ID) return process.env.BROWSER_ID;
+  try {
+    const idFile = path.join(__dirname, '..', '..', 'data', 'browser-id.json');
+    return JSON.parse(fs.readFileSync(idFile, 'utf8')).browserId || '';
+  } catch { return ''; }
+}
+
 // ── 配置 ──
 const CONFIG = {
   session: 'xhs_' + Date.now().toString(36),
-  browserId: process.env.BROWSER_ID || 'chrome_local_104622926254309377',
+  browserId: getBrowserId(),
   publishUrl: 'https://creator.xiaohongshu.com/publish/publish',
   xhsTitleMax: 20,
 };

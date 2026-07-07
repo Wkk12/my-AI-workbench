@@ -24,10 +24,18 @@ const readline = require('readline');
 const os = require('os');
 const { generateCover } = require('./generate-cover');
 
+function getBrowserId() {
+  if (process.env.BROWSER_ID) return process.env.BROWSER_ID;
+  try {
+    const idFile = path.join(__dirname, '..', '..', 'data', 'browser-id.json');
+    return JSON.parse(fs.readFileSync(idFile, 'utf8')).browserId || '';
+  } catch { return ''; }
+}
+
 // ── 配置 ──
 const CONFIG = {
   session: 'dy_persist',  // 固定会话名，cookie/localStorage 跨次复用 → 免二次验证
-  browserId: process.env.BROWSER_ID || 'chrome_local_104622926254309377',
+  browserId: getBrowserId(),
   publishUrl: 'https://creator.douyin.com/creator-micro/content/upload?default-tab=3',
   titleMax: 55,
   // 模型 fallback 列表（qweapi 可用模型）

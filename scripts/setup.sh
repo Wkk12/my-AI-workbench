@@ -2,6 +2,8 @@
 # setup.sh — my-AI-workbench 环境初始化
 set -e
 
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
 echo "🛠️  my-AI-workbench 环境检查"
 echo "=============================="
 
@@ -73,13 +75,22 @@ fi
 # 6. 浏览器配置
 echo ""
 echo "🔧 浏览器配置..."
+BROWSER_DATA="$PROJECT_ROOT/data/browser-id.json"
 if command -v browser-act &>/dev/null; then
-  if browser-act browser list 2>/dev/null | grep -q "chrome_local"; then
-    echo "  ✅ Chrome 浏览器已配置"
+  # 检查是否已有 Chrome 浏览器
+  EXISTING=$(browser-act browser list 2>/dev/null | grep -o 'chrome_local_[0-9]*' | head -1)
+  if [ -n "$EXISTING" ]; then
+    echo "  ✅ 已有 Chrome 浏览器: $EXISTING"
   else
-    echo "  ⚠️ 需要创建 Chrome 浏览器:"
-    echo "     browser-act browser create chrome --name workbench"
+    echo "  📥 创建 Chrome 浏览器..."
+    browser-act browser create chrome --name workbench 2>&1 | tail -1
+    EXISTING=$(browser-act browser list 2>/dev/null | grep -o 'chrome_local_[0-9]*' | head -1)
+    echo "  ✅ 已创建: $EXISTING"
   fi
+  # 保存浏览器 ID
+  mkdir -p "$PROJECT_ROOT/data"
+  echo "{\"browserId\":\"$EXISTING\"}" > "$BROWSER_DATA"
+  echo "  📁 浏览器 ID 已保存到 data/browser-id.json"
 else
   echo "  ⏭️ 跳过（browser-act 未安装）"
 fi
