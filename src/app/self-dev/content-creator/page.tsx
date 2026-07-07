@@ -124,10 +124,17 @@ export default function ContentCreatorPage() {
   };
 
   const fetchContents = async () => {
-    const res = await fetch("/api/content");
-    const data = await res.json();
-    setContents(data.contents || []);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/content");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setContents(data.contents || []);
+    } catch (err) {
+      console.error("加载内容列表失败:", err);
+      setContents([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchMonitor = useCallback(async () => {
@@ -290,20 +297,26 @@ export default function ContentCreatorPage() {
 
   // 一键发布（带环境检查）
   const handlePublish = async (item: ContentItem) => {
-    // 先检查环境
+    // 立即反馈：防止重复点击，显示 loading
+    setPublishingId(item.id);
     setPublishLog("正在检查发布环境...");
-    const { ready, checks: checkList } = await runChecks();
-
-    if (!ready) {
-      setChecks(checkList || []);
-      setCheckReady(false);
-      setPendingPublish(item);
-      setSetupDialogOpen(true);
-      setPublishLog("请先完成环境配置");
-      return;
+    
+    try {
+      const { ready, checks: checkList } = await runChecks();
+      if (!ready) {
+        setChecks(checkList || []);
+        setCheckReady(false);
+        setPendingPublish(item);
+        setSetupDialogOpen(true);
+        setPublishLog("请先完成环境配置");
+        setPublishingId(null);
+        return;
+      }
+      doPublish(item);
+    } catch (err) {
+      setPublishLog(`检查环境失败: ${String(err)}`);
+      setPublishingId(null);
     }
-
-    doPublish(item);
   };
 
   const doPublish = async (item: ContentItem) => {
