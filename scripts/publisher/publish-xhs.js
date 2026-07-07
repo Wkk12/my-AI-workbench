@@ -199,13 +199,27 @@ async function publishXHS(title, content, tags, imagePath) {
   bc('wait stable');
 
   console.log('🔐 检查登录...');
-  const curUrl = bc('eval "window.location.href"');
+  let curUrl = bc('eval "window.location.href"');
   if (curUrl.includes('/login') || curUrl.includes('/signin')) {
-    bail(
-      '未登录！请运行:\n' +
-      '  browser-act --session xhs_login browser open ' + CONFIG.browserId +
-      ' "https://creator.xiaohongshu.com" --headed\n  在弹出窗口扫码/验证码登录后再试。'
-    );
+    console.log('[NEED_LOGIN] 请在浏览器窗口中扫码或验证码登录，登录后会自动继续...');
+    console.log('[NEED_LOGIN] 等待中...（最多等待 5 分钟）');
+    // 轮询等待用户登录
+    for (let i = 0; i < 60; i++) {
+      sleep(5000);
+      try {
+        curUrl = bc('eval "window.location.href"', { timeout: 10000 });
+        if (!curUrl.includes('/login') && !curUrl.includes('/signin')) {
+          console.log('  ✅ 已登录，继续发布...');
+          break;
+        }
+      } catch { /* 继续等待 */ }
+      if (i % 6 === 0) console.log('[NEED_LOGIN] 仍在等待登录... (' + Math.round((i + 1) * 5 / 60) + '分钟)');
+    }
+    // 重新检查
+    curUrl = bc('eval "window.location.href"');
+    if (curUrl.includes('/login') || curUrl.includes('/signin')) {
+      bail('登录超时（5分钟），请先登录后再重试发布。');
+    }
   }
   console.log('  ✅ 已登录');
 

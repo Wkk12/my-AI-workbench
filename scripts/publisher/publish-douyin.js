@@ -210,24 +210,39 @@ async function publishDY(title, content, tags, imagePath) {
   bc('wait stable');
 
   console.log('🔐 检查登录状态...');
-  // 先看是否直接到了发布页（已登录+cookie有效）
   let curUrl = bc('eval "window.location.href"');
   if (curUrl.includes('/upload') || curUrl.includes('/content')) {
-    console.log('  ✅ 已登录，跳过验证');
+    console.log('  ✅ 已登录');
+  } else if (curUrl.includes('/login') || curUrl.includes('/signin')) {
+    console.log('[NEED_LOGIN] 请在浏览器窗口中扫码或验证码登录，登录后会自动继续...');
+    console.log('[NEED_LOGIN] 等待中...（最多等待 5 分钟）');
+    for (let i = 0; i < 60; i++) {
+      sleep(5000);
+      try {
+        curUrl = bc('eval "window.location.href"', { timeout: 10000 });
+        if (!curUrl.includes('/login') && !curUrl.includes('/signin')) {
+          console.log('  ✅ 已登录，继续发布...');
+          break;
+        }
+      } catch { /* continue */ }
+      if (i % 6 === 0) console.log('[NEED_LOGIN] 仍在等待登录... (' + Math.round((i + 1) * 5 / 60) + '分钟)');
+    }
+    curUrl = bc('eval "window.location.href"');
+    if (curUrl.includes('/login') || curUrl.includes('/signin')) {
+      bail('登录超时（5分钟），请先登录后再重试发布。');
+    }
   } else {
-    console.log('  ⚠️  需要登录...');
+    // 可能需要验证或其他情况
     const pgState = bc('state --format text');
-
     if (pgState.includes('身份验证')) {
       console.log('  🪪 刷脸验证中...');
       bc('eval "var items=[...document.querySelectorAll(\'[class*=\\\"uc_verification\\\"]\')];var f=items.find(function(x){return x.textContent.includes(\'刷脸\')});if(f)f.click()"', { ignoreError: true });
       sleep(3000);
-      await ask('✅ 手机上完成刷脸后按回车...');
-      sleep(3000);
+      console.log('[NEED_LOGIN] 请在手机上完成刷脸验证...');
+      sleep(5000);
       bc('wait stable');
       curUrl = bc('eval "window.location.href"');
     }
-
     // 导航到图文发布页
     if (curUrl.includes('/home') || !curUrl.includes('/upload')) {
       console.log('  🧭 导航到图文发布页...');

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { execSync, spawn } from "child_process";
+import { exec } from "child_process";
 import path from "path";
 import fs from "fs";
 import os from "os";
@@ -132,29 +132,13 @@ async function publishToPlatform(
   let log = "";
   runningJobs.set(jobId, { status: "running", log: "", startTime: Date.now() });
 
-  const child = spawn("node", args, {
-    cwd: getPublisherDir(),
-    env,
-    stdio: ["ignore", "pipe", "pipe"],
-  });
+  const cmd = `node ${args.map(a => `"${a}"`).join(" ")}`;
 
-  child.stdout.on("data", (data: Buffer) => {
-    log += data.toString();
-    const job = runningJobs.get(jobId);
-    if (job) job.log = log.slice(-5000);
-  });
-
-  child.stderr.on("data", (data: Buffer) => {
-    log += "[stderr] " + data.toString();
-    const job = runningJobs.get(jobId);
-    if (job) job.log = log.slice(-5000);
-  });
-
-  child.on("close", (code) => {
+  exec(cmd, { cwd: getPublisherDir(), env }, (error, stdout, stderr) => {
     const job = runningJobs.get(jobId);
     if (job) {
-      job.status = code === 0 ? "done" : "error";
-      job.log = log.slice(-5000);
+      job.status = error ? "error" : "done";
+      job.log = ((stdout || "") + (stderr ? "[stderr] " + stderr : "")).slice(-5000);
     }
     setTimeout(() => runningJobs.delete(jobId), 3600_000);
   });

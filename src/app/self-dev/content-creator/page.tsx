@@ -606,6 +606,12 @@ export default function ContentCreatorPage() {
                 关闭
               </Button>
             </div>
+            {publishLog.includes("[NEED_LOGIN]") && (
+              <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-sm space-y-1.5">
+                <p className="font-medium text-amber-800">🔐 请在浏览器中手动登录</p>
+                <p className="text-xs text-amber-600">登录后脚本会自动检测并继续发布，无需额外操作</p>
+              </div>
+            )}
             <pre className="text-xs text-muted-foreground whitespace-pre-wrap max-h-32 overflow-y-auto font-mono">
               {publishLog || "等待日志..."}
             </pre>
