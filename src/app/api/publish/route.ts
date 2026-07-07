@@ -110,13 +110,21 @@ async function publishToPlatform(
 
   const cmd = `node ${args.map(a => `"${a}"`).join(" ")}`;
   const sep = process.platform === "win32" ? ";" : ":";
-  // 读取浏览器 ID（优先环境变量 → data/browser-id.json）
+  const homePath = os.homedir();
+  // 读取浏览器 ID（优先环境变量 → data/browser-id.json → 默认值）
   let browserId = process.env.BROWSER_ID || "";
   if (!browserId) {
     const idFile = path.join(process.cwd(), "data", "browser-id.json");
     try { browserId = JSON.parse(fs.readFileSync(idFile, "utf8")).browserId || ""; } catch {}
   }
-  const env = { ...process.env, HOME: os.homedir(), QWAPI_API_KEY: apiKey, BROWSER_ID: browserId, PATH: `${os.homedir()}/.local/bin${sep}${process.env.PATH || ""}` };
+  if (!browserId) browserId = "chrome_local_104622926254309377";
+  const env = {
+    ...process.env,
+    HOME: homePath,
+    QWAPI_API_KEY: apiKey,
+    BROWSER_ID: browserId,
+    PATH: `${homePath}/.local/bin${sep}${process.env.PATH || ""}`,
+  };
 
   runningJobs.set(jobId, { status: "running", log: "", startTime: Date.now() });
 

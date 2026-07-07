@@ -5,30 +5,30 @@
       "name": "每日早安",
       "enabled": true,
       "actionType": "ai_morning",
-      "schedule": "11:00",
+      "schedule": "11:45",
       "daysOfWeek": [],
       "config": {
         "city": "北京"
       },
+      "lastRun": "2026-07-07T04:35:14.760Z",
+      "lastResult": "早安呀，美少女珂！☀️ 今天北京的天气晴朗，微风轻拂，气温大约在18-25度，是个适合出门的好日子呢～  \n\n穿搭建议：可以穿一件薄外套搭配连衣裙或长裤，既舒适又时尚，记得带上一件小外套，早晚温差有点大哦！  \n\n今天也要元气满满地迎接新的一天，相信自己，你是最棒的！💖 加油～",
       "createdAt": "2026-07-06T02:55:53.880Z",
-      "updatedAt": "2026-07-06T02:56:00.680Z",
-      "lastRun": "2026-07-07T01:52:05.394Z",
-      "lastResult": "早安呀美少女珂！☀️ 今天北京的天气还不错哦，阳光明媚，温度大概在15-20度左右，早晚会有点凉，中午暖暖的～ \n\n穿搭建议：可以穿一件薄外套搭配长袖内搭，中午热了可以脱掉外套，记得带把伞以防万一哦！👗\n\n今天也要加油哦，你是最棒的！💪"
+      "updatedAt": "2026-07-07T03:42:04.381Z"
     },
     {
       "id": "cb410b0e-c6c3-43c9-9206-a14d7e98e8b5",
       "name": "下午生成日报",
       "enabled": true,
       "actionType": "generate_report",
-      "schedule": "17:00",
+      "schedule": "11:47",
       "daysOfWeek": [],
       "config": {
         "city": "北京"
       },
+      "lastRun": "2026-07-07T04:47:55.649Z",
+      "lastResult": "日报已生成 (0 commits)",
       "createdAt": "2026-07-06T02:56:24.224Z",
-      "updatedAt": "2026-07-06T02:56:24.224Z",
-      "lastRun": "2026-07-07T01:54:59.825Z",
-      "lastResult": "日报已生成 (0 commits)"
+      "updatedAt": "2026-07-07T03:45:46.178Z"
     },
     {
       "id": "df25fab7-7fe2-492b-9982-48f96dd59887",
@@ -50,15 +50,15 @@
       "name": "喝水提醒",
       "enabled": true,
       "actionType": "custom",
-      "schedule": "11:06",
+      "schedule": "11:43",
       "daysOfWeek": [],
       "config": {
         "city": "北京"
       },
-      "lastRun": "2026-07-07T03:03:39.308Z",
+      "lastRun": "2026-07-07T04:35:14.764Z",
       "lastResult": "自定义任务（待实现脚本调用）",
       "createdAt": "2026-07-07T01:56:42.224Z",
-      "updatedAt": "2026-07-07T03:04:03.538Z"
+      "updatedAt": "2026-07-07T03:41:52.811Z"
     }
   ]
 }

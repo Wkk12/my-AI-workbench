@@ -136,9 +136,11 @@ export default function NotificationProvider({ children }: { children: ReactNode
 
     // 尝试发送 — 用最精简参数避免静默失败
     try {
-      const n = new window.Notification(`🐱 ${title}`, { body: body.slice(0, 200) });
+      const n = new window.Notification(`🐱 ${title}`, {
+        body: body.slice(0, 200),
+        requireInteraction: true,
+      });
       diag(`已发送: ${title.slice(0, 20)}`, true);
-      setTimeout(() => n.close(), 5000);
       return true;
     } catch (e: unknown) {
       const msg = e instanceof Error ? (e as Error).message : String(e);

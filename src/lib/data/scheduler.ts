@@ -42,12 +42,13 @@ export function deleteTask(id: string): void {
   saveIndex(index);
 }
 
-/** 获取当前应执行的任务（到期后首次轮询即执行，不要求精确到分钟） */
+/** 获取当前应执行的任务（到期后首次轮询即执行，30分钟内不重复） */
 export function getDueTasks(): ScheduledTask[] {
+  // 使用本地时间（UTC+8），与用户设置任务时的时区一致
   const now = new Date();
-  const timeKey = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const localHours = now.getHours(); // JS Date.getHours() 已返回本地时间
+  const timeKey = `${String(localHours).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   const dayOfWeek = now.getDay();
-  const today = now.toISOString().split("T")[0];
 
   return getAllTasks().filter((t) => {
     if (!t.enabled) return false;
@@ -55,8 +56,11 @@ export function getDueTasks(): ScheduledTask[] {
     if (t.schedule > timeKey) return false;
     // 星期匹配
     if (t.daysOfWeek.length > 0 && !t.daysOfWeek.includes(dayOfWeek)) return false;
-    // 今天已执行过则跳过
-    if (t.lastRun && t.lastRun.startsWith(today)) return false;
+    // 30 分钟内已执行过则跳过（避免轮询重复触发）
+    if (t.lastRun) {
+      const last = new Date(t.lastRun).getTime();
+      if (now.getTime() - last < 30 * 60 * 1000) return false;
+    }
     return true;
   });
 }

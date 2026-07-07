@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDueTasks, saveTask } from "@/lib/data/scheduler";
+import { getDueTasks, saveTask, getAllTasks } from "@/lib/data/scheduler";
 import { getSettings } from "@/lib/data/settings";
 import type { ScheduledTask } from "@/lib/types";
 
@@ -142,8 +142,35 @@ function getBaseUrl() {
 
 /** 检查并执行到期任务 */
 export async function GET() {
+  const now = new Date();
+  const timeKey = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const dayOfWeek = now.getDay();
+
   const tasks = getDueTasks();
   const results: { id: string; name: string; result: string }[] = [];
+
+  // 诊断：列出所有任务及其过滤状态
+  const all = getAllTasks();
+  const diag = all.map((t) => {
+    const reasons: string[] = [];
+    if (!t.enabled) reasons.push("已禁用");
+    if (t.schedule > timeKey) reasons.push(`时间未到(schedule=${t.schedule} > now=${timeKey})`);
+    if (t.daysOfWeek.length > 0 && !t.daysOfWeek.includes(dayOfWeek)) reasons.push("今天不执行");
+    if (t.lastRun) {
+      const last = new Date(t.lastRun).getTime();
+      const diffMin = Math.round((now.getTime() - last) / 60000);
+      if (diffMin < 30) reasons.push(`刚执行过(${diffMin}分钟前，30分钟内不重复)`);
+    }
+    return {
+      id: t.id,
+      name: t.name,
+      schedule: t.schedule,
+      enabled: t.enabled,
+      lastRun: t.lastRun,
+      willRun: reasons.length === 0,
+      skipReasons: reasons,
+    };
+  });
 
   for (const task of tasks) {
     try {
@@ -162,9 +189,12 @@ export async function GET() {
   }
 
   return NextResponse.json({
-    checked: new Date().toISOString(),
+    checked: now.toISOString(),
+    timeKey,
+    dayOfWeek,
     executed: results.length,
     results,
+    diag,
   });
 }
 
