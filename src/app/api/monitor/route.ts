@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import os from "os";
 
-const PUBLISHER_DIR = path.resolve(
-  process.env.HOME || "/Users/wkk",
-  ".openclaw/workspace/skills/social-publisher"
-);
+function getPublisherDir(): string {
+  const projectDir = path.resolve(process.cwd(), "scripts", "publisher");
+  if (fs.existsSync(path.join(projectDir, "publish-xhs.js"))) {
+    return projectDir;
+  }
+  return path.resolve(os.homedir(), ".openclaw", "workspace", "skills", "social-publisher");
+}
+
+const PUBLISHER_DIR = getPublisherDir();
 
 interface MonitorState {
   [platform: string]: {

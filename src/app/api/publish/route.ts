@@ -14,8 +14,14 @@ const LLM_BASE = "https://qweapi.com/v1";
 const LLM_MODELS = ["deepseek-v3.2", "deepseek-chat", "gpt-4o-mini"];
 
 function getPublisherDir(): string {
-  const home = os.homedir();
-  return path.join(home, ".openclaw", "workspace", "skills", "social-publisher");
+  // 优先项目内 scripts/publisher/，兼容旧路径
+  const projectDir = path.resolve(process.cwd(), "scripts", "publisher");
+  const { existsSync } = require("fs");
+  if (existsSync(path.join(projectDir, "publish-xhs.js"))) {
+    return projectDir;
+  }
+  // fallback: 旧路径（开发环境）
+  return path.join(os.homedir(), ".openclaw", "workspace", "skills", "social-publisher");
 }
 
 function getHermesEnvPath(): string {
