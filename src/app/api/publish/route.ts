@@ -109,7 +109,8 @@ async function publishToPlatform(
   const jobId = `${platform}_${Date.now()}`;
 
   const cmd = `node ${args.map(a => `"${a}"`).join(" ")}`;
-  const env = { ...process.env, HOME: os.homedir(), QWAPI_API_KEY: apiKey, BROWSER_ID: process.env.BROWSER_ID || "chrome_local_104622926254309377" };
+  const sep = process.platform === "win32" ? ";" : ":";
+  const env = { ...process.env, HOME: os.homedir(), QWAPI_API_KEY: apiKey, BROWSER_ID: process.env.BROWSER_ID || "chrome_local_104622926254309377", PATH: `${os.homedir()}/.local/bin${sep}${process.env.PATH || ""}` };
 
   runningJobs.set(jobId, { status: "running", log: "", startTime: Date.now() });
 

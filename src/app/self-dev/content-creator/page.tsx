@@ -79,6 +79,50 @@ export default function ContentCreatorPage() {
   const [publishJobId, setPublishJobId] = useState<string | null>(null);
   const [publishLog, setPublishLog] = useState("");
 
+  // 环境检查对话框
+  const [setupDialogOpen, setSetupDialogOpen] = useState(false);
+  const [checks, setChecks] = useState<{ name: string; label: string; ok: boolean; detail: string; action?: string; actionLabel?: string }[]>([]);
+  const [checkReady, setCheckReady] = useState(false);
+  const [checkLoading, setCheckLoading] = useState(false);
+  const [pendingPublish, setPendingPublish] = useState<ContentItem | null>(null);
+  const [fixingName, setFixingName] = useState<string | null>(null);
+
+  const runChecks = async () => {
+    setCheckLoading(true);
+    try {
+      const res = await fetch("/api/publish/check");
+      const data = await res.json();
+      setChecks(data.checks || []);
+      setCheckReady(data.ready);
+      return data;
+    } catch {
+      setChecks([]);
+      setCheckReady(false);
+      return { ready: false, checks: [] };
+    } finally {
+      setCheckLoading(false);
+    }
+  };
+
+  const handleFix = async (checkName: string, action: string) => {
+    setFixingName(checkName);
+    setPublishLog(`正在执行: ${action}`);
+    try {
+      const res = await fetch("/api/publish/fix", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: checkName, action }),
+      });
+      const data = await res.json();
+      setPublishLog(data.ok ? `✅ ${data.detail}` : `❌ ${data.detail}`);
+      // 重新检查
+      setTimeout(() => { runChecks(); setFixingName(null); }, 1500);
+    } catch {
+      setPublishLog("修复失败，请手动执行");
+      setFixingName(null);
+    }
+  };
+
   const fetchContents = async () => {
     const res = await fetch("/api/content");
     const data = await res.json();
@@ -244,8 +288,25 @@ export default function ContentCreatorPage() {
     fetchContents();
   };
 
-  // 一键发布
+  // 一键发布（带环境检查）
   const handlePublish = async (item: ContentItem) => {
+    // 先检查环境
+    setPublishLog("正在检查发布环境...");
+    const { ready, checks: checkList } = await runChecks();
+
+    if (!ready) {
+      setChecks(checkList || []);
+      setCheckReady(false);
+      setPendingPublish(item);
+      setSetupDialogOpen(true);
+      setPublishLog("请先完成环境配置");
+      return;
+    }
+
+    doPublish(item);
+  };
+
+  const doPublish = async (item: ContentItem) => {
     setPublishingId(item.id);
     setPublishJobId(null);
     setPublishLog("正在启动发布任务...");
@@ -657,6 +718,75 @@ export default function ContentCreatorPage() {
           ))}
         </div>
       )}
+
+      {/* 发布环境配置向导 */}
+      <Dialog open={setupDialogOpen} onOpenChange={setSetupDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>🔧 发布环境检查</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 mt-2">
+            {checkLoading ? (
+              <div className="flex items-center gap-2 py-4 text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>正在检查环境...</span>
+              </div>
+            ) : (
+              <>
+                {checks.map((c) => (
+                  <div key={c.name} className={`flex items-start gap-2.5 p-2.5 rounded-lg ${c.ok ? "bg-green-50 dark:bg-green-950" : "bg-amber-50 dark:bg-amber-950"}`}>
+                    <span className="text-lg shrink-0 mt-0.5">{c.ok ? "✅" : "⚠️"}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">{c.label}</p>
+                      <p className="text-xs text-muted-foreground">{c.detail}</p>
+                      {!c.ok && c.action && c.actionLabel && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 mt-1.5 text-xs"
+                          disabled={fixingName === c.name}
+                          onClick={() => {
+                            if (c.action?.startsWith("http")) window.open(c.action, "_blank");
+                            else if (c.action?.startsWith("/")) window.location.href = c.action;
+                            else handleFix(c.name, c.action || "");
+                          }}
+                        >
+                          {fixingName === c.name ? (
+                            <><Loader2 className="h-3 w-3 animate-spin mr-1" />执行中</>
+                          ) : (
+                            c.actionLabel
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                <div className="flex gap-2 pt-2">
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSetupDialogOpen(false); setPendingPublish(null); }}>
+                    取消
+                  </Button>
+                  <Button size="sm" className="flex-1 gap-1" onClick={async () => {
+                    await runChecks();
+                  }} disabled={checkLoading}>
+                    <RefreshCw className={`h-3.5 w-3.5 ${checkLoading ? "animate-spin" : ""}`} />
+                    重新检查
+                  </Button>
+                </div>
+
+                {checkReady && (
+                  <Button className="w-full gap-1" onClick={() => {
+                    setSetupDialogOpen(false);
+                    if (pendingPublish) doPublish(pendingPublish);
+                  }}>
+                    环境就绪，继续发布
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
