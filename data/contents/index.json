@@ -38,7 +38,7 @@
       "title": "15元海报设计！免费改1次，太香了💥",
       "description": "姐妹们！发现一个宝藏海报设计服务！\n\n只要15元一张，还免费修改1次！💰\n\n虽然不提供源文件，但这个价格还要啥自行车！\n\n适合急用、预算不多的活动宣传或小店海报～\n\n沟通好需求，出图速度也很快！🚀\n\n你们觉得这个价格划算吗？评论区聊聊！",
       "platform": "xiaohongshu",
-      "status": "draft",
+      "status": "published",
       "tags": [
         "海报设计",
         "性价比好物",
@@ -49,7 +49,8 @@
       "mediaPaths": [],
       "aiGenerated": false,
       "createdAt": "2026-07-07T02:01:34.784Z",
-      "updatedAt": "2026-07-07T02:19:22.380Z"
+      "updatedAt": "2026-07-07T09:15:45.304Z",
+      "publishedAt": "2026-07-07T09:15:45.304Z"
     }
   ]
 }
