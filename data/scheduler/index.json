@@ -35,30 +35,110 @@
       "name": "晚上发抖音",
       "enabled": false,
       "actionType": "publish_douyin",
-      "schedule": "20:00",
+      "schedule": "20:55",
       "daysOfWeek": [],
       "config": {
         "city": "北京"
       },
+      "lastRun": "2026-07-07T13:32:41.234Z",
+      "lastResult": "🎵 发布完成，详情: 030.png\n\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ wait stable\n🔐 检查登录状态...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n📤 上传图片...\n  ▶ state --format text\n  ▶ upload 65 \"/var/folders/vs/zc4sfn6d0754qd49b9v08jgh0...\n  ▶ wait stable --timeout 60000\n  ▶ wait stable\n✏️  填写标题...\n  ▶ eval \"var i=document.querySelector('input[placeholde...\n  ▶ session close dy_persist\nError 210313: Error: no title\n    at <anonymous>:1:122\n\n💥 失败: Command failed: browser-act --session dy_persist eval \"var i=document.querySelector('input[placeholder*=\\\"标题\\\"]')||document.querySelector('input[placeholder*=\\\"作品\\\"]');if(!i)throw new Error('no title');i.value='今日份心动瞬间✨ 平凡日子里的小确幸都在这啦';i.dispatchEvent(new Event('input',{bubbles:true}))\"\nError 210313: Error: no title\n    at <anonymous>:1:122\n\n",
       "createdAt": "2026-07-06T02:56:37.392Z",
-      "updatedAt": "2026-07-07T05:36:42.974Z",
-      "lastRun": "2026-07-07T01:54:49.485Z",
-      "lastResult": "🎵 发布脚本未安装。请将 social-publisher 脚本放到 ~/.openclaw/workspace/skills/social-publisher/"
+      "updatedAt": "2026-07-07T13:36:14.762Z"
     },
     {
       "id": "7bc111c5-4e81-45ad-b8e7-d98565fde4f1",
       "name": "喝水提醒",
-      "enabled": false,
+      "enabled": true,
       "actionType": "custom",
-      "schedule": "11:43",
+      "schedule": "20:53",
       "daysOfWeek": [],
       "config": {
         "city": "北京"
       },
-      "lastRun": "2026-07-07T05:36:13.665Z",
+      "lastRun": "2026-07-07T13:23:33.553Z",
       "lastResult": "自定义任务（待实现脚本调用）",
       "createdAt": "2026-07-07T01:56:42.224Z",
-      "updatedAt": "2026-07-07T05:36:41.820Z"
+      "updatedAt": "2026-07-07T12:52:37.368Z"
+    },
+    {
+      "id": "a2bb4345-6ac1-4790-8f3c-a7463e2cbd93",
+      "name": "晚上发小红书",
+      "enabled": false,
+      "actionType": "publish_xhs",
+      "schedule": "21:00",
+      "daysOfWeek": [],
+      "config": {
+        "city": "北京"
+      },
+      "createdAt": "2026-07-07T12:52:11.313Z",
+      "updatedAt": "2026-07-07T13:36:09.292Z",
+      "lastRun": "2026-07-07T13:33:25.296Z",
+      "lastResult": "📕 发布完成，详情: \n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"好物分享\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"治愈系\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"仪式感\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ✅ 已添加 5/5 个标签\n🚀 发布...\n  ▶ eval \"window.scrollTo(0,document.body.scrollHeight)\"\n  ▶ state --format text\n  ▶ click 142\n  ▶ eval \"window.location.href\"\n\n🎉 发布成功！\n  ▶ session close xhs_mraosc2h\n"
+    },
+    {
+      "id": "fe347ef4-67d9-412f-b798-f8117260f796",
+      "name": "提醒给奶油洗澡",
+      "enabled": true,
+      "actionType": "ai_morning",
+      "schedule": "20:57",
+      "daysOfWeek": [],
+      "config": {
+        "city": "北京"
+      },
+      "createdAt": "2026-07-07T12:55:13.119Z",
+      "updatedAt": "2026-07-07T12:55:13.119Z",
+      "lastRun": "2026-07-07T13:30:40.703Z",
+      "lastResult": "早安呀美少女珂！☀️ 今天也要像小太阳一样闪闪发光哦～\n\n北京今天大概是晴朗的好天气，微风轻轻吹，温度在20度左右，超舒服的！🌤️ 建议穿件薄针织衫配牛仔裤，再加件小外套备用，既舒适又好看呢～\n\n记得今天也要对自己温柔一点，你努力的样子真的特别迷人！💕 加油哦～"
+    },
+    {
+      "id": "c40c3d56-7f26-426e-986d-d5f4e7c5ef03",
+      "name": "AI时代🔥普通人如何抓住机遇",
+      "enabled": false,
+      "actionType": "publish_douyin",
+      "schedule": "21:15",
+      "daysOfWeek": [],
+      "config": {
+        "city": "北京",
+        "contentId": "7a1ed834-15fd-4a3c-8bf3-3073e4de7e47"
+      },
+      "createdAt": "2026-07-07T13:12:31.315Z",
+      "updatedAt": "2026-07-07T13:36:25.065Z",
+      "lastRun": "2026-07-07T13:18:49.791Z",
+      "lastResult": "🎵 发布完成:  eval \"var i=document.querySelector('input[placeholde...\n📝 填写正文...\n  ▶ eval \"window.__dyContent = \\\"姐妹们！AI浪潮真的来了🌊\\n\\n以前觉得A...\n  ▶ eval \"var ed=document.querySelector('[class*=\\\"zone-...\n🏷️  添加标签...\n  ▶ eval \"document.execCommand('insertText',false,' #AI工...\n  ▶ keys \"Escape\"\n🚀 发布...\n  ▶ eval \"window.scrollTo(0,document.body.scrollHeight)\"\n  ▶ eval \"var bs=[...document.querySelectorAll('button')...\n  ▶ state --format text\n  ▶ eval \"window.location.href\"\n\n🎉 发布成功！\n  ▶ session close dy_persist\n"
+    },
+    {
+      "id": "223aa23a-f86c-4a84-86c2-d9acc31d54c5",
+      "name": "AI时代🔥普通人如何抓住机遇",
+      "enabled": true,
+      "actionType": "publish_xhs",
+      "schedule": "21:50",
+      "daysOfWeek": [],
+      "config": {
+        "topic": "姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+        "city": "北京",
+        "contentId": "7a1ed834-15fd-4a3c-8bf3-3073e4de7e47"
+      },
+      "createdAt": "2026-07-07T13:23:33.610Z",
+      "updatedAt": "2026-07-07T13:49:01.765Z",
+      "lastRun": "2026-07-07T13:53:04.535Z",
+      "lastResult": "📕 发布完成，详情:   ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"治愈日常\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"慢生活\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"人间值得\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ✅ 已添加 5/5 个标签\n🚀 发布...\n  ▶ eval \"window.scrollTo(0,document.body.scrollHeight)\"\n  ▶ state --format text\n  ▶ click 145\n  ▶ eval \"window.location.href\"\n\n🎉 发布成功！\n  ▶ session close xhs_mraphqh4\n"
+    },
+    {
+      "id": "61c7e4f2-70c8-4702-b59e-bd853a668ad0",
+      "name": "15元海报设计！免费改1次，太香了💥",
+      "enabled": true,
+      "actionType": "publish_xhs",
+      "schedule": "21:55",
+      "daysOfWeek": [],
+      "config": {
+        "topic": "姐妹们！发现一个宝藏海报设计服务！\n\n只要15元一张，还免费修改1次！💰\n\n虽然不提供源文件，但这",
+        "city": "北京",
+        "contentId": "dd4e2cc3-677e-4ed2-98f1-0a6d584d9544"
+      },
+      "createdAt": "2026-07-07T13:43:06.580Z",
+      "updatedAt": "2026-07-07T13:43:31.460Z",
+      "lastRun": "2026-07-07T13:57:52.494Z",
+      "lastResult": "📕 发布完成，详情:  eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"性价比之王\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"设计分享\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"省钱小技巧\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ✅ 已添加 5/5 个标签\n🚀 发布...\n  ▶ eval \"window.scrollTo(0,document.body.scrollHeight)\"\n  ▶ state --format text\n  ▶ click 144\n  ▶ eval \"window.location.href\"\n\n🎉 发布成功！\n  ▶ session close xhs_mrapo5yf\n"
     }
   ]
 }

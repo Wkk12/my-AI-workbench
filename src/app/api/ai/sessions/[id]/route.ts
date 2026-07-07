@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const session = getSession(id);
+  const session = await getSession(id);
   if (!session) {
     return NextResponse.json({ error: "会话不存在" }, { status: 404 });
   }
@@ -22,7 +22,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const session = updateSession(id, body.messages || [], body.title);
+    const session = await updateSession(id, body.messages || [], body.title);
     if (!session) {
       return NextResponse.json({ error: "会话不存在" }, { status: 404 });
     }
@@ -39,7 +39,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const deleted = deleteSession(id);
+  const deleted = await deleteSession(id);
   if (!deleted) {
     return NextResponse.json({ error: "会话不存在" }, { status: 404 });
   }

@@ -1,76 +1,70 @@
 // ============================================================
-// 日报数据 CRUD
+// 日报数据 CRUD（使用 Prisma + SQLite）
 // ============================================================
 
-import { readJSONSafe, writeJSON, readTextFile, writeTextFile, deleteFile, listFiles } from "./base";
-import type { DailyReportIndex, DailyReportMeta } from "@/lib/types";
+import prisma from "@/lib/prisma";
+import type { DailyReportMeta } from "@/lib/types";
 
-const INDEX_PATH = "daily-reports/index.json";
-const REPORTS_DIR = "daily-reports/reports";
-
-/** 获取日报索引 */
-export function getReportIndex(): DailyReportIndex {
-  return readJSONSafe<DailyReportIndex>(INDEX_PATH, { reports: [] });
+function toMeta(row: any): DailyReportMeta {
+  return {
+    id: row.id,
+    date: row.date,
+    projectCount: row.projectCount ?? 0,
+    commitCount: row.commitCount ?? 0,
+    createdAt: row.createdAt,
+    source: row.source as "local" | "gitlab",
+    summary: row.summary || undefined,
+  };
 }
 
-/** 保存日报索引 */
-function saveReportIndex(index: DailyReportIndex): void {
-  writeJSON(INDEX_PATH, index);
+export async function getAllReports(): Promise<DailyReportMeta[]> {
+  const rows = await prisma.dailyReport.findMany({
+    orderBy: { date: "desc" },
+  });
+  return rows.map(toMeta);
 }
 
-/** 获取所有日报列表（按日期倒序） */
-export function getAllReports(): DailyReportMeta[] {
-  const index = getReportIndex();
-  return index.reports.sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+export async function getReportMeta(id: string): Promise<DailyReportMeta | undefined> {
+  const row = await prisma.dailyReport.findUnique({ where: { id } });
+  if (!row) return undefined;
+  return toMeta(row);
 }
 
-/** 根据 ID（日期）获取单篇日报元数据 */
-export function getReportMeta(id: string): DailyReportMeta | undefined {
-  const index = getReportIndex();
-  return index.reports.find((r) => r.id === id);
+export async function getReportContent(id: string): Promise<string | null> {
+  const row = await prisma.dailyReport.findUnique({ where: { id } });
+  if (!row) return null;
+  return row.content || null;
 }
 
-/** 获取日报内容（Markdown） */
-export function getReportContent(id: string): string | null {
-  try {
-    return readTextFile(`${REPORTS_DIR}/${id}.md`);
-  } catch {
-    return null;
-  }
+export async function saveReport(meta: DailyReportMeta, content: string): Promise<void> {
+  await prisma.dailyReport.upsert({
+    where: { id: meta.id },
+    update: {
+      date: meta.date || meta.id,
+      projectCount: meta.projectCount ?? 0,
+      commitCount: meta.commitCount ?? 0,
+      source: meta.source || "local",
+      summary: meta.summary || "",
+      content,
+    },
+    create: {
+      id: meta.id,
+      date: meta.date || meta.id,
+      projectCount: meta.projectCount ?? 0,
+      commitCount: meta.commitCount ?? 0,
+      source: meta.source || "local",
+      summary: meta.summary || "",
+      content,
+      createdAt: meta.createdAt || new Date().toISOString(),
+    },
+  });
 }
 
-/** 保存或更新日报（索引 + 内容） */
-export function saveReport(meta: DailyReportMeta, content: string): void {
-  const index = getReportIndex();
-  const existingIdx = index.reports.findIndex((r) => r.id === meta.id);
-
-  if (existingIdx >= 0) {
-    index.reports[existingIdx] = meta;
-  } else {
-    index.reports.push(meta);
-  }
-
-  saveReportIndex(index);
-  writeTextFile(`${REPORTS_DIR}/${meta.id}.md`, content);
+export async function deleteReport(id: string): Promise<void> {
+  await prisma.dailyReport.delete({ where: { id } }).catch(() => {});
 }
 
-/** 删除日报 */
-export function deleteReport(id: string): void {
-  const index = getReportIndex();
-  index.reports = index.reports.filter((r) => r.id !== id);
-  saveReportIndex(index);
-  deleteFile(`${REPORTS_DIR}/${id}.md`);
-}
-
-/** 获取所有已有日报的日期集合 */
-export function getExistingReportDates(): Set<string> {
-  const index = getReportIndex();
-  return new Set(index.reports.map((r) => r.id));
-}
-
-/** 列出 reports 目录下的 .md 文件 */
-export function listReportFiles(): string[] {
-  return listFiles(REPORTS_DIR).filter((f) => f.endsWith(".md"));
+export async function getExistingReportDates(): Promise<Set<string>> {
+  const rows = await prisma.dailyReport.findMany({ select: { id: true } });
+  return new Set(rows.map((r) => r.id));
 }

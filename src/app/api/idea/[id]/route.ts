@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const item = getIdea(id);
+  const item = await getIdea(id);
   if (!item) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -18,6 +18,6 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  deleteIdea(id);
+  await deleteIdea(id);
   return NextResponse.json({ success: true });
 }

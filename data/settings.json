@@ -13,5 +13,6 @@
     "model": "claude-sonnet-4-20250514",
     "qwapiKey": "sk-JozRcGOmPcACjAgP1Oji4EWjc0YkmB8Pu6kpuhkefSpohkZ9"
   },
-  "platforms": {}
+  "platforms": {},
+  "setupCompleted": true
 }

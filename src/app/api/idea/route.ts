@@ -3,12 +3,12 @@ import { getAllIdeas, saveIdea } from "@/lib/data/ideas";
 import type { Idea } from "@/lib/types";
 
 export async function GET() {
-  const ideas = getAllIdeas();
+  const ideas = await getAllIdeas();
   return NextResponse.json({ ideas });
 }
 
 export async function POST(request: NextRequest) {
   const item: Idea = await request.json();
-  saveIdea(item);
+  await saveIdea(item);
   return NextResponse.json({ success: true });
 }

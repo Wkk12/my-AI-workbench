@@ -1,43 +1,68 @@
 // ============================================================
-// 创意灵感数据 CRUD
+// 创意灵感数据 CRUD（使用 Prisma + SQLite）
 // ============================================================
 
-import { readJSONSafe, writeJSON } from "./base";
-import type { IdeaIndex, Idea } from "@/lib/types";
+import prisma from "@/lib/prisma";
+import type { Idea } from "@/lib/types";
 
-const INDEX_PATH = "ideas/index.json";
-
-function getIndex(): IdeaIndex {
-  return readJSONSafe<IdeaIndex>(INDEX_PATH, { ideas: [] });
+function toIdea(row: any): Idea {
+  return {
+    id: row.id,
+    content: row.content,
+    category: row.category as Idea["category"],
+    source: row.source || undefined,
+    tags: JSON.parse(row.tags || "[]"),
+    status: row.status as Idea["status"],
+    linkedProjectId: row.linkedProjectId || undefined,
+    aiExpanded: row.aiExpanded || undefined,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
 }
 
-function saveIndex(index: IdeaIndex): void {
-  writeJSON(INDEX_PATH, index);
+export async function getAllIdeas(): Promise<Idea[]> {
+  const rows = await prisma.idea.findMany({
+    orderBy: { updatedAt: "desc" },
+  });
+  return rows.map(toIdea);
 }
 
-export function getAllIdeas(): Idea[] {
-  return getIndex().ideas.sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  );
+export async function getIdea(id: string): Promise<Idea | undefined> {
+  const row = await prisma.idea.findUnique({ where: { id } });
+  if (!row) return undefined;
+  return toIdea(row);
 }
 
-export function getIdea(id: string): Idea | undefined {
-  return getIndex().ideas.find((i) => i.id === id);
+export async function saveIdea(idea: Idea): Promise<void> {
+  await prisma.idea.upsert({
+    where: { id: idea.id },
+    update: {
+      title: idea.content?.slice(0, 50) || "",
+      content: idea.content,
+      category: idea.category,
+      source: idea.source || "",
+      tags: JSON.stringify(idea.tags || []),
+      status: idea.status,
+      linkedProjectId: idea.linkedProjectId || null,
+      aiExpanded: idea.aiExpanded || "",
+      updatedAt: idea.updatedAt || new Date().toISOString(),
+    },
+    create: {
+      id: idea.id,
+      title: idea.content?.slice(0, 50) || "",
+      content: idea.content,
+      category: idea.category,
+      source: idea.source || "",
+      tags: JSON.stringify(idea.tags || []),
+      status: idea.status,
+      linkedProjectId: idea.linkedProjectId || null,
+      aiExpanded: idea.aiExpanded || "",
+      createdAt: idea.createdAt || new Date().toISOString(),
+      updatedAt: idea.updatedAt || new Date().toISOString(),
+    },
+  });
 }
 
-export function saveIdea(idea: Idea): void {
-  const index = getIndex();
-  const idx = index.ideas.findIndex((i) => i.id === idea.id);
-  if (idx >= 0) {
-    index.ideas[idx] = idea;
-  } else {
-    index.ideas.push(idea);
-  }
-  saveIndex(index);
-}
-
-export function deleteIdea(id: string): void {
-  const index = getIndex();
-  index.ideas = index.ideas.filter((i) => i.id !== id);
-  saveIndex(index);
+export async function deleteIdea(id: string): Promise<void> {
+  await prisma.idea.delete({ where: { id } }).catch(() => {});
 }

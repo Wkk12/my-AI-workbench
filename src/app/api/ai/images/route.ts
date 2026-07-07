@@ -15,9 +15,10 @@ import os from "os";
 
 const BASE_URL = "https://qweapi.com/v1";
 
-function getApiKey(): string {
+async function getApiKey(): Promise<string> {
   if (process.env.QWAPI_API_KEY) return process.env.QWAPI_API_KEY;
-  const key = getSettings().claude?.qwapiKey;
+  const settings = await getSettings();
+  const key = settings.claude?.qwapiKey;
   if (key) return key;
   throw new Error("未配置 QWAPI_API_KEY");
 }
@@ -56,17 +57,18 @@ async function generateOneImage(
   return data.data[0].b64_json;
 }
 
-function buildStylePrompt(
+async function buildStylePrompt(
   basePrompt: string,
   ipId: string | undefined,
   index: number,
   total: number
-): string {
+): Promise<string> {
   let prompt = basePrompt;
 
   // 融入 IP 风格描述
   if (ipId) {
-    const ip = getAllIPs().find((i) => i.id === ipId);
+    const ips = await getAllIPs();
+    const ip = ips.find((i) => i.id === ipId);
     if (ip?.stylePrompt) {
       prompt = `${prompt}. Style reference: ${ip.stylePrompt}`;
     }
@@ -97,11 +99,11 @@ export async function POST(request: NextRequest) {
     const imageCount = Math.min(Math.max(count || 1, 1), 9);
     const imageSize = size || "1024x1536";
 
-    const apiKey = getApiKey();
+    const apiKey = await getApiKey();
     const images: string[] = [];
 
     for (let i = 0; i < imageCount; i++) {
-      const fullPrompt = buildStylePrompt(prompt, ipId, i, imageCount);
+      const fullPrompt = await buildStylePrompt(prompt, ipId, i, imageCount);
       const b64 = await generateOneImage(fullPrompt, apiKey, imageSize);
 
       // 保存到 data/images/

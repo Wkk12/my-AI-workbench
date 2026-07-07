@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDueTasks, saveTask, getAllTasks } from "@/lib/data/scheduler";
 import { getSettings } from "@/lib/data/settings";
+import { getContent } from "@/lib/data/contents";
 import type { ScheduledTask } from "@/lib/types";
 
 /**
@@ -25,14 +26,9 @@ async function pollPublishJob(
       if (data.done) {
         const log = (data.log || "").slice(-800);
         if (data.status === "done") {
-          // 检查日志中是否有明确的发布成功/失败标记
-          // 注意：不能简单匹配 "error"/"fail"，因为 browser-act 的 stderr
-          // 输出中常含 "Error" 字样（如 help text），这些不是真正的发布失败。
-          // 只看明确的失败关键词：❌、bail、process.exit、ENOENT
           if (/❌|发布失败|脚本未找到|ENOENT|ECONNREFUSED|browser-act: command not found/i.test(log)) {
             return `${emoji} 发布可能失败: ${log}`;
           }
-          // 有正常输出 → 发布流程已执行
           if (log.trim()) {
             return `${emoji} 发布完成，详情: ${log}`;
           }
@@ -49,7 +45,7 @@ async function pollPublishJob(
   return `${emoji} 发布超时（超过${timeoutMs / 1000}秒），任务可能仍在后台运行`;
 }
 
-/** 如果有 contentId，从内容库提取标题/正文/标签，标题为空时自动 AI 生成 */
+/** 如果有 contentId，从内容库提取标题/正文/标签 */
 async function resolveContentConfig(
   config: Record<string, string>,
   platform: string
@@ -60,14 +56,12 @@ async function resolveContentConfig(
   }
 
   try {
-    const { getContent } = await import("@/lib/data/contents");
-    const item = getContent(contentId);
+    const item = await getContent(contentId);
     if (!item) return { topic: config.topic || "每日精选" };
 
     let title = item.title;
-    // 标题为空时自动 AI 生成
     if (!title || !title.trim()) {
-      const settings = getSettings();
+      const settings = await getSettings();
       const apiKey = process.env.QWAPI_API_KEY || settings.claude?.qwapiKey || "";
       if (apiKey && (item.description || config.topic)) {
         try {
@@ -99,7 +93,7 @@ async function resolveContentConfig(
 }
 
 async function executeTask(task: ScheduledTask): Promise<string> {
-  const settings = getSettings();
+  const settings = await getSettings();
   const qwapiKey = process.env.QWAPI_API_KEY || settings.claude?.qwapiKey || "";
   const claudeKey = settings.claude?.apiKey || "";
 
@@ -119,7 +113,6 @@ async function executeTask(task: ScheduledTask): Promise<string> {
         }
         return `📕 发布启动失败: ${data.error}`;
       }
-      // 等待实际执行结果
       return await pollPublishJob(data.jobId, "xiaohongshu");
     }
 
@@ -159,7 +152,6 @@ async function executeTask(task: ScheduledTask): Promise<string> {
       });
       const data = await resp.json();
       if (data.success) {
-        // 自动保存
         await fetch(`${getBaseUrl()}/api/daily-report`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -240,11 +232,10 @@ export async function GET() {
   const timeKey = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   const dayOfWeek = now.getDay();
 
-  const tasks = getDueTasks();
+  const tasks = await getDueTasks();
   const results: { id: string; name: string; result: string }[] = [];
 
-  // 诊断：列出所有任务及其过滤状态
-  const all = getAllTasks();
+  const all = await getAllTasks();
   const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const diag = all.map((t) => {
     const reasons: string[] = [];
@@ -272,13 +263,13 @@ export async function GET() {
       const result = await executeTask(task);
       task.lastRun = new Date().toISOString();
       task.lastResult = result;
-      saveTask(task);
+      await saveTask(task);
       results.push({ id: task.id, name: task.name, result });
     } catch (e) {
       const err = String(e);
       task.lastRun = new Date().toISOString();
       task.lastResult = `错误: ${err}`;
-      saveTask(task);
+      await saveTask(task);
       results.push({ id: task.id, name: task.name, result: err });
     }
   }
@@ -301,7 +292,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { getTask } = await import("@/lib/data/scheduler");
-  const task = getTask(taskId);
+  const task = await getTask(taskId);
   if (!task) {
     return NextResponse.json({ error: "任务不存在" }, { status: 404 });
   }
@@ -309,7 +300,7 @@ export async function POST(request: NextRequest) {
   const result = await executeTask(task);
   task.lastRun = new Date().toISOString();
   task.lastResult = result;
-  saveTask(task);
+  await saveTask(task);
 
   return NextResponse.json({ success: true, result });
 }

@@ -1,43 +1,73 @@
 // ============================================================
-// 项目看板数据 CRUD
+// 项目看板数据 CRUD（使用 Prisma + SQLite）
 // ============================================================
 
-import { readJSONSafe, writeJSON } from "./base";
-import type { ProjectIndex, Project } from "@/lib/types";
+import prisma from "@/lib/prisma";
+import type { Project } from "@/lib/types";
+import { v4 as uuidv4 } from "uuid";
 
-const INDEX_PATH = "projects/index.json";
-
-function getIndex(): ProjectIndex {
-  return readJSONSafe<ProjectIndex>(INDEX_PATH, { projects: [] });
+function toProject(row: any): Project {
+  return {
+    id: row.id,
+    name: row.title,
+    description: row.description,
+    status: row.status as Project["status"],
+    icon: row.icon || undefined,
+    techStack: JSON.parse(row.techStack || "[]"),
+    tasks: JSON.parse(row.tasks || "[]"),
+    milestones: JSON.parse(row.milestones || "[]"),
+    revenue: row.revenue ?? undefined,
+    notes: row.notes,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
 }
 
-function saveIndex(index: ProjectIndex): void {
-  writeJSON(INDEX_PATH, index);
+export async function getAllProjects(): Promise<Project[]> {
+  const rows = await prisma.project.findMany({
+    orderBy: { updatedAt: "desc" },
+  });
+  return rows.map(toProject);
 }
 
-export function getAllProjects(): Project[] {
-  return getIndex().projects.sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  );
+export async function getProject(id: string): Promise<Project | undefined> {
+  const row = await prisma.project.findUnique({ where: { id } });
+  if (!row) return undefined;
+  return toProject(row);
 }
 
-export function getProject(id: string): Project | undefined {
-  return getIndex().projects.find((p) => p.id === id);
+export async function saveProject(project: Project): Promise<void> {
+  await prisma.project.upsert({
+    where: { id: project.id },
+    update: {
+      title: project.name,
+      description: project.description,
+      status: project.status,
+      icon: project.icon || "",
+      techStack: JSON.stringify(project.techStack || []),
+      tasks: JSON.stringify(project.tasks || []),
+      milestones: JSON.stringify(project.milestones || []),
+      revenue: project.revenue ?? null,
+      notes: project.notes,
+      updatedAt: project.updatedAt || new Date().toISOString(),
+    },
+    create: {
+      id: project.id,
+      title: project.name,
+      description: project.description,
+      status: project.status,
+      icon: project.icon || "",
+      techStack: JSON.stringify(project.techStack || []),
+      tasks: JSON.stringify(project.tasks || []),
+      milestones: JSON.stringify(project.milestones || []),
+      revenue: project.revenue ?? null,
+      notes: project.notes,
+      createdAt: project.createdAt || new Date().toISOString(),
+      updatedAt: project.updatedAt || new Date().toISOString(),
+    },
+  });
 }
 
-export function saveProject(project: Project): void {
-  const index = getIndex();
-  const idx = index.projects.findIndex((p) => p.id === project.id);
-  if (idx >= 0) {
-    index.projects[idx] = project;
-  } else {
-    index.projects.push(project);
-  }
-  saveIndex(index);
-}
-
-export function deleteProject(id: string): void {
-  const index = getIndex();
-  index.projects = index.projects.filter((p) => p.id !== id);
-  saveIndex(index);
+export async function deleteProject(id: string): Promise<void> {
+  await prisma.project.delete({ where: { id } }).catch(() => {});
 }

@@ -1,61 +1,94 @@
 // ============================================================
-// 我的钱包 — 订阅数据 CRUD
+// 我的钱包 — 订阅数据 CRUD（使用 Prisma + SQLite）
 // ============================================================
 
-import { readJSONSafe, writeJSON } from "./base";
-import type { SubIndex, Subscription } from "@/lib/types";
+import prisma from "@/lib/prisma";
+import type { Subscription, SubHistory, SubCycle } from "@/lib/types";
 
-const INDEX_PATH = "subscriptions/index.json";
-
-function getIndex(): SubIndex {
-  return readJSONSafe<SubIndex>(INDEX_PATH, { subscriptions: [] });
+function toSub(row: any): Subscription {
+  return {
+    id: row.id,
+    name: row.name,
+    category: row.category as Subscription["category"],
+    cycle: row.cycle as Subscription["cycle"],
+    amount: row.amount ?? 0,
+    startDate: row.startDate,
+    expireDate: row.expireDate,
+    autoRenew: row.autoRenew ?? true,
+    provider: row.provider,
+    notes: row.notes,
+    history: JSON.parse(row.history || "[]") as SubHistory[],
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
 }
 
-function saveIndex(index: SubIndex): void {
-  writeJSON(INDEX_PATH, index);
+export async function getAll(): Promise<Subscription[]> {
+  const rows = await prisma.subscription.findMany({
+    orderBy: { expireDate: "asc" },
+  });
+  return rows.map(toSub);
 }
 
-export function getAll(): Subscription[] {
-  return getIndex().subscriptions.sort(
-    (a, b) => new Date(a.expireDate).getTime() - new Date(b.expireDate).getTime()
-  );
+export async function getById(id: string): Promise<Subscription | undefined> {
+  const row = await prisma.subscription.findUnique({ where: { id } });
+  if (!row) return undefined;
+  return toSub(row);
 }
 
-export function getById(id: string): Subscription | undefined {
-  return getIndex().subscriptions.find((s) => s.id === id);
-}
-
-export function save(sub: Subscription): void {
-  const index = getIndex();
-  const idx = index.subscriptions.findIndex((s) => s.id === sub.id);
+export async function save(sub: Subscription): Promise<void> {
   sub.updatedAt = new Date().toISOString();
-  if (idx >= 0) {
-    index.subscriptions[idx] = sub;
-  } else {
-    sub.createdAt = new Date().toISOString();
-    index.subscriptions.push(sub);
-  }
-  saveIndex(index);
+  await prisma.subscription.upsert({
+    where: { id: sub.id },
+    update: {
+      name: sub.name,
+      category: sub.category,
+      cycle: sub.cycle,
+      amount: sub.amount,
+      startDate: sub.startDate,
+      expireDate: sub.expireDate,
+      autoRenew: sub.autoRenew,
+      provider: sub.provider,
+      notes: sub.notes,
+      history: JSON.stringify(sub.history || []),
+      updatedAt: sub.updatedAt,
+    },
+    create: {
+      id: sub.id,
+      name: sub.name,
+      category: sub.category,
+      cycle: sub.cycle,
+      amount: sub.amount,
+      startDate: sub.startDate,
+      expireDate: sub.expireDate,
+      autoRenew: sub.autoRenew,
+      provider: sub.provider,
+      notes: sub.notes,
+      history: JSON.stringify(sub.history || []),
+      createdAt: sub.createdAt || new Date().toISOString(),
+      updatedAt: sub.updatedAt,
+    },
+  });
 }
 
-export function remove(id: string): void {
-  const index = getIndex();
-  index.subscriptions = index.subscriptions.filter((s) => s.id !== id);
-  saveIndex(index);
+export async function remove(id: string): Promise<void> {
+  await prisma.subscription.delete({ where: { id } }).catch(() => {});
 }
 
-/** 续费操作 */
-export function renew(id: string, data: { cycle: string; amount: number; fromDate?: string }): Subscription | null {
-  const index = getIndex();
-  const sub = index.subscriptions.find((s) => s.id === id);
-  if (!sub) return null;
+export async function renew(
+  id: string,
+  data: { cycle: string; amount: number; fromDate?: string }
+): Promise<Subscription | null> {
+  const row = await prisma.subscription.findUnique({ where: { id } });
+  if (!row) return null;
 
+  const sub = toSub(row);
   const daysMap: Record<string, number> = { month: 30, quarter: 90, year: 365, once: 0 };
   const days = daysMap[data.cycle] || 30;
   const from = data.fromDate || sub.expireDate;
   const newExpire = addDays(from, days);
 
-  sub.cycle = data.cycle as Subscription["cycle"];
+  sub.cycle = data.cycle as SubCycle;
   sub.amount = data.amount;
   sub.expireDate = newExpire;
   sub.history.push({
@@ -66,7 +99,8 @@ export function renew(id: string, data: { cycle: string; amount: number; fromDat
     expireDate: newExpire,
   });
   sub.updatedAt = new Date().toISOString();
-  saveIndex(index);
+
+  await save(sub);
   return sub;
 }
 
@@ -76,7 +110,6 @@ function addDays(dateStr: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** 到期状态 */
 export function daysUntil(dateStr: string): number {
   const d = new Date(dateStr + "T00:00:00");
   const now = new Date();
@@ -86,6 +119,7 @@ export function daysUntil(dateStr: string): number {
 }
 
 export type SubStatus = "expired" | "urgent" | "soon" | "normal";
+
 export function getStatus(sub: Subscription): SubStatus {
   const left = daysUntil(sub.expireDate);
   if (left < 0) return "expired";
@@ -94,24 +128,53 @@ export function getStatus(sub: Subscription): SubStatus {
   return "normal";
 }
 
-/** 统计 */
-export function getStats(): { total: number; active: number; expired: number; monthCost: number; yearCost: number } {
-  const subs = getAll();
-  let active = 0, expired = 0, monthCost = 0, yearCost = 0;
+export async function getStats(): Promise<{
+  total: number;
+  active: number;
+  expired: number;
+  monthCost: number;
+  yearCost: number;
+}> {
+  const subs = await getAll();
+  let active = 0,
+    expired = 0,
+    monthCost = 0,
+    yearCost = 0;
   for (const s of subs) {
     const left = daysUntil(s.expireDate);
-    if (left < 0) expired++; else active++;
-    const monthlyRate = s.cycle === "month" ? s.amount : s.cycle === "quarter" ? s.amount / 3 : s.cycle === "year" ? s.amount / 12 : 0;
+    if (left < 0) expired++;
+    else active++;
+    const monthlyRate =
+      s.cycle === "month"
+        ? s.amount
+        : s.cycle === "quarter"
+          ? s.amount / 3
+          : s.cycle === "year"
+            ? s.amount / 12
+            : 0;
     monthCost += monthlyRate;
     yearCost += monthlyRate * 12;
   }
-  return { total: subs.length, active, expired, monthCost: Math.round(monthCost), yearCost: Math.round(yearCost) };
+  return {
+    total: subs.length,
+    active,
+    expired,
+    monthCost: Math.round(monthCost),
+    yearCost: Math.round(yearCost),
+  };
 }
 
-/** 到期提醒 */
-export function getReminders(): { urgent: Subscription[]; soon: Subscription[]; expired: Subscription[] } {
-  const subs = getAll();
-  const result = { urgent: [] as Subscription[], soon: [] as Subscription[], expired: [] as Subscription[] };
+export async function getReminders(): Promise<{
+  urgent: Subscription[];
+  soon: Subscription[];
+  expired: Subscription[];
+}> {
+  const subs = await getAll();
+  const result = {
+    urgent: [] as Subscription[],
+    soon: [] as Subscription[],
+    expired: [] as Subscription[],
+  };
   for (const s of subs) {
     const left = daysUntil(s.expireDate);
     if (left < 0) result.expired.push(s);

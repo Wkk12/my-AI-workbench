@@ -7,11 +7,12 @@ import { getAllIPs } from "@/lib/data/ips";
  * POST /api/ai/generate  { topic, platform, ipId? }
  */
 
-function getApiKey(): string {
+async function getApiKey(): Promise<string> {
   // 1. 环境变量
   if (process.env.QWAPI_API_KEY) return process.env.QWAPI_API_KEY;
   // 2. 系统设置（用户可在「设置 → QWAPI 配置」中填写）
-  const key = getSettings().claude?.qwapiKey;
+  const settings = await getSettings();
+  const key = settings.claude?.qwapiKey;
   if (key) return key;
   throw new Error("未配置 QWAPI_API_KEY。请在「系统设置 → QWAPI 配置」中填写 API Key。");
 }
@@ -111,7 +112,8 @@ async function generateImagePrompt(
 
   let ipHint = "";
   if (ipId) {
-    const ip = getAllIPs().find((i) => i.id === ipId);
+    const ips = await getAllIPs();
+    const ip = ips.find((i) => i.id === ipId);
     if (ip?.stylePrompt) {
       ipHint = `。风格参考：${ip.stylePrompt}`;
     }
@@ -167,13 +169,14 @@ export async function POST(request: NextRequest) {
     // 融入 IP 人设信息
     let ipContext = "";
     if (ipId) {
-      const ip = getAllIPs().find((i) => i.id === ipId);
+      const ips = await getAllIPs();
+      const ip = ips.find((i) => i.id === ipId);
       if (ip) {
         ipContext = `\n\n【重要：你扮演的人设是"${ip.name}"】${ip.description || ""}。所有内容要符合这个角色的人设风格。`;
       }
     }
 
-    const apiKey = getApiKey();
+    const apiKey = await getApiKey();
     const raw = await callLLM(
       apiKey,
       prompt.system,

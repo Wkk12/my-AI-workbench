@@ -17,7 +17,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const ip = getIP(id);
+  const ip = await getIP(id);
   if (!ip) {
     return NextResponse.json({ error: "IP 不存在" }, { status: 404 });
   }
@@ -29,7 +29,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const existing = getIP(id);
+  const existing = await getIP(id);
   if (!existing) {
     return NextResponse.json({ error: "IP 不存在" }, { status: 404 });
   }
@@ -37,8 +37,8 @@ export async function PUT(
   try {
     const formData = await request.formData();
     const name = formData.get("name") as string;
-    const description = formData.get("description") as string || "";
-    const stylePrompt = formData.get("stylePrompt") as string || "";
+    const description = (formData.get("description") as string) || "";
+    const stylePrompt = (formData.get("stylePrompt") as string) || "";
     const imageFile = formData.get("image") as File | null;
 
     if (!name || !name.trim()) {
@@ -48,7 +48,6 @@ export async function PUT(
     let imagePath = existing.imagePath;
 
     if (imageFile && imageFile.size > 0) {
-      // 删除旧图
       if (existing.imagePath) {
         const oldPath = path.join(process.cwd(), existing.imagePath);
         try { fs.unlinkSync(oldPath); } catch { /* ignore */ }
@@ -75,7 +74,7 @@ export async function PUT(
       updatedAt: new Date().toISOString(),
     };
 
-    saveIP(updated);
+    await saveIP(updated);
 
     return NextResponse.json({ success: true, ip: updated });
   } catch (error: unknown) {
@@ -89,18 +88,17 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const ip = getIP(id);
+  const ip = await getIP(id);
   if (!ip) {
     return NextResponse.json({ error: "IP 不存在" }, { status: 404 });
   }
 
-  // 清理图片文件
   if (ip.imagePath) {
     const imgPath = path.join(process.cwd(), ip.imagePath);
     try { fs.unlinkSync(imgPath); } catch { /* ignore */ }
   }
 
-  deleteIP(id);
+  await deleteIP(id);
 
   return NextResponse.json({ success: true });
 }

@@ -47,7 +47,7 @@ function isMac() { return process.platform === "darwin"; }
 
 export async function GET() {
   const steps: CheckStep[] = [];
-  const settings = getSettings();
+  const settings = await getSettings();
   const env = shellEnv();
   const home = os.homedir();
 

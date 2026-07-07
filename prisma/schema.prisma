@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ── 系统设置 ──
+model Setting {
+  key   String @id
+  value String
+}
+
+// ── 内容创作 ──
+model Content {
+  id           String   @id
+  title        String   @default("")
+  description  String   @default("")
+  platform     String   @default("xiaohongshu") // xiaohongshu | douyin | both
+  status       String   @default("draft")       // draft | scheduled | published | failed
+  tags         String   @default("[]")          // JSON 字符串数组
+  imagePrompt  String   @default("")
+  publishedAt  String?
+  scheduledAt  String?
+  mediaPaths   String   @default("[]")          // JSON 字符串数组
+  aiGenerated  Boolean  @default(false)
+  stats        String?                          // JSON 对象 {likes, comments, shares}
+  ipId         String?
+  ipName       String?
+  imageCount   Int      @default(1)
+  createdAt    String   @default("")
+  updatedAt    String   @default("")
+}
+
+// ── 项目看板 ──
+model Project {
+  id          String @id
+  title       String @default("")
+  description String @default("")
+  status      String @default("idea") // idea | developing | launched | maintaining | archived
+  icon        String @default("")
+  techStack   String @default("[]")   // JSON 字符串数组
+  tasks       String @default("[]")   // JSON 数组
+  milestones  String @default("[]")   // JSON 数组
+  revenue     Float?
+  notes       String @default("")
+  createdAt   String @default("")
+  updatedAt   String @default("")
+}
+
+// ── 创意灵感 ──
+model Idea {
+  id        String @id
+  title     String @default("")
+  content   String @default("")
+  tags      String @default("[]")   // JSON 字符串数组
+  category  String @default("other")
+  source    String @default("")
+  status    String @default("new")
+  linkedProjectId String?
+  aiExpanded String @default("")
+  createdAt String @default("")
+  updatedAt String @default("")
+}
+
+// ── 监控状态 ──
+model MonitorState {
+  id        String   @id
+  platform  String
+  lastCount Int      @default(0)
+  lastTotal Int      @default(0)
+  lastCheck String?
+  updatedAt String   @default("")
+
+  @@unique([platform])
+}
+
+// ── 发布日志 ──
+model PublishLog {
+  id        String   @id
+  contentId String?
+  platform  String
+  status    String   @default("running") // running | done | error
+  log       String   @default("")
+  createdAt String   @default("")
+}
+
+// ── 日报 ──
+model DailyReport {
+  id           String @id      // YYYY-MM-DD
+  date         String @default("")
+  projectCount Int    @default(0)
+  commitCount  Int    @default(0)
+  source       String @default("local")
+  summary      String @default("")
+  content      String @default("") // Markdown 正文
+  createdAt    String @default("")
+}
+
+// ── 订阅管理 ──
+model Subscription {
+  id         String @id
+  name       String @default("")
+  category   String @default("other")
+  cycle      String @default("month")
+  amount     Float  @default(0)
+  startDate  String @default("")
+  expireDate String @default("")
+  autoRenew  Boolean @default(true)
+  provider   String @default("")
+  notes      String @default("")
+  history    String @default("[]") // JSON 数组
+  createdAt  String @default("")
+  updatedAt  String @default("")
+}
+
+// ── 定时任务 ──
+model ScheduledTask {
+  id         String  @id
+  name       String  @default("")
+  enabled    Boolean @default(true)
+  actionType String  @default("custom")
+  schedule   String  @default("")
+  daysOfWeek String  @default("[]")  // JSON 数组
+  config     String  @default("{}")  // JSON 对象
+  lastRun    String?
+  lastResult String  @default("")
+  createdAt  String  @default("")
+  updatedAt  String  @default("")
+}
+
+// ── AI 会话 ──
+model ChatSession {
+  id        String @id
+  title     String @default("")
+  messages  String @default("[]") // JSON 数组
+  createdAt String @default("")
+  updatedAt String @default("")
+}
+
+// ── IP 管理 ──
+model IPItem {
+  id          String @id
+  name        String @default("")
+  description String @default("")
+  imagePath   String @default("")
+  stylePrompt String @default("")
+  createdAt   String @default("")
+  updatedAt   String @default("")
+}

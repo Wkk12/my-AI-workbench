@@ -102,7 +102,8 @@ async function publishToPlatform(
     return { success: false, error: `发布脚本未找到: ${scriptPath}` };
   }
 
-  const apiKey = process.env.QWAPI_API_KEY || getSettings().claude?.qwapiKey || "";
+  const settings = await getSettings();
+  const apiKey = process.env.QWAPI_API_KEY || settings.claude?.qwapiKey || "";
 
   const args = [scriptPath];
   if (topic && topic !== "true") {

@@ -1,0 +1,13 @@
+{
+  "ips": [
+    {
+      "id": "7218f11e-bfed-4473-b50e-420ac0acd605",
+      "name": "美少女珂",
+      "description": "99年 程序员 甜酷风格",
+      "imagePath": "/data/ips/images/7218f11e-bfed-4473-b50e-420ac0acd605.jpeg",
+      "stylePrompt": "",
+      "createdAt": "2026-07-07T14:36:00.376Z",
+      "updatedAt": "2026-07-07T14:36:38.029Z"
+    }
+  ]
+}

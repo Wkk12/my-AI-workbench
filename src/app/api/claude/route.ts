@@ -7,9 +7,10 @@ import { getSettings } from "@/lib/data/settings";
  * POST /api/claude  { messages, system? }
  */
 
-function getQwapiKey(): string {
+async function getQwapiKey(): Promise<string> {
   if (process.env.QWAPI_API_KEY) return process.env.QWAPI_API_KEY;
-  return getSettings().claude?.qwapiKey || "";
+  const settings = await getSettings();
+  return settings.claude?.qwapiKey || "";
 }
 
 async function callClaudeNative(
@@ -50,7 +51,6 @@ async function callOpenAICompat(
     ...messages.map((m) => ({ role: m.role, content: m.content })),
   ];
 
-  // Model fallback list for QWAPI
   const models = [model, "deepseek-v3.2", "deepseek-chat", "gpt-4o-mini"];
   let lastErr: Error | null = null;
 
@@ -98,9 +98,9 @@ async function callOpenAICompat(
 
 /** 健康检查：是否有可用 AI 后端 */
 export async function GET() {
-  const settings = getSettings();
+  const settings = await getSettings();
   const hasClaude = !!settings.claude?.apiKey;
-  const hasQwapi = !!getQwapiKey();
+  const hasQwapi = !!(process.env.QWAPI_API_KEY || settings.claude?.qwapiKey);
   return NextResponse.json({
     available: hasClaude || hasQwapi,
     backends: {
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
     const sysPrompt = system || defaultSystem;
 
     // 1. 尝试 Anthropic/Claude（如果配置了 Key）
-    const settings = getSettings();
+    const settings = await getSettings();
     const claudeKey = settings.claude?.apiKey || "";
     if (claudeKey) {
       try {
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Fallback: QWAPI (DeepSeek via qweapi.com)
-    const qwKey = getQwapiKey();
+    const qwKey = await getQwapiKey();
     if (qwKey) {
       const result = await callOpenAICompat(
         qwKey,

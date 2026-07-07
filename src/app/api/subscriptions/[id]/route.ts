@@ -7,12 +7,12 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const existing = SubDB.getById(id);
+  const existing = await SubDB.getById(id);
   if (!existing) return NextResponse.json({ error: "不存在" }, { status: 404 });
 
   const body = await request.json();
   const updated = { ...existing, ...body, id, updatedAt: new Date().toISOString() };
-  SubDB.save(updated);
+  await SubDB.save(updated);
   return NextResponse.json({ success: true, item: updated });
 }
 
@@ -22,7 +22,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  SubDB.remove(id);
+  await SubDB.remove(id);
   return NextResponse.json({ success: true });
 }
 
@@ -33,7 +33,7 @@ export async function PATCH(
 ) {
   const { id } = await params;
   const body = await request.json();
-  const result = SubDB.renew(id, {
+  const result = await SubDB.renew(id, {
     cycle: body.cycle,
     amount: Number(body.amount),
     fromDate: body.fromDate,

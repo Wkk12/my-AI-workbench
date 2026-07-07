@@ -111,7 +111,7 @@ export async function callAI(
   messages: { role: string; content: string }[],
   options?: { temperature?: number; maxTokens?: number }
 ): Promise<{ content: string; model: string; backend: string }> {
-  const settings = getSettings();
+  const settings = await getSettings();
   const claudeKey = settings.claude?.apiKey || "";
 
   if (claudeKey) {

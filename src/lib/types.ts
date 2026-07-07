@@ -55,6 +55,7 @@ export interface ContentItem {
   ipId?: string;        // 关联的 IP
   ipName?: string;      // IP 名称（冗余，方便显示）
   imageCount?: number;  // 生成图片张数（1-9）
+  imagePrompt?: string; // AI 生成的图片提示词
   createdAt: string;
   updatedAt: string;
 }

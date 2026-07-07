@@ -4,13 +4,13 @@ import { DEFAULT_SETTINGS } from "@/lib/constants";
 import type { Settings } from "@/lib/types";
 
 export async function GET() {
-  const settings = getSettings();
+  const settings = await getSettings();
   return NextResponse.json(settings);
 }
 
 export async function PUT(request: NextRequest) {
   const body = await request.json();
-  const current = getSettings();
+  const current = await getSettings();
 
   const updated: Settings = {
     ...DEFAULT_SETTINGS,
@@ -21,6 +21,6 @@ export async function PUT(request: NextRequest) {
     platforms: { ...current.platforms, ...body.platforms },
   };
 
-  saveSettings(updated);
+  await saveSettings(updated);
   return NextResponse.json({ success: true });
 }

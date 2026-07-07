@@ -1,39 +1,57 @@
-import { readJSONSafe, writeJSON } from "./base";
-import type { IPIndex, IPItem } from "@/lib/types";
+// ============================================================
+// IP 管理数据 CRUD（使用 Prisma + SQLite）
+// ============================================================
 
-const INDEX_PATH = "ips/index.json";
+import prisma from "@/lib/prisma";
+import type { IPItem } from "@/lib/types";
 
-function getIndex(): IPIndex {
-  return readJSONSafe<IPIndex>(INDEX_PATH, { ips: [] });
+function toIPItem(row: any): IPItem {
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description || undefined,
+    imagePath: row.imagePath,
+    stylePrompt: row.stylePrompt || undefined,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
 }
 
-function saveIndex(index: IPIndex): void {
-  writeJSON(INDEX_PATH, index);
+export async function getAllIPs(): Promise<IPItem[]> {
+  const rows = await prisma.iPItem.findMany({
+    orderBy: { updatedAt: "desc" },
+  });
+  return rows.map(toIPItem);
 }
 
-export function getAllIPs(): IPItem[] {
-  return getIndex().ips.sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-  );
+export async function getIP(id: string): Promise<IPItem | undefined> {
+  const row = await prisma.iPItem.findUnique({ where: { id } });
+  if (!row) return undefined;
+  return toIPItem(row);
 }
 
-export function getIP(id: string): IPItem | undefined {
-  return getIndex().ips.find((ip) => ip.id === id);
+export async function saveIP(item: IPItem): Promise<void> {
+  await prisma.iPItem.upsert({
+    where: { id: item.id },
+    update: {
+      name: item.name,
+      description: item.description || "",
+      imagePath: item.imagePath || "",
+      stylePrompt: item.stylePrompt || "",
+      updatedAt: item.updatedAt || new Date().toISOString(),
+    },
+    create: {
+      id: item.id,
+      name: item.name,
+      description: item.description || "",
+      imagePath: item.imagePath || "",
+      stylePrompt: item.stylePrompt || "",
+      createdAt: item.createdAt || new Date().toISOString(),
+      updatedAt: item.updatedAt || new Date().toISOString(),
+    },
+  });
 }
 
-export function saveIP(item: IPItem): void {
-  const index = getIndex();
-  const idx = index.ips.findIndex((ip) => ip.id === item.id);
-  if (idx >= 0) {
-    index.ips[idx] = { ...index.ips[idx], ...item };
-  } else {
-    index.ips.push(item);
-  }
-  saveIndex(index);
-}
-
-export function deleteIP(id: string): void {
-  const index = getIndex();
-  index.ips = index.ips.filter((ip) => ip.id !== id);
-  saveIndex(index);
+export async function deleteIP(id: string): Promise<void> {
+  await prisma.iPItem.delete({ where: { id } }).catch(() => {});
 }

@@ -3,7 +3,6 @@ import { getAllIPs, saveIP } from "@/lib/data/ips";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
-import { getSettings } from "@/lib/data/settings";
 
 /**
  * IP 管理 API
@@ -20,7 +19,7 @@ function ensureImagesDir() {
 }
 
 export async function GET() {
-  const ips = getAllIPs();
+  const ips = await getAllIPs();
   return NextResponse.json({ ips });
 }
 
@@ -28,8 +27,8 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const name = formData.get("name") as string;
-    const description = formData.get("description") as string || "";
-    const stylePrompt = formData.get("stylePrompt") as string || "";
+    const description = (formData.get("description") as string) || "";
+    const stylePrompt = (formData.get("stylePrompt") as string) || "";
     const imageFile = formData.get("image") as File | null;
 
     if (!name || !name.trim()) {
@@ -62,7 +61,7 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     };
 
-    saveIP(ip);
+    await saveIP(ip);
 
     return NextResponse.json({ success: true, ip });
   } catch (error: unknown) {

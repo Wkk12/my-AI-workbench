@@ -3,7 +3,7 @@ import { getSessionList, createSession } from "@/lib/data/memory";
 
 /** 获取所有会话列表 */
 export async function GET() {
-  const sessions = getSessionList();
+  const sessions = await getSessionList();
   return NextResponse.json({ sessions });
 }
 
@@ -11,7 +11,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
-    const session = createSession(body.title);
+    const session = await createSession(body.title);
     return NextResponse.json({ session });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);
