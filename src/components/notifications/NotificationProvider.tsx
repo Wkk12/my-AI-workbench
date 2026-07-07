@@ -89,6 +89,8 @@ export default function NotificationProvider({ children }: { children: ReactNode
   const [permission, setPermission] = useState<NotificationPermission>("default");
   const [diagLog, setDiagLog] = useState<DiagEntry[]>([]);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const swRef = useRef<ServiceWorkerRegistration | null>(null);
+  const swReadyRef = useRef(false);
 
   const diag = useCallback((msg: string, ok: boolean) => {
     setDiagLog((prev) => [{ time: now(), msg, ok }, ...prev.slice(0, MAX_DIAG - 1)]);
@@ -96,12 +98,45 @@ export default function NotificationProvider({ children }: { children: ReactNode
     else console.log(`[通知诊断] ${msg}`);
   }, []);
 
-  // 初始化
+  // 初始化 & 注册 Service Worker
   useEffect(() => {
     setNotifications(loadFromStorage());
     const p = Notification.permission || "default";
     setPermission(p);
     diag(`初始化: Notification.permission = "${p}", 支持Notification = ${"Notification" in window}`, p === "granted");
+
+    // 注册 Service Worker 用于可靠跨平台桌面通知
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+        .then(async (reg) => {
+          swRef.current = reg;
+          // 等待 SW 激活并就绪（skipWaiting + claim 生效）
+          if (reg.installing) {
+            await new Promise<void>((resolve) => {
+              reg.installing!.addEventListener("statechange", () => {
+                if (reg.installing!.state === "activated") resolve();
+              });
+            });
+          }
+          // 等待 controller 就绪（clients.claim 生效）
+          if (!navigator.serviceWorker.controller) {
+            await new Promise<void>((resolve) => {
+              const onControllerChange = () => {
+                navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
+                resolve();
+              };
+              navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
+            });
+          }
+          swReadyRef.current = true;
+          diag("Service Worker 已注册并就绪", true);
+        })
+        .catch((err) => {
+          diag(`Service Worker 注册失败: ${err.message}`, false);
+        });
+    } else {
+      diag("浏览器不支持 Service Worker", false);
+    }
   }, [diag]);
 
   // 持久化
@@ -112,6 +147,9 @@ export default function NotificationProvider({ children }: { children: ReactNode
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   // ── 核心：发送桌面通知 ──
+  // 优先通过 ServiceWorkerRegistration.showNotification() 发送
+  // （不依赖 navigator.serviceWorker.controller，SW 注册完即可用）
+  // 降级方案：直接使用 window.Notification
   const sendNativeNotification = useCallback((title: string, body: string): boolean => {
     if (typeof window === "undefined") {
       diag("SSR 环境，跳过", false);
@@ -126,21 +164,45 @@ export default function NotificationProvider({ children }: { children: ReactNode
     diag(`权限="${p}"`, p === "granted");
 
     if (p === "denied") {
-      diag("权限被拒。地址栏锁图标→通知→允许", false);
+      diag("权限被拒。系统设置→通知→允许浏览器通知", false);
       return false;
     }
     if (p === "default") {
-      diag("权限未决定，需用户手势", false);
+      diag("权限未决定，需用户手势授权（点击铃铛→测试通知）", false);
       return false;
     }
 
-    // 尝试发送 — 用最精简参数避免静默失败
+    const fullTitle = `🐱 ${title}`;
+    const trimmedBody = body.slice(0, 200);
+
+    // 通过 ServiceWorkerRegistration.showNotification() 发送
+    // 不需要 controller 已激活，SW registration 对象可直接调用
+    if (swRef.current) {
+      try {
+        swRef.current.showNotification(fullTitle, {
+          body: trimmedBody,
+          requireInteraction: true,
+          icon: "/file.svg",
+          badge: "/file.svg",
+          tag: "meow-workbench",
+        });
+        diag(`SW显示: ${title.slice(0, 20)}`, true);
+        return true;
+      } catch (e: unknown) {
+        diag(`SW显示异常: ${String(e)}，降级直接发送`, false);
+      }
+    }
+
+    // 降级：直接使用 Notification API（Safari 无用户手势时可能被忽略）
     try {
-      const n = new window.Notification(`🐱 ${title}`, {
-        body: body.slice(0, 200),
+      new window.Notification(fullTitle, {
+        body: trimmedBody,
         requireInteraction: true,
+        icon: "/file.svg",
+        badge: "/file.svg",
+        tag: "meow-workbench",
       });
-      diag(`已发送: ${title.slice(0, 20)}`, true);
+      diag(`直接发送: ${title.slice(0, 20)}`, true);
       return true;
     } catch (e: unknown) {
       const msg = e instanceof Error ? (e as Error).message : String(e);
@@ -219,13 +281,13 @@ export default function NotificationProvider({ children }: { children: ReactNode
       const ok = sendNativeNotification("测试通知", `喵站工作台通知正常！${now()}`);
       addNotification({
         title: ok ? "✅ 通知已发送" : "❌ 发送失败",
-        body: ok ? "检查屏幕右下角" : "查看诊断日志",
+        body: ok ? "检查屏幕右上角（Mac）或右下角（Win）" : "查看诊断日志",
         type: ok ? "success" : "error",
       });
     } else if (p === "denied") {
       addNotification({
         title: "❌ 权限被阻止",
-        body: "地址栏锁图标 → 通知 → 改为允许，然后刷新页面",
+        body: "Mac: 系统设置→通知→浏览器→允许 / Win: 地址栏锁图标→通知→允许",
         type: "error",
       });
     } else if (p === "default") {
@@ -239,7 +301,7 @@ export default function NotificationProvider({ children }: { children: ReactNode
         }
       });
     } else {
-      addNotification({ title: "❌ 不支持", body: "请使用 Chrome 浏览器", type: "error" });
+      addNotification({ title: "❌ 不支持", body: "请使用 Chrome 或 Safari 浏览器", type: "error" });
     }
   }, [sendNativeNotification, addNotification, diag]);
 

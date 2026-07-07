@@ -34,9 +34,15 @@ import {
   FileText,
   Bell,
   RefreshCw,
+  CheckCircle2,
+  AlertTriangle,
+  ExternalLink,
+  RotateCw,
+  Image as ImageIcon,
+  X,
 } from "lucide-react";
 import { CONTENT_STATUS_MAP } from "@/lib/constants";
-import type { ContentItem, Platform, ContentStatus, MonitorPlatform } from "@/lib/types";
+import type { ContentItem, Platform, ContentStatus, MonitorPlatform, IPItem } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -70,6 +76,14 @@ export default function ContentCreatorPage() {
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiError, setAiError] = useState("");
 
+  // IP 和多图生成
+  const [ipList, setIpList] = useState<IPItem[]>([]);
+  const [selectedIPId, setSelectedIPId] = useState("");
+  const [imageCount, setImageCount] = useState(1);
+  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [imageGenerating, setImageGenerating] = useState(false);
+  const [imagePrompt, setImagePrompt] = useState("");
+
   // 监控状态
   const [monitorData, setMonitorData] = useState<MonitorPlatform[]>([]);
   const [monitorChecking, setMonitorChecking] = useState(false);
@@ -79,49 +93,17 @@ export default function ContentCreatorPage() {
   const [publishJobId, setPublishJobId] = useState<string | null>(null);
   const [publishLog, setPublishLog] = useState("");
 
-  // 环境检查对话框
-  const [setupDialogOpen, setSetupDialogOpen] = useState(false);
-  const [checks, setChecks] = useState<{ name: string; label: string; ok: boolean; detail: string; action?: string; actionLabel?: string }[]>([]);
-  const [checkReady, setCheckReady] = useState(false);
-  const [checkLoading, setCheckLoading] = useState(false);
-  const [pendingPublish, setPendingPublish] = useState<ContentItem | null>(null);
-  const [fixingName, setFixingName] = useState<string | null>(null);
+  // Setup 环境检测
+  const [setupCompleted, setSetupCompleted] = useState<boolean | null>(null);
+  const [setupSteps, setSetupSteps] = useState<CheckStep[]>([]);
+  const [setupFixing, setSetupFixing] = useState<string | null>(null);
+  const [setupFixResult, setSetupFixResult] = useState<{ name: string; ok: boolean; msg: string } | null>(null);
 
-  const runChecks = async () => {
-    setCheckLoading(true);
-    try {
-      const res = await fetch("/api/publish/check");
-      const data = await res.json();
-      setChecks(data.checks || []);
-      setCheckReady(data.ready);
-      return data;
-    } catch {
-      setChecks([]);
-      setCheckReady(false);
-      return { ready: false, checks: [] };
-    } finally {
-      setCheckLoading(false);
-    }
-  };
-
-  const handleFix = async (checkName: string, action: string) => {
-    setFixingName(checkName);
-    setPublishLog(`正在执行: ${action}`);
-    try {
-      const res = await fetch("/api/publish/fix", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: checkName, action }),
-      });
-      const data = await res.json();
-      setPublishLog(data.ok ? `✅ ${data.detail}` : `❌ ${data.detail}`);
-      // 重新检查
-      setTimeout(() => { runChecks(); setFixingName(null); }, 1500);
-    } catch {
-      setPublishLog("修复失败，请手动执行");
-      setFixingName(null);
-    }
-  };
+  // CheckStep 类型
+  interface CheckStep {
+    step: number; name: string; label: string; ok: boolean;
+    detail: string; hint?: string; action?: string; actionLabel?: string; required: boolean;
+  }
 
   const fetchContents = async () => {
     try {
@@ -158,10 +140,73 @@ export default function ContentCreatorPage() {
     }
   };
 
+  const fetchIPs = useCallback(async () => {
+    try {
+      const res = await fetch("/api/ips");
+      const data = await res.json();
+      setIpList(data.ips || []);
+    } catch { /* ignore */ }
+  }, []);
+
   useEffect(() => {
     fetchContents();
     fetchMonitor();
-  }, [fetchMonitor]);
+    fetchIPs();
+    checkSetup();
+  }, [fetchMonitor, fetchIPs]);
+
+  // Setup 环境检测
+  const checkSetup = async () => {
+    try {
+      const res = await fetch("/api/setup");
+      const d = await res.json();
+      setSetupCompleted(d.setupCompleted ?? false);
+    } catch {
+      setSetupCompleted(false);
+    }
+  };
+
+  const runSetupChecks = async () => {
+    try {
+      const res = await fetch("/api/publish/check");
+      const data = await res.json();
+      setSetupSteps(data.steps || []);
+    } catch {
+      setSetupSteps([]);
+    }
+  };
+
+  const handleSetupFix = async (step: CheckStep) => {
+    if (!step.action || setupFixing) return;
+    setSetupFixing(step.name);
+    setSetupFixResult(null);
+    try {
+      const res = await fetch("/api/publish/fix", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: step.name, action: step.action }),
+      });
+      const d = await res.json();
+      setSetupFixResult({ name: step.name, ok: d.ok, msg: d.detail || d.output || (d.ok ? "修复成功" : "修复失败") });
+      setTimeout(async () => {
+        await runSetupChecks();
+        setSetupFixing(null);
+        setSetupFixResult(null);
+      }, 2000);
+    } catch {
+      setSetupFixResult({ name: step.name, ok: false, msg: "修复请求失败" });
+      setSetupFixing(null);
+    }
+  };
+
+  const handleSetupComplete = async () => {
+    await fetch("/api/setup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ setupCompleted: true }),
+    });
+    setSetupCompleted(true);
+  };
 
   // 每30秒刷新监控
   useEffect(() => {
@@ -216,10 +261,15 @@ export default function ContentCreatorPage() {
     setTags("");
     setEditingContent(null);
     setAiError("");
+    setSelectedIPId("");
+    setImageCount(1);
+    setGeneratedImages([]);
+    setImagePrompt("");
   };
 
   const handleSave = async () => {
     const now = new Date().toISOString();
+    const selectedIP = ipList.find((ip) => ip.id === selectedIPId);
     const content: ContentItem = {
       id: editingContent?.id || uuidv4(),
       title,
@@ -230,8 +280,11 @@ export default function ContentCreatorPage() {
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean),
-      mediaPaths: editingContent?.mediaPaths || [],
+      mediaPaths: generatedImages.length > 0 ? generatedImages : (editingContent?.mediaPaths || []),
       aiGenerated: editingContent?.aiGenerated || false,
+      ipId: selectedIPId || undefined,
+      ipName: selectedIP?.name,
+      imageCount,
       scheduledAt: editingContent?.scheduledAt,
       publishedAt: editingContent?.publishedAt,
       stats: editingContent?.stats,
@@ -260,7 +313,11 @@ export default function ContentCreatorPage() {
       const res = await fetch("/api/ai/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: aiTopic, platform: platform === "both" ? "xiaohongshu" : platform }),
+        body: JSON.stringify({
+          topic: aiTopic,
+          platform: platform === "both" ? "xiaohongshu" : platform,
+          ipId: selectedIPId || undefined,
+        }),
       });
 
       const data = await res.json();
@@ -268,6 +325,7 @@ export default function ContentCreatorPage() {
         setTitle(data.title || "");
         setDescription(data.content || "");
         setTags((data.tags || []).join(", "));
+        if (data.imagePrompt) setImagePrompt(data.imagePrompt);
         setAiGenerating(false);
         setAiTopic("");
       } else {
@@ -280,6 +338,40 @@ export default function ContentCreatorPage() {
     }
   };
 
+  // AI 批量生成图片
+  const handleGenerateImages = async () => {
+    const prompt = imagePrompt || description || title;
+    if (!prompt) {
+      setAiError("请先生成文案或填写描述，以便生成匹配的图片");
+      return;
+    }
+    setImageGenerating(true);
+    setAiError("");
+    setGeneratedImages([]);
+
+    try {
+      const res = await fetch("/api/ai/images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt,
+          ipId: selectedIPId || undefined,
+          count: imageCount,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setGeneratedImages(data.images || []);
+      } else {
+        setAiError(data.error || "图片生成失败");
+      }
+    } catch (err) {
+      setAiError(String(err));
+    }
+    setImageGenerating(false);
+  };
+
   const handleEdit = (item: ContentItem) => {
     setEditingContent(item);
     setTitle(item.title);
@@ -287,6 +379,9 @@ export default function ContentCreatorPage() {
     setPlatform(item.platform);
     setStatus(item.status);
     setTags(item.tags.join(", "));
+    setSelectedIPId(item.ipId || "");
+    setImageCount(item.imageCount || 1);
+    setGeneratedImages(item.mediaPaths || []);
     setDialogOpen(true);
   };
 
@@ -295,28 +390,9 @@ export default function ContentCreatorPage() {
     fetchContents();
   };
 
-  // 一键发布（带环境检查）
+  // 一键发布
   const handlePublish = async (item: ContentItem) => {
-    // 立即反馈：防止重复点击，显示 loading
-    setPublishingId(item.id);
-    setPublishLog("正在检查发布环境...");
-    
-    try {
-      const { ready, checks: checkList } = await runChecks();
-      if (!ready) {
-        setChecks(checkList || []);
-        setCheckReady(false);
-        setPendingPublish(item);
-        setSetupDialogOpen(true);
-        setPublishLog("请先完成环境配置");
-        setPublishingId(null);
-        return;
-      }
-      doPublish(item);
-    } catch (err) {
-      setPublishLog(`检查环境失败: ${String(err)}`);
-      setPublishingId(null);
-    }
+    doPublish(item);
   };
 
   const doPublish = async (item: ContentItem) => {
@@ -333,6 +409,8 @@ export default function ContentCreatorPage() {
           title: item.title,
           content: item.description,
           tags: item.tags,
+          imagePaths: item.mediaPaths?.length ? item.mediaPaths : undefined,
+          ipId: item.ipId,
         }),
       });
 
@@ -395,6 +473,7 @@ export default function ContentCreatorPage() {
         title="内容创作"
         description="AI 辅助创作 + 一键发布小红书/抖音"
         action={
+          setupCompleted ? (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger>
               <Button
@@ -416,8 +495,23 @@ export default function ContentCreatorPage() {
               <div className="space-y-4 mt-2">
                 {/* AI 生成区 */}
                 <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-100 dark:from-purple-950 dark:to-pink-950 dark:border-purple-900">
-                  <CardContent className="p-4">
-                    <p className="text-sm font-medium mb-2 flex items-center gap-1">
+                  <CardContent className="p-4 space-y-3">
+                    {/* IP 选择器 */}
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs shrink-0 whitespace-nowrap">IP 人设</Label>
+                      <select
+                        value={selectedIPId}
+                        onChange={(e) => setSelectedIPId(e.target.value)}
+                        className="h-8 text-sm flex-1 rounded-md border bg-background px-2"
+                      >
+                        <option value="">不使用 IP</option>
+                        {ipList.map((ip) => (
+                          <option key={ip.id} value={ip.id}>{ip.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <p className="text-sm font-medium flex items-center gap-1">
                       <Sparkles className="h-3.5 w-3.5 text-purple-500" />
                       AI 生成文案
                     </p>
@@ -443,8 +537,63 @@ export default function ContentCreatorPage() {
                         生成
                       </Button>
                     </div>
+
+                    {/* 图片生成区 */}
+                    <div className="pt-2 border-t border-purple-200 dark:border-purple-800">
+                      <p className="text-sm font-medium mb-2 flex items-center gap-1">
+                        <ImageIcon className="h-3.5 w-3.5 text-purple-500" />
+                        AI 生成图片
+                      </p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Label className="text-xs shrink-0">张数</Label>
+                        <select
+                          value={imageCount}
+                          onChange={(e) => setImageCount(Number(e.target.value))}
+                          className="h-8 text-sm w-20 rounded-md border bg-background px-2"
+                        >
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                            <option key={n} value={n}>{n} 张</option>
+                          ))}
+                        </select>
+                        <Button
+                          size="sm"
+                          className="h-8 gap-1"
+                          onClick={handleGenerateImages}
+                          disabled={imageGenerating}
+                        >
+                          {imageGenerating ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <ImageIcon className="h-3 w-3" />
+                          )}
+                          生成图片
+                        </Button>
+                      </div>
+
+                      {/* 生成图片预览 */}
+                      {generatedImages.length > 0 && (
+                        <div className="flex gap-2 flex-wrap">
+                          {generatedImages.map((img, i) => (
+                            <div key={i} className="relative group">
+                              <img
+                                src={img}
+                                alt={`生成图 ${i + 1}`}
+                                className="h-16 w-12 object-cover rounded border"
+                              />
+                              <button
+                                className="absolute -top-1 -right-1 bg-destructive text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => setGeneratedImages(prev => prev.filter((_, j) => j !== i))}
+                              >
+                                <X className="h-2.5 w-2.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
                     {aiError && (
-                      <p className="text-xs text-red-500 mt-2">{aiError}</p>
+                      <p className="text-xs text-red-500">{aiError}</p>
                     )}
                   </CardContent>
                 </Card>
@@ -515,6 +664,7 @@ export default function ContentCreatorPage() {
               </div>
             </DialogContent>
           </Dialog>
+          ) : null
         }
       />
 
@@ -632,6 +782,23 @@ export default function ContentCreatorPage() {
         </Card>
       )}
 
+      {/* Setup 环境向导 — 未配置时替换内容列表 */}
+      {setupCompleted === false ? (
+        <SetupWizard
+          steps={setupSteps}
+          fixing={setupFixing}
+          fixResult={setupFixResult}
+          onRunChecks={runSetupChecks}
+          onFix={handleSetupFix}
+          onComplete={handleSetupComplete}
+        />
+      ) : setupCompleted === null ? (
+        <div className="text-center py-8 text-muted-foreground">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+          <p className="text-sm">检查环境配置...</p>
+        </div>
+      ) : (
+        <>
       {/* 内容列表 */}
       {loading ? (
         <div className="text-center py-8 text-muted-foreground">加载中...</div>
@@ -737,75 +904,204 @@ export default function ContentCreatorPage() {
           ))}
         </div>
       )}
+        </>
+      )}
+    </div>
+  );
+}
 
-      {/* 发布环境配置向导 */}
-      <Dialog open={setupDialogOpen} onOpenChange={setSetupDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>🔧 发布环境检查</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 mt-2">
-            {checkLoading ? (
-              <div className="flex items-center gap-2 py-4 text-muted-foreground">
-                <Loader2 className="h-5 w-5 animate-spin" />
-                <span>正在检查环境...</span>
-              </div>
-            ) : (
-              <>
-                {checks.map((c) => (
-                  <div key={c.name} className={`flex items-start gap-2.5 p-2.5 rounded-lg ${c.ok ? "bg-green-50 dark:bg-green-950" : "bg-amber-50 dark:bg-amber-950"}`}>
-                    <span className="text-lg shrink-0 mt-0.5">{c.ok ? "✅" : "⚠️"}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">{c.label}</p>
-                      <p className="text-xs text-muted-foreground">{c.detail}</p>
-                      {!c.ok && c.action && c.actionLabel && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-7 mt-1.5 text-xs"
-                          disabled={fixingName === c.name}
-                          onClick={() => {
-                            if (c.action?.startsWith("http")) window.open(c.action, "_blank");
-                            else if (c.action?.startsWith("/")) window.location.href = c.action;
-                            else handleFix(c.name, c.action || "");
-                          }}
-                        >
-                          {fixingName === c.name ? (
-                            <><Loader2 className="h-3 w-3 animate-spin mr-1" />执行中</>
-                          ) : (
-                            c.actionLabel
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
+// ── SetupWizard 内嵌组件 ──
 
-                <div className="flex gap-2 pt-2">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSetupDialogOpen(false); setPendingPublish(null); }}>
-                    取消
-                  </Button>
-                  <Button size="sm" className="flex-1 gap-1" onClick={async () => {
-                    await runChecks();
-                  }} disabled={checkLoading}>
-                    <RefreshCw className={`h-3.5 w-3.5 ${checkLoading ? "animate-spin" : ""}`} />
-                    重新检查
-                  </Button>
-                </div>
+const STEP_ICONS: Record<string, string> = {
+  node: "📦", python: "🐍", uv: "📥", "browser-act": "🌐",
+  chrome: "🌐", "browser-id": "🔧", "qwapi-key": "🔑", login: "🔐",
+};
 
-                {checkReady && (
-                  <Button className="w-full gap-1" onClick={() => {
-                    setSetupDialogOpen(false);
-                    if (pendingPublish) doPublish(pendingPublish);
-                  }}>
-                    环境就绪，继续发布
-                  </Button>
-                )}
-              </>
-            )}
+interface CheckStep {
+  step: number; name: string; label: string; ok: boolean;
+  detail: string; hint?: string; action?: string; actionLabel?: string; required: boolean;
+}
+
+function SetupWizard({
+  steps,
+  fixing,
+  fixResult,
+  onRunChecks,
+  onFix,
+  onComplete,
+}: {
+  steps: CheckStep[];
+  fixing: string | null;
+  fixResult: { name: string; ok: boolean; msg: string } | null;
+  onRunChecks: () => Promise<void>;
+  onFix: (step: CheckStep) => void;
+  onComplete: () => void;
+}) {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    onRunChecks().then(() => setLoading(false));
+  }, [onRunChecks]);
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center text-muted-foreground">
+          <Loader2 className="h-10 w-10 animate-spin mx-auto mb-3" />
+          <p className="text-sm">正在检测发布环境...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const allDone = steps.length > 0 && steps.every((s) => s.ok);
+  const currentStep = steps.find((s) => !s.ok);
+  const passedCount = steps.filter((s) => s.ok).length;
+  const totalCount = steps.length;
+
+  // 全部通过 → 完成页面
+  if (allDone) {
+    return (
+      <Card className="border-2 border-green-200">
+        <CardContent className="py-8 text-center space-y-4">
+          <div className="text-5xl">🎉</div>
+          <div>
+            <p className="text-lg font-semibold">所有环境检查已通过！</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              所有依赖和配置已就绪，现在可以一键发布内容了
+            </p>
           </div>
-        </DialogContent>
-      </Dialog>
+          <div className="space-y-1.5 text-left max-w-sm mx-auto">
+            {steps.map((s) => (
+              <div key={s.name} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                <span>{STEP_ICONS[s.name]} {s.label}</span>
+                <span className="text-xs ml-auto opacity-60">{s.detail}</span>
+              </div>
+            ))}
+          </div>
+          <Button size="lg" className="gap-2" onClick={onComplete}>
+            <CheckCircle2 className="h-4 w-4" />
+            完成配置，开始使用
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            配置完成后，新建内容和发布功能将自动开启
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // 有未通过步骤
+  return (
+    <div className="space-y-4">
+      {/* 进度条 */}
+      <div className="space-y-2">
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>环境配置进度 {passedCount}/{totalCount}</span>
+          <span>{Math.round((passedCount / Math.max(totalCount, 1)) * 100)}%</span>
+        </div>
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div
+            className="h-full bg-primary transition-all duration-500 rounded-full"
+            style={{ width: `${(passedCount / Math.max(totalCount, 1)) * 100}%` }}
+          />
+        </div>
+        <div className="flex gap-1.5 justify-center">
+          {steps.map((s) => (
+            <div
+              key={s.name}
+              className={`w-6 h-1.5 rounded-full transition-colors ${
+                s.ok ? "bg-green-500" : s === currentStep ? "bg-primary" : "bg-muted-foreground/30"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* 当前步骤卡片 */}
+      {currentStep && (
+        <Card className="border-2 border-primary/20">
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="text-sm px-3 py-1">
+                步骤 {currentStep.step}/{totalCount}
+              </Badge>
+              <h2 className="font-semibold">
+                {STEP_ICONS[currentStep.name]} {currentStep.label}
+              </h2>
+              {!currentStep.required && (
+                <Badge variant="secondary" className="text-xs">可选</Badge>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              <span className="text-sm">{currentStep.detail}</span>
+            </div>
+
+            {currentStep.hint && (
+              <div className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3 whitespace-pre-line">
+                {currentStep.hint}
+              </div>
+            )}
+
+            {fixResult && fixResult.name === currentStep.name && (
+              <div className={`text-sm p-3 rounded-lg ${fixResult.ok ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}>
+                {fixResult.ok ? "✅ " : "❌ "}{fixResult.msg}
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2">
+              {currentStep.action && (
+                currentStep.action.startsWith("http") ? (
+                  <Button variant="default" size="sm" className="gap-1.5" onClick={() => window.open(currentStep.action, "_blank")}>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    {currentStep.actionLabel || "前往"}
+                  </Button>
+                ) : currentStep.action.startsWith("/") ? (
+                  <Button variant="default" size="sm" className="gap-1.5" onClick={() => window.location.href = currentStep.action!}>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    {currentStep.actionLabel || "前往"}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="gap-1.5"
+                    disabled={fixing === currentStep.name}
+                    onClick={() => onFix(currentStep)}
+                  >
+                    {fixing === currentStep.name ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" />执行中...</>
+                    ) : (
+                      <><RotateCw className="h-3.5 w-3.5" />{currentStep.actionLabel || "一键修复"}</>
+                    )}
+                  </Button>
+                )
+              )}
+
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={onRunChecks}>
+                <RotateCw className="h-3.5 w-3.5" />重新检测
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 已完成步骤摘要 */}
+      {passedCount > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-xs text-muted-foreground font-medium">已完成</p>
+          {steps.filter((s) => s.ok).map((s) => (
+            <div key={s.name} className="flex items-center gap-2 text-sm text-muted-foreground">
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
+              <span>{STEP_ICONS[s.name]} {s.label}</span>
+              <span className="text-xs ml-auto opacity-60">{s.detail}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

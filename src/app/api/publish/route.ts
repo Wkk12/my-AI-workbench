@@ -80,9 +80,9 @@ const runningJobs = new Map<
 /** 发布到指定平台，返回 jobId */
 async function publishToPlatform(
   platform: "xiaohongshu" | "douyin",
-  opts: { title?: string; content?: string; tags?: string[]; topic?: string; imagePath?: string }
+  opts: { title?: string; content?: string; tags?: string[]; topic?: string; imagePaths?: string[] }
 ): Promise<{ success: true; jobId: string; script: string } | { success: false; error: string }> {
-  const { title, content, tags, topic, imagePath } = opts;
+  const { title, content, tags, topic, imagePaths } = opts;
   const isWin = process.platform === "win32";
   let scriptName = platform === "xiaohongshu" ? "publish-xhs" : "publish-douyin";
   // Windows 使用适配版脚本（如果存在），否则回退到原版
@@ -111,8 +111,10 @@ async function publishToPlatform(
     if (title) args.push("--title", title);
     if (content) args.push("--content", content.replace(/\n/g, "\\n"));
     if (tags && tags.length > 0) args.push("--tags", tags.join(","));
-    if (imagePath) {
-      args.push("--image", imagePath);
+    if (imagePaths && imagePaths.length > 0) {
+      for (const img of imagePaths) {
+        args.push("--image", img);
+      }
     } else if (content && apiKey) {
       try {
         const prompt = await generateImagePrompt(content, apiKey, platform);
@@ -149,8 +151,13 @@ async function publishToPlatform(
   exec(cmd, { cwd: getPublisherDir(), env }, (error, stdout, stderr) => {
     const job = runningJobs.get(jobId);
     if (job) {
-      job.status = error ? "error" : "done";
-      job.log = ((stdout || "") + (stderr ? "[stderr] " + stderr : "")).slice(-5000);
+      // browser-act / puppeteer 经常向 stderr 输出信息性消息（非致命），
+      // 因此不能仅凭 exit code 判断失败。始终标记为 "done"，
+      // 由调用方检查日志内容来判断实际结果。
+      const out = (stdout || "") + (stderr || "");
+      // 仅当完全无输出且 exit code 非零时才标记为 error
+      job.status = error && !out.trim() ? "error" : "done";
+      job.log = out.slice(-5000);
     }
     setTimeout(() => runningJobs.delete(jobId), 3600_000);
   });
@@ -161,7 +168,7 @@ async function publishToPlatform(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { platform, title, content, tags, topic, imagePath } = body;
+    const { platform, title, content, tags, topic, imagePaths, ipId } = body;
 
     if (!platform || !["xiaohongshu", "douyin", "both"].includes(platform)) {
       return NextResponse.json(
@@ -175,7 +182,7 @@ export async function POST(request: NextRequest) {
       const platforms = ["xiaohongshu", "douyin"] as const;
       const jobs: { platform: string; jobId: string; script: string }[] = [];
       for (const p of platforms) {
-        const result = await publishToPlatform(p, { title, content, tags, topic, imagePath });
+        const result = await publishToPlatform(p, { title, content, tags, topic, imagePaths });
         if (result.success) jobs.push({ platform: p, jobId: result.jobId, script: result.script });
       }
       if (jobs.length > 0) {
@@ -201,7 +208,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await publishToPlatform(platform, { title, content, tags, topic, imagePath });
+    const result = await publishToPlatform(platform, { title, content, tags, topic, imagePaths });
     if (!result.success) {
       return NextResponse.json({ error: result.error }, { status: 500 });
     }

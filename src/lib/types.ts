@@ -52,12 +52,31 @@ export interface ContentItem {
   mediaPaths: string[];
   aiGenerated: boolean;
   stats?: ContentStats;
+  ipId?: string;        // 关联的 IP
+  ipName?: string;      // IP 名称（冗余，方便显示）
+  imageCount?: number;  // 生成图片张数（1-9）
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ContentIndex {
   contents: ContentItem[];
+}
+
+// --- IP 管理 ---
+
+export interface IPItem {
+  id: string;
+  name: string;           // IP 名称
+  description?: string;   // IP 人设描述
+  imagePath: string;      // 参考图路径 data/ips/images/{id}.png
+  stylePrompt?: string;   // 风格提示词
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IPIndex {
+  ips: IPItem[];
 }
 
 // --- 一人公司项目 ---
@@ -159,6 +178,7 @@ export interface Settings {
   gitlab: GitLabSettings;
   claude: ClaudeSettings;
   platforms: PlatformSettings;
+  setupCompleted?: boolean;
 }
 
 // --- 我的钱包（订阅管理）---

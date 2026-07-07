@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSettings } from "@/lib/data/settings";
+import { getAllIPs } from "@/lib/data/ips";
 
 /**
- * AI 内容生成 — 给定主题，返回标题/正文/标签
- * POST /api/ai/generate  { topic, platform }
+ * AI 内容生成 — 给定主题，返回标题/正文/标签 + 图片 prompt
+ * POST /api/ai/generate  { topic, platform, ipId? }
  */
 
 function getApiKey(): string {
@@ -97,9 +98,61 @@ const PROMPTS: Record<string, { system: string; template: (topic: string) => str
   },
 };
 
+async function generateImagePrompt(
+  content: string,
+  apiKey: string,
+  platform: string,
+  ipId?: string
+): Promise<string> {
+  const styleHint =
+    platform === "xiaohongshu"
+      ? "干净、小清新、适合小红书审美，温暖柔和色调"
+      : "醒目、冲击力强、适合抖音封面风格";
+
+  let ipHint = "";
+  if (ipId) {
+    const ip = getAllIPs().find((i) => i.id === ipId);
+    if (ip?.stylePrompt) {
+      ipHint = `。风格参考：${ip.stylePrompt}`;
+    }
+    if (ip?.description) {
+      ipHint += `。角色：${ip.name}，${ip.description}`;
+    }
+  }
+
+  const userMessage = `根据以下内容生成一个AI封面图英文prompt。要求：
+- 风格：${styleHint}${ipHint}
+- 画面：竖版3:4比例，适合手机封面
+- 英文输出，不超过200字符
+
+内容：${content.slice(0, 300)}`;
+
+  for (const model of MODELS) {
+    try {
+      const resp = await fetch(`${BASE_URL}/chat/completions`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: "你是AI图片提示词专家。只输出英文prompt，不要任何解释。" },
+            { role: "user", content: userMessage },
+          ],
+          max_tokens: 300,
+        }),
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      return data.choices[0].message.content.trim();
+    } catch { continue; }
+  }
+  return "";
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { topic, platform } = await request.json();
+    const { topic, platform, ipId } = await request.json();
 
     if (!topic || typeof topic !== "string") {
       return NextResponse.json(
@@ -111,8 +164,21 @@ export async function POST(request: NextRequest) {
     const p = platform === "douyin" ? "douyin" : "xiaohongshu";
     const prompt = PROMPTS[p];
 
+    // 融入 IP 人设信息
+    let ipContext = "";
+    if (ipId) {
+      const ip = getAllIPs().find((i) => i.id === ipId);
+      if (ip) {
+        ipContext = `\n\n【重要：你扮演的人设是"${ip.name}"】${ip.description || ""}。所有内容要符合这个角色的人设风格。`;
+      }
+    }
+
     const apiKey = getApiKey();
-    const raw = await callLLM(apiKey, prompt.system, prompt.template(topic));
+    const raw = await callLLM(
+      apiKey,
+      prompt.system,
+      prompt.template(topic) + ipContext
+    );
 
     // 解析 JSON
     let parsed: { title: string; content: string; tags: string };
@@ -160,6 +226,7 @@ export async function POST(request: NextRequest) {
       title: parsed.title,
       content: parsed.content.replace(/\\n/g, "\n"),
       tags: cleanTags,
+      imagePrompt: await generateImagePrompt(parsed.content, apiKey, p, ipId),
     });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);

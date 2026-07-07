@@ -9,6 +9,95 @@ import type { ScheduledTask } from "@/lib/types";
  * POST /api/scheduler/run { taskId } — 手动触发指定任务
  */
 
+/** 轮询发布任务直到完成或超时，返回实际日志 */
+async function pollPublishJob(
+  jobId: string,
+  platform: string,
+  timeoutMs = 300_000
+): Promise<string> {
+  const startTime = Date.now();
+  const emoji = platform === "xiaohongshu" ? "📕" : "🎵";
+  while (Date.now() - startTime < timeoutMs) {
+    await new Promise((r) => setTimeout(r, 3000));
+    try {
+      const resp = await fetch(`${getBaseUrl()}/api/publish?jobId=${jobId}`);
+      const data = await resp.json();
+      if (data.done) {
+        const log = (data.log || "").slice(-800);
+        if (data.status === "done") {
+          // 检查日志中是否有明确的发布成功/失败标记
+          // 注意：不能简单匹配 "error"/"fail"，因为 browser-act 的 stderr
+          // 输出中常含 "Error" 字样（如 help text），这些不是真正的发布失败。
+          // 只看明确的失败关键词：❌、bail、process.exit、ENOENT
+          if (/❌|发布失败|脚本未找到|ENOENT|ECONNREFUSED|browser-act: command not found/i.test(log)) {
+            return `${emoji} 发布可能失败: ${log}`;
+          }
+          // 有正常输出 → 发布流程已执行
+          if (log.trim()) {
+            return `${emoji} 发布完成，详情: ${log}`;
+          }
+          return `${emoji} 发布完成（无日志输出）`;
+        }
+        if (data.status === "error") {
+          return `${emoji} 发布脚本异常退出: ${log || "无输出"}`;
+        }
+      }
+    } catch {
+      // 轮询出错，继续重试
+    }
+  }
+  return `${emoji} 发布超时（超过${timeoutMs / 1000}秒），任务可能仍在后台运行`;
+}
+
+/** 如果有 contentId，从内容库提取标题/正文/标签，标题为空时自动 AI 生成 */
+async function resolveContentConfig(
+  config: Record<string, string>,
+  platform: string
+): Promise<{ title?: string; content?: string; tags?: string[]; topic?: string }> {
+  const contentId = config.contentId;
+  if (!contentId) {
+    return { topic: config.topic || "每日精选" };
+  }
+
+  try {
+    const { getContent } = await import("@/lib/data/contents");
+    const item = getContent(contentId);
+    if (!item) return { topic: config.topic || "每日精选" };
+
+    let title = item.title;
+    // 标题为空时自动 AI 生成
+    if (!title || !title.trim()) {
+      const settings = getSettings();
+      const apiKey = process.env.QWAPI_API_KEY || settings.claude?.qwapiKey || "";
+      if (apiKey && (item.description || config.topic)) {
+        try {
+          const resp = await fetch(`${getBaseUrl()}/api/ai/generate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              topic: item.description?.slice(0, 100) || config.topic || "每日精选",
+              platform,
+            }),
+          });
+          const data = await resp.json();
+          if (data.success && data.title) {
+            title = data.title;
+          }
+        } catch { /* AI 生成失败，继续 */ }
+      }
+    }
+
+    return {
+      title: title || item.title || undefined,
+      content: item.description || undefined,
+      tags: item.tags?.length ? item.tags : undefined,
+      topic: config.topic || undefined,
+    };
+  } catch {
+    return { topic: config.topic || "每日精选" };
+  }
+}
+
 async function executeTask(task: ScheduledTask): Promise<string> {
   const settings = getSettings();
   const qwapiKey = process.env.QWAPI_API_KEY || settings.claude?.qwapiKey || "";
@@ -17,34 +106,39 @@ async function executeTask(task: ScheduledTask): Promise<string> {
   switch (task.actionType) {
     // ── 发布小红书 ──
     case "publish_xhs": {
-      const topic = task.config?.topic || "每日精选";
+      const pubConfig = await resolveContentConfig(task.config, "xiaohongshu");
       const resp = await fetch(`${getBaseUrl()}/api/publish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ platform: "xiaohongshu", topic }),
+        body: JSON.stringify({ platform: "xiaohongshu", ...pubConfig }),
       });
       const data = await resp.json();
-      if (data.success) return "📕 小红书发布任务已启动";
-      if (data.error?.includes("脚本未找到")) {
-        return "📕 发布脚本未安装。请将 social-publisher 脚本放到 ~/.openclaw/workspace/skills/social-publisher/";
+      if (!data.success) {
+        if (data.error?.includes("脚本未找到")) {
+          return "📕 发布脚本未安装。请将 social-publisher 脚本放到 ~/.openclaw/workspace/skills/social-publisher/";
+        }
+        return `📕 发布启动失败: ${data.error}`;
       }
-      return `📕 发布失败: ${data.error}`;
+      // 等待实际执行结果
+      return await pollPublishJob(data.jobId, "xiaohongshu");
     }
 
     // ── 发布抖音 ──
     case "publish_douyin": {
-      const topic = task.config?.topic || "每日精选";
+      const pubConfig = await resolveContentConfig(task.config, "douyin");
       const resp = await fetch(`${getBaseUrl()}/api/publish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ platform: "douyin", topic }),
+        body: JSON.stringify({ platform: "douyin", ...pubConfig }),
       });
       const data = await resp.json();
-      if (data.success) return "🎵 抖音发布任务已启动";
-      if (data.error?.includes("脚本未找到")) {
-        return "🎵 发布脚本未安装。请将 social-publisher 脚本放到 ~/.openclaw/workspace/skills/social-publisher/";
+      if (!data.success) {
+        if (data.error?.includes("脚本未找到")) {
+          return "🎵 发布脚本未安装。请将 social-publisher 脚本放到 ~/.openclaw/workspace/skills/social-publisher/";
+        }
+        return `🎵 发布启动失败: ${data.error}`;
       }
-      return `🎵 发布失败: ${data.error}`;
+      return await pollPublishJob(data.jobId, "douyin");
     }
 
     // ── 生成日报 ──
@@ -151,15 +245,16 @@ export async function GET() {
 
   // 诊断：列出所有任务及其过滤状态
   const all = getAllTasks();
+  const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   const diag = all.map((t) => {
     const reasons: string[] = [];
     if (!t.enabled) reasons.push("已禁用");
-    if (t.schedule > timeKey) reasons.push(`时间未到(schedule=${t.schedule} > now=${timeKey})`);
+    if (t.schedule !== timeKey) reasons.push(`时间不匹配(schedule=${t.schedule} now=${timeKey})`);
     if (t.daysOfWeek.length > 0 && !t.daysOfWeek.includes(dayOfWeek)) reasons.push("今天不执行");
     if (t.lastRun) {
-      const last = new Date(t.lastRun).getTime();
-      const diffMin = Math.round((now.getTime() - last) / 60000);
-      if (diffMin < 30) reasons.push(`刚执行过(${diffMin}分钟前，30分钟内不重复)`);
+      const lastDate = new Date(t.lastRun);
+      const lastDayKey = `${lastDate.getFullYear()}-${String(lastDate.getMonth() + 1).padStart(2, "0")}-${String(lastDate.getDate()).padStart(2, "0")}`;
+      if (lastDayKey === todayKey) reasons.push("今日已执行");
     }
     return {
       id: t.id,

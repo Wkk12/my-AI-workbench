@@ -18,9 +18,9 @@ import { Switch } from "@/components/ui/switch";
 import {
   Plus, Clock, Play, Trash2, Edit, RefreshCw, CheckCircle2,
   XCircle, Loader2, Bell, FileText, Send, Sunrise, Wrench,
-  History,
+  History, AlertTriangle, ExternalLink,
 } from "lucide-react";
-import type { ScheduledTask, SchedulerActionType } from "@/lib/types";
+import type { ScheduledTask, SchedulerActionType, ContentItem } from "@/lib/types";
 import { useNotifications } from "@/components/notifications/NotificationProvider";
 import { v4 as uuidv4 } from "uuid";
 
@@ -61,6 +61,10 @@ export default function SchedulerPage() {
   const [runningTaskId, setRunningTaskId] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
 
+  // Setup 环境检测
+  const [setupCompleted, setSetupCompleted] = useState<boolean | null>(null);
+  const [setupWarnOpen, setSetupWarnOpen] = useState(false);
+
   // 表单
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -71,6 +75,10 @@ export default function SchedulerPage() {
   const [fEnabled, setFEnabled] = useState(true);
   const [fConfigTopic, setFConfigTopic] = useState("");
   const [fConfigCity, setFConfigCity] = useState("北京");
+  const [fConfigContentId, setFConfigContentId] = useState("");
+
+  // 内容列表（用于选择已有内容发布）
+  const [contentList, setContentList] = useState<ContentItem[]>([]);
 
   const fetchTasks = useCallback(async () => {
     const res = await fetch("/api/scheduler");
@@ -79,7 +87,13 @@ export default function SchedulerPage() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchTasks(); }, [fetchTasks]);
+  useEffect(() => {
+    fetchTasks();
+    // 检查发布环境配置
+    fetch("/api/setup").then(r => r.json()).then(d => setSetupCompleted(d.setupCompleted ?? false)).catch(() => setSetupCompleted(false));
+    // 加载内容列表（供发布任务选择）
+    fetch("/api/content").then(r => r.json()).then(d => setContentList(d.contents || [])).catch(() => {});
+  }, [fetchTasks]);
 
   const resetForm = () => {
     setFName("");
@@ -89,6 +103,7 @@ export default function SchedulerPage() {
     setFEnabled(true);
     setFConfigTopic("");
     setFConfigCity("北京");
+    setFConfigContentId("");
     setEditingId(null);
   };
 
@@ -101,14 +116,22 @@ export default function SchedulerPage() {
     setFEnabled(t.enabled);
     setFConfigTopic(t.config?.topic || "");
     setFConfigCity(t.config?.city || "北京");
+    setFConfigContentId(t.config?.contentId || "");
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
+    // 发布类任务需要环境配置
+    if ((fActionType === "publish_xhs" || fActionType === "publish_douyin") && !setupCompleted) {
+      setSetupWarnOpen(true);
+      return;
+    }
+
     const now = new Date().toISOString();
     const config: Record<string, string> = {};
     if (fConfigTopic) config.topic = fConfigTopic;
     if (fConfigCity) config.city = fConfigCity;
+    if (fConfigContentId && fConfigContentId !== "none") config.contentId = fConfigContentId;
 
     const task: ScheduledTask = {
       id: editingId || uuidv4(),
@@ -198,6 +221,10 @@ export default function SchedulerPage() {
   };
 
   const handlePreset = (preset: typeof QUICK_PRESETS[number]) => {
+    if ((preset.actionType === "publish_xhs" || preset.actionType === "publish_douyin") && !setupCompleted) {
+      setSetupWarnOpen(true);
+      return;
+    }
     setFName(preset.name);
     setFActionType(preset.actionType);
     setFSchedule(preset.schedule);
@@ -300,9 +327,45 @@ export default function SchedulerPage() {
 
                   {/* 动作配置 */}
                   {(fActionType === "publish_xhs" || fActionType === "publish_douyin") && (
-                    <div className="space-y-2">
-                      <Label>发布主题（可选）</Label>
-                      <Input value={fConfigTopic} onChange={(e) => setFConfigTopic(e.target.value)} placeholder="如：每日精选话题" />
+                    <div className="space-y-3">
+                      {/* 选择已有内容 */}
+                      <div className="space-y-2">
+                        <Label>选择内容（可选）</Label>
+                        <Select value={fConfigContentId} onValueChange={(v) => {
+                          const val = v || "";
+                          setFConfigContentId(val);
+                          if (val && val !== "none") {
+                            const selected = contentList.find((c) => c.id === val);
+                            if (selected) {
+                              if (selected.title) setFName(selected.title);
+                              if (selected.description && !fConfigTopic) setFConfigTopic(selected.description.slice(0, 50));
+                            }
+                          }
+                        }}>
+                          <SelectTrigger>
+                            {fConfigContentId && fConfigContentId !== "none"
+                              ? (contentList.find(c => c.id === fConfigContentId)?.title || "已选择内容")
+                              : "不使用已有内容（按主题生成）"}
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">不使用已有内容（按主题生成）</SelectItem>
+                            {contentList.map((c) => (
+                              <SelectItem key={c.id} value={c.id}>
+                                {c.title || "无标题"} {c.platform === "xiaohongshu" ? "📕" : c.platform === "douyin" ? "🎵" : "📱"}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {fConfigContentId && fConfigContentId !== "none" && (
+                          <p className="text-xs text-muted-foreground">
+                            将发布已选内容，标题为空时自动 AI 生成
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label>发布主题（可选，无内容时使用）</Label>
+                        <Input value={fConfigTopic} onChange={(e) => setFConfigTopic(e.target.value)} placeholder="如：每日精选话题" />
+                      </div>
                     </div>
                   )}
 
@@ -392,6 +455,14 @@ export default function SchedulerPage() {
                   </div>
                 )}
 
+                {/* 任务配置摘要 */}
+                {task.config?.contentId && (
+                  <div className="mb-3 text-xs text-muted-foreground">
+                    📝 内容：
+                    {contentList.find(c => c.id === task.config.contentId)?.title || task.config.contentId}
+                  </div>
+                )}
+
                 {/* 操作按钮 */}
                 <div className="flex gap-1.5">
                   <Button
@@ -435,12 +506,37 @@ export default function SchedulerPage() {
       <Card className="bg-muted/30">
         <CardContent className="py-3 text-xs text-muted-foreground space-y-1">
           <p>💡 <strong>使用说明：</strong></p>
-          <p>• 定时任务在当前时间匹配时自动执行（每分钟检查一次）</p>
-          <p>• 点击「立即执行」可手动触发任意任务</p>
+          <p>• 定时任务在设定时间到达时精确触发（每分钟检查一次，每天只执行一次）</p>
+          <p>• 点击「立即执行」可手动触发任意任务（不受每日一次限制）</p>
           <p>• 点击「立即检查」可一次性运行所有到期任务</p>
           <p>• AI 功能需要在「系统设置」中配置 Claude API Key 或 QWAPI Key</p>
         </CardContent>
       </Card>
+
+      {/* 发布环境未配置警告 */}
+      <Dialog open={setupWarnOpen} onOpenChange={setSetupWarnOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              发布环境未配置
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              创建发布类定时任务需要先完成发布环境初始化。请前往「内容创作」页面完成环境配置。
+            </p>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="flex-1" onClick={() => setSetupWarnOpen(false)}>
+                知道了
+              </Button>
+              <Button size="sm" className="flex-1 gap-1" onClick={() => { setSetupWarnOpen(false); window.location.href = "/self-dev/content-creator"; }}>
+                前往配置 <ExternalLink className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -18,6 +18,7 @@ import {
   Settings,
   Wrench,
   Wallet,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -54,6 +55,7 @@ export const NAV_ITEMS: NavGroup[] = [
     items: [
       { title: "自研概览", href: "/self-dev", icon: LayoutDashboard },
       { title: "内容创作", href: "/self-dev/content-creator", icon: PencilRuler },
+      { title: "IP 管理", href: "/self-dev/ips", icon: Sparkles },
       { title: "项目看板", href: "/self-dev/projects", icon: Kanban },
       { title: "创意实验室", href: "/self-dev/idea-lab", icon: FlaskConical },
       { title: "定时任务", href: "/self-dev/scheduler", icon: Clock },
@@ -101,6 +103,7 @@ export const DEFAULT_SETTINGS = {
     qwapiKey: "",
   },
   platforms: {},
+  setupCompleted: false,
 };
 
 // --- 项目状态映射 ---

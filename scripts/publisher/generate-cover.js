@@ -47,6 +47,8 @@ function loadApiKey() {
 async function generateCover(prompt, outputPath, options) {
   options = options || {};
   const size = options.size || '1024x1536'; // 默认竖版 3:4
+  const n = options.n || 1; // 生成张数，1-9
+  const outputPaths = options.outputPaths; // 数组输出路径（多张时）
 
   const apiKey = loadApiKey();
   if (!apiKey) {
@@ -60,10 +62,10 @@ async function generateCover(prompt, outputPath, options) {
   console.log('🎨 AI 生成封面图...');
   console.log('  提示词: ' + prompt.slice(0, 60) + (prompt.length > 60 ? '...' : ''));
   console.log('  尺寸: ' + size);
+  console.log('  张数: ' + n);
 
   const proxy = options.proxy || 'http://127.0.0.1:7890';
 
-  // 动态导入 fetch（Node.js ≥18 内置）
   let fetch;
   try {
     fetch = globalThis.fetch;
@@ -72,9 +74,7 @@ async function generateCover(prompt, outputPath, options) {
     fetch = f;
   }
 
-  const startTime = Date.now();
-
-  // 代理：qweapi 需要代理（默认 7890），传 null 可跳过
+  // 代理设置
   if (proxy !== null) {
     const proxyUrl = proxy || 'http://127.0.0.1:7890';
     if (!process.env.HTTP_PROXY && !process.env.http_proxy) {
@@ -85,47 +85,63 @@ async function generateCover(prompt, outputPath, options) {
     }
   }
 
+  const startTime = Date.now();
+  const results = [];
+
   try {
-    // 使用 JSON body（generations 端点）
-    const resp = await fetch('https://qweapi.com/v1/images/generations', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + apiKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-image-2',
-        prompt: prompt,
-        n: 1,
-        size: size,
-        response_format: 'b64_json',
-      }),
-      // 代理通过全局 fetch 无法直接设置，需要环境变量
-      // 如果设置了代理环境变量会自动走代理
-      signal: AbortSignal.timeout(120000),
-    });
+    for (let i = 0; i < n; i++) {
+      const variantPrompt = n > 1
+        ? `${prompt} (variation ${i + 1} of ${n})`
+        : prompt;
 
-    if (!resp.ok) {
-      const errText = await resp.text();
-      throw new Error('API 返回 ' + resp.status + ': ' + errText.slice(0, 200));
+      if (n > 1) {
+        console.log(`  生成第 ${i + 1}/${n} 张...`);
+      }
+
+      const resp = await fetch('https://qweapi.com/v1/images/generations', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + apiKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-image-2',
+          prompt: variantPrompt,
+          n: 1,
+          size: size,
+          response_format: 'b64_json',
+        }),
+        signal: AbortSignal.timeout(120000),
+      });
+
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error('API 返回 ' + resp.status + ': ' + errText.slice(0, 200));
+      }
+
+      const data = await resp.json();
+
+      if (!data.data || !data.data[0] || !data.data[0].b64_json) {
+        throw new Error('API 返回格式异常: ' + JSON.stringify(data).slice(0, 200));
+      }
+
+      const b64 = data.data[0].b64_json;
+      const buffer = Buffer.from(b64, 'base64');
+
+      const outPath = outputPaths && outputPaths[i]
+        ? outputPaths[i]
+        : outputPath;
+
+      fs.writeFileSync(outPath, buffer);
+      const sizeKB = (buffer.length / 1024).toFixed(0);
+      results.push(outPath);
+      console.log('  ✅ 第 ' + (i + 1) + ' 张 ' + sizeKB + 'KB');
     }
 
-    const data = await resp.json();
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    console.log('  🎉 全部生成完成 ' + elapsed + 's');
 
-    if (!data.data || !data.data[0] || !data.data[0].b64_json) {
-      throw new Error('API 返回格式异常: ' + JSON.stringify(data).slice(0, 200));
-    }
-
-    const b64 = data.data[0].b64_json;
-    const buffer = Buffer.from(b64, 'base64');
-    fs.writeFileSync(outputPath, buffer);
-
-    const sizeKB = (buffer.length / 1024).toFixed(0);
-    console.log('  ✅ 生成成功 ' + sizeKB + 'KB / ' + elapsed + 's');
-    console.log('  输出: ' + outputPath);
-
-    return outputPath;
+    return n === 1 ? outputPath : results;
 
   } catch (e) {
     if (e.message.includes('fetch')) {
