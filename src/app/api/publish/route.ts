@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
 import path from "path";
 import fs from "fs";
 import os from "os";
@@ -155,6 +155,16 @@ export async function POST(request: NextRequest) {
       }
       return NextResponse.json(
         { error: "双平台发布失败，请检查发布脚本是否安装" },
+        { status: 500 }
+      );
+    }
+
+    // 检查 browser-act
+    try {
+      execSync("browser-act --version", { stdio: "pipe", timeout: 5000 });
+    } catch {
+      return NextResponse.json(
+        { error: "browser-act 未安装。请运行: bash scripts/setup.sh" },
         { status: 500 }
       );
     }

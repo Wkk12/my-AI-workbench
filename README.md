@@ -28,6 +28,25 @@
 | 语言 | TypeScript |
 | AI | Anthropic Claude SDK |
 | 存储 | JSON 文件（`data/` 目录） |
+| 浏览器自动化 | browser-act CLI (Python/uv) |
+
+## 🚀 快速开始
+
+```bash
+# 1. 克隆 + 环境初始化
+git clone https://github.com/Wkk12/my-AI-workbench.git
+cd my-AI-workbench
+bash scripts/setup.sh
+
+# 2. 配置浏览器（首次需要）
+browser-act browser create chrome --name workbench
+
+# 3. 启动
+npm run dev
+# → http://localhost:3000
+```
+
+> 发布功能需要：[browser-act](https://www.browseract.com) + Chrome + [QWAPI Key](https://qweapi.com)
 | 日报脚本 | Python 3（Git 日志提取 + GitLab API） |
 
 ## 🚀 本地运行
