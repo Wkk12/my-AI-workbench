@@ -33,9 +33,11 @@ import {
   Send,
   Eye,
   FileText,
+  Bell,
+  RefreshCw,
 } from "lucide-react";
 import { CONTENT_STATUS_MAP } from "@/lib/constants";
-import type { ContentItem, Platform, ContentStatus } from "@/lib/types";
+import type { ContentItem, Platform, ContentStatus, MonitorPlatform } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
 
 export default function ContentCreatorPage() {
@@ -57,6 +59,10 @@ export default function ContentCreatorPage() {
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiError, setAiError] = useState("");
 
+  // 监控状态
+  const [monitorData, setMonitorData] = useState<MonitorPlatform[]>([]);
+  const [monitorChecking, setMonitorChecking] = useState(false);
+
   // 发布状态
   const [publishingId, setPublishingId] = useState<string | null>(null);
   const [publishJobId, setPublishJobId] = useState<string | null>(null);
@@ -69,9 +75,37 @@ export default function ContentCreatorPage() {
     setLoading(false);
   };
 
+  const fetchMonitor = useCallback(async () => {
+    try {
+      const res = await fetch("/api/monitor");
+      const data = await res.json();
+      setMonitorData(data.platforms || []);
+    } catch { /* 忽略 */ }
+  }, []);
+
+  const triggerCheck = async () => {
+    setMonitorChecking(true);
+    try {
+      await fetch("/api/monitor", { method: "POST" });
+      setTimeout(() => {
+        fetchMonitor();
+        setMonitorChecking(false);
+      }, 5000);
+    } catch {
+      setMonitorChecking(false);
+    }
+  };
+
   useEffect(() => {
     fetchContents();
-  }, []);
+    fetchMonitor();
+  }, [fetchMonitor]);
+
+  // 每30秒刷新监控
+  useEffect(() => {
+    const t = setInterval(fetchMonitor, 30000);
+    return () => clearInterval(t);
+  }, [fetchMonitor]);
 
   // 轮询发布状态
   useEffect(() => {
@@ -405,6 +439,82 @@ export default function ContentCreatorPage() {
           </Dialog>
         }
       />
+
+      {/* 消息监控面板 */}
+      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100 dark:from-blue-950 dark:to-indigo-950 dark:border-blue-900">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Bell className="h-4 w-4" /> 消息监控
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1 text-xs"
+              onClick={triggerCheck}
+              disabled={monitorChecking}
+            >
+              {monitorChecking ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3 w-3" />
+              )}
+              刷新检测
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            {monitorData.map((platform) => (
+              <div
+                key={platform.platform}
+                className={`rounded-lg border p-3 text-center ${
+                  platform.supported
+                    ? "bg-white dark:bg-gray-900"
+                    : "bg-gray-50 dark:bg-gray-800 opacity-60"
+                }`}
+              >
+                <div className="text-lg mb-1">{platform.icon}</div>
+                <div className="text-xs font-medium mb-2">{platform.label}</div>
+                {platform.supported ? (
+                  <>
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <span
+                        className={`inline-block w-2 h-2 rounded-full ${
+                          platform.lastCount > 0
+                            ? "bg-orange-500"
+                            : "bg-green-500"
+                        }`}
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        {platform.lastCount > 0
+                          ? `${platform.lastCount} 条未读`
+                          : "无未读"}
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      总消息: {platform.lastTotal}
+                    </div>
+                    {platform.lastCheck && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        检测:{" "}
+                        {new Date(platform.lastCheck).toLocaleTimeString(
+                          "zh-CN",
+                          { hour: "2-digit", minute: "2-digit" }
+                        )}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-xs text-muted-foreground">
+                    暂未支持
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* 发布任务日志 */}
       {publishingId && (

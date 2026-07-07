@@ -29,6 +29,17 @@ export interface ContentStats {
   shares?: number;
 }
 
+export interface MonitorPlatform {
+  platform: string;
+  label: string;
+  icon: string;
+  lastCount: number;
+  lastTotal: number;
+  lastCheck: string | null;
+  hasNew: boolean;
+  supported: boolean;
+}
+
 export interface ContentItem {
   id: string; // uuid
   title: string;
