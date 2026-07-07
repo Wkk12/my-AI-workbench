@@ -33,30 +33,39 @@
 ## 🚀 快速开始
 
 ```bash
-# 1. 克隆 + 环境初始化
 git clone https://github.com/Wkk12/my-AI-workbench.git
 cd my-AI-workbench
-bash scripts/setup.sh
-
-# 2. 配置浏览器（首次需要）
-browser-act browser create chrome --name workbench
-
-# 3. 启动
-npm run dev
-# → http://localhost:3000
+bash scripts/setup.sh    # 一键安装所有依赖
+npm run dev               # → http://localhost:3000
 ```
 
-> 发布功能需要：[browser-act](https://www.browseract.com) + Chrome + [QWAPI Key](https://qweapi.com)
-| 日报脚本 | Python 3（Git 日志提取 + GitLab API） |
+> setup.sh 自动处理：Node.js 检查 → npm install → Python/uv → browser-act → Chrome 浏览器配置 → 保存浏览器 ID
 
-## 🚀 本地运行
+## 💻 换电脑 / 新环境部署
 
 ```bash
-npm install
+# 1. 克隆项目
+git clone https://github.com/Wkk12/my-AI-workbench.git
+cd my-AI-workbench
+
+# 2. 一键安装环境
+bash scripts/setup.sh
+
+# 3. 配置 API Key
+#    打开 http://localhost:3000 → 设置 → QWAPI_API_KEY
+#    注册: https://qweapi.com
+
+# 4. ⚠️ 登录各平台（仅首次需要）
+#    在启动的 Chrome 中分别打开以下网站扫码/验证码登录：
+#    - 小红书创作后台: https://creator.xiaohongshu.com
+#    - 抖音创作后台: https://creator.douyin.com
+#    （登录态会保存在 Chrome 中，后续自动复用）
+
+# 5. 启动使用
 npm run dev
 ```
 
-打开 [http://localhost:3000](http://localhost:3000)
+> ⚠️ Chrome 登录态是浏览器本地存储，无法跨设备同步，换电脑必须重新登录一次。
 
 ## 📁 项目结构
 
