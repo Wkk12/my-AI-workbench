@@ -24,7 +24,11 @@ async function executeTask(task: ScheduledTask): Promise<string> {
         body: JSON.stringify({ platform: "xiaohongshu", topic }),
       });
       const data = await resp.json();
-      return data.success ? "小红书发布任务已启动" : `失败: ${data.error}`;
+      if (data.success) return "📕 小红书发布任务已启动";
+      if (data.error?.includes("脚本未找到")) {
+        return "📕 发布脚本未安装。请将 social-publisher 脚本放到 ~/.openclaw/workspace/skills/social-publisher/";
+      }
+      return `📕 发布失败: ${data.error}`;
     }
 
     // ── 发布抖音 ──
@@ -36,7 +40,11 @@ async function executeTask(task: ScheduledTask): Promise<string> {
         body: JSON.stringify({ platform: "douyin", topic }),
       });
       const data = await resp.json();
-      return data.success ? "抖音发布任务已启动" : `失败: ${data.error}`;
+      if (data.success) return "🎵 抖音发布任务已启动";
+      if (data.error?.includes("脚本未找到")) {
+        return "🎵 发布脚本未安装。请将 social-publisher 脚本放到 ~/.openclaw/workspace/skills/social-publisher/";
+      }
+      return `🎵 发布失败: ${data.error}`;
     }
 
     // ── 生成日报 ──

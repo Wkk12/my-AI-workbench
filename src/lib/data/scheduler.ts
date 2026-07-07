@@ -42,22 +42,21 @@ export function deleteTask(id: string): void {
   saveIndex(index);
 }
 
-/** 获取当前应执行的任务 */
+/** 获取当前应执行的任务（到期后首次轮询即执行，不要求精确到分钟） */
 export function getDueTasks(): ScheduledTask[] {
   const now = new Date();
   const timeKey = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
   const dayOfWeek = now.getDay();
+  const today = now.toISOString().split("T")[0];
 
   return getAllTasks().filter((t) => {
     if (!t.enabled) return false;
-    if (t.schedule !== timeKey) return false;
-    // daysOfWeek 为空或包含今天
+    // 时间已到（schedule <= 当前时间）
+    if (t.schedule > timeKey) return false;
+    // 星期匹配
     if (t.daysOfWeek.length > 0 && !t.daysOfWeek.includes(dayOfWeek)) return false;
-    // 避免同一分钟重复执行
-    if (t.lastRun) {
-      const last = new Date(t.lastRun);
-      if (last.getTime() > Date.now() - 60_000) return false;
-    }
+    // 今天已执行过则跳过
+    if (t.lastRun && t.lastRun.startsWith(today)) return false;
     return true;
   });
 }

@@ -42,6 +42,8 @@ export default function NotificationBell() {
     clearAll,
     permission,
     requestPermission,
+    testDesktopNotification,
+    diagLog,
   } = useNotifications();
 
   const [open, setOpen] = useState(false);
@@ -54,11 +56,14 @@ export default function NotificationBell() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger>
         <Button variant="ghost" size="icon" className="relative h-8 w-8">
-          <Bell className="h-4 w-4" />
+          <Bell className={`h-4 w-4 ${permission !== "granted" ? "text-amber-500 animate-pulse" : ""}`} />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
+          )}
+          {permission !== "granted" && unreadCount === 0 && (
+            <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-amber-500" />
           )}
         </Button>
       </PopoverTrigger>
@@ -74,14 +79,14 @@ export default function NotificationBell() {
             )}
           </span>
           <div className="flex gap-1">
-            {permission === "default" && (
+            {permission !== "granted" && (
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="h-7 text-xs"
+                className="h-7 text-xs border-amber-300 text-amber-600 hover:bg-amber-50"
                 onClick={requestPermission}
               >
-                开启通知
+                {permission === "denied" ? "⚠️ 通知已阻止 (点此重试)" : "🔔 开启桌面通知"}
               </Button>
             )}
             <Button
@@ -162,6 +167,39 @@ export default function NotificationBell() {
             </div>
           </ScrollArea>
         )}
+        {/* 权限状态 + 测试按钮 */}
+        <div className="px-4 py-2 border-t space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+              <span className={`h-1.5 w-1.5 rounded-full ${permission === "granted" ? "bg-green-500" : permission === "denied" ? "bg-red-500" : "bg-amber-500"}`} />
+              {permission === "granted"
+                ? "桌面通知已开启"
+                : permission === "denied"
+                ? "桌面通知已阻止"
+                : "桌面通知未开启"}
+            </span>
+            <div className="flex gap-1">
+              <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={testDesktopNotification}>
+                🧪 测试
+              </Button>
+              {permission !== "granted" && (
+                <Button variant="ghost" size="sm" className="h-6 text-[10px] text-amber-600" onClick={requestPermission}>
+                  授权
+                </Button>
+              )}
+            </div>
+          </div>
+          {/* 诊断日志（最近 3 条） */}
+          {diagLog.length > 0 && (
+            <div className="space-y-0.5 max-h-20 overflow-y-auto">
+              {diagLog.slice(0, 3).map((d, i) => (
+                <div key={i} className={`text-[10px] ${d.ok ? "text-green-600" : "text-red-500"}`}>
+                  {d.time} {d.ok ? "✅" : "❌"} {d.msg}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </PopoverContent>
     </Popover>
   );

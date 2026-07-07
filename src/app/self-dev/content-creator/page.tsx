@@ -264,8 +264,14 @@ export default function ContentCreatorPage() {
 
       const data = await res.json();
       if (data.success) {
-        setPublishJobId(data.jobId);
-        setPublishLog(`发布任务已启动: ${data.script}`);
+        // 双平台返回 jobs 数组
+        if (data.jobs) {
+          setPublishJobId(data.jobs[0]?.jobId || "both");
+          setPublishLog(`双平台发布已启动 (${data.jobs.length} 个任务)`);
+        } else {
+          setPublishJobId(data.jobId);
+          setPublishLog(`发布任务已启动: ${data.script}`);
+        }
       } else {
         setPublishLog(`启动失败: ${data.error}`);
         setPublishingId(null);

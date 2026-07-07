@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { spawn } from "child_process";
+import { exec } from "child_process";
 import path from "path";
 import fs from "fs";
 import os from "os";
@@ -14,13 +14,12 @@ const LLM_BASE = "https://qweapi.com/v1";
 const LLM_MODELS = ["deepseek-v3.2", "deepseek-chat", "gpt-4o-mini"];
 
 function getPublisherDir(): string {
-  // 优先项目内 scripts/publisher/，兼容旧路径
+  // 优先项目内 scripts/publisher/
   const projectDir = path.resolve(process.cwd(), "scripts", "publisher");
-  const { existsSync } = require("fs");
-  if (existsSync(path.join(projectDir, "publish-xhs.js"))) {
+  if (fs.existsSync(path.join(projectDir, "publish-xhs.js"))) {
     return projectDir;
   }
-  // fallback: 旧路径（开发环境）
+  // fallback: 旧路径
   return path.join(os.homedir(), ".openclaw", "workspace", "skills", "social-publisher");
 }
 
@@ -75,104 +74,100 @@ const runningJobs = new Map<
   { status: "running" | "done" | "error"; log: string; startTime: number }
 >();
 
+/** 发布到指定平台，返回 jobId */
+async function publishToPlatform(
+  platform: "xiaohongshu" | "douyin",
+  opts: { title?: string; content?: string; tags?: string[]; topic?: string; imagePath?: string }
+): Promise<{ success: true; jobId: string; script: string } | { success: false; error: string }> {
+  const { title, content, tags, topic, imagePath } = opts;
+  const scriptName = platform === "xiaohongshu" ? "publish-xhs.js" : "publish-douyin.js";
+  const scriptPath = path.join(getPublisherDir(), scriptName);
+
+  if (!fs.existsSync(scriptPath)) {
+    return { success: false, error: `发布脚本未找到: ${scriptPath}` };
+  }
+
+  const apiKey = process.env.QWAPI_API_KEY || getSettings().claude?.qwapiKey || "";
+
+  const args = [scriptPath];
+  if (topic && topic !== "true") {
+    args.push("--topic", topic);
+  } else {
+    if (title) args.push("--title", title);
+    if (content) args.push("--content", content.replace(/\n/g, "\\n"));
+    if (tags && tags.length > 0) args.push("--tags", tags.join(","));
+    if (imagePath) {
+      args.push("--image", imagePath);
+    } else if (content && apiKey) {
+      try {
+        const prompt = await generateImagePrompt(content, apiKey, platform);
+        if (prompt) args.push("--prompt", prompt);
+      } catch { /* ignore */ }
+    }
+  }
+
+  const jobId = `${platform}_${Date.now()}`;
+
+  const cmd = `node ${args.map(a => `"${a}"`).join(" ")}`;
+  const env = { ...process.env, HOME: os.homedir(), QWAPI_API_KEY: apiKey, BROWSER_ID: process.env.BROWSER_ID || "chrome_local_104622926254309377" };
+
+  runningJobs.set(jobId, { status: "running", log: "", startTime: Date.now() });
+
+  exec(cmd, { cwd: getPublisherDir(), env }, (error, stdout, stderr) => {
+    const job = runningJobs.get(jobId);
+    if (job) {
+      job.status = error ? "error" : "done";
+      job.log = ((stdout || "") + (stderr ? "[stderr] " + stderr : "")).slice(-5000);
+    }
+    setTimeout(() => runningJobs.delete(jobId), 3600_000);
+  });
+
+  return { success: true, jobId, script: scriptName };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { platform, title, content, tags, topic, imagePath } = body;
 
-    if (!platform || !["xiaohongshu", "douyin"].includes(platform)) {
+    if (!platform || !["xiaohongshu", "douyin", "both"].includes(platform)) {
       return NextResponse.json(
-        { error: "platform 必须是 xiaohongshu 或 douyin" },
+        { error: "platform 必须是 xiaohongshu、douyin 或 both" },
         { status: 400 }
       );
     }
 
-    const scriptName =
-      platform === "xiaohongshu" ? "publish-xhs.js" : "publish-douyin.js";
-    const scriptPath = path.join(getPublisherDir(), scriptName);
-
-    if (!fs.existsSync(scriptPath)) {
+    // 双平台：分别发布
+    if (platform === "both") {
+      const platforms = ["xiaohongshu", "douyin"] as const;
+      const jobs: { platform: string; jobId: string; script: string }[] = [];
+      for (const p of platforms) {
+        const result = await publishToPlatform(p, { title, content, tags, topic, imagePath });
+        if (result.success) jobs.push({ platform: p, jobId: result.jobId, script: result.script });
+      }
+      if (jobs.length > 0) {
+        return NextResponse.json({
+          success: true,
+          jobs,
+          status: "running",
+          message: `已启动 ${jobs.length} 个发布任务`,
+        });
+      }
       return NextResponse.json(
-        { error: `发布脚本未找到: ${scriptPath}` },
+        { error: "双平台发布失败，请检查发布脚本是否安装" },
         { status: 500 }
       );
     }
 
-    // 获取 QWAPI_API_KEY（优先环境变量 → 系统设置）
-    let apiKey = process.env.QWAPI_API_KEY || getSettings().claude?.qwapiKey || "";
-
-    // 构建命令行参数
-    const args = [scriptPath];
-    if (topic && topic !== "true") {
-      args.push("--topic", topic);
-    } else {
-      if (title) args.push("--title", title);
-      if (content) args.push("--content", content.replace(/\n/g, "\\n"));
-      if (tags && tags.length > 0) {
-        args.push("--tags", tags.join(","));
-      }
-      if (imagePath) {
-        args.push("--image", imagePath);
-      } else if (content && apiKey) {
-        // 手动模式无图 → 用内容自动生成生图 prompt
-        try {
-          const prompt = await generateImagePrompt(content, apiKey, platform);
-          if (prompt) args.push("--prompt", prompt);
-        } catch { /* prompt 生成失败则跳过，脚本会报清晰错误 */ }
-      }
+    const result = await publishToPlatform(platform, { title, content, tags, topic, imagePath });
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 500 });
     }
-
-    const env = {
-      ...process.env,
-      HOME: os.homedir(),
-      QWAPI_API_KEY: apiKey,
-      BROWSER_ID:
-        process.env.BROWSER_ID || "chrome_local_104622926254309377",
-    };
-
-    const jobId = `${platform}_${Date.now()}`;
-    let log = "";
-
-    const child = spawn("node", args, {
-      cwd: getPublisherDir(),
-      env,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-
-    runningJobs.set(jobId, {
-      status: "running",
-      log: "",
-      startTime: Date.now(),
-    });
-
-    child.stdout.on("data", (data: Buffer) => {
-      const text = data.toString();
-      log += text;
-      const job = runningJobs.get(jobId);
-      if (job) job.log = log.slice(-5000); // 只保留最后 5KB
-    });
-
-    child.stderr.on("data", (data: Buffer) => {
-      log += "[stderr] " + data.toString();
-      const job = runningJobs.get(jobId);
-      if (job) job.log = log.slice(-5000);
-    });
-
-    child.on("close", (code) => {
-      const job = runningJobs.get(jobId);
-      if (job) {
-        job.status = code === 0 ? "done" : "error";
-        job.log = log.slice(-5000);
-      }
-      // 1 小时后清理
-      setTimeout(() => runningJobs.delete(jobId), 3600_000);
-    });
-
     return NextResponse.json({
       success: true,
-      jobId,
+      jobId: result.jobId,
       status: "running",
-      script: scriptName,
+      script: result.script,
     });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);

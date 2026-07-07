@@ -142,6 +142,10 @@ export default function SchedulerPage() {
 
   const handleRun = async (taskId: string) => {
     setRunningTaskId(taskId);
+    // 利用用户点击手势请求通知权限
+    if ("Notification" in window && Notification.permission === "default") {
+      await Notification.requestPermission();
+    }
     try {
       const res = await fetch("/api/scheduler/run", {
         method: "POST",
@@ -151,11 +155,12 @@ export default function SchedulerPage() {
       const data = await res.json();
       if (data.success) {
         const task = tasks.find((t) => t.id === taskId);
+        const isFail = /失败|错误|未安装|未找到|异常/.test(data.result || "");
         addNotification({
           taskId,
-          title: `${task?.name || "任务"} — 执行完成`,
+          title: `${task?.name || "任务"} — ${isFail ? "执行失败" : "执行完成"}`,
           body: data.result || "无结果",
-          type: "success",
+          type: isFail ? "error" : "success",
         });
         fetchTasks();
       }
