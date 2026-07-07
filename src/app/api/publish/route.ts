@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exec } from "child_process";
+import { execSync, spawn } from "child_process";
 import path from "path";
 import fs from "fs";
 import os from "os";
@@ -111,7 +111,6 @@ async function publishToPlatform(
 
   const jobId = `${platform}_${Date.now()}`;
 
-  const cmd = `node ${args.map(a => `"${a}"`).join(" ")}`;
   const sep = process.platform === "win32" ? ";" : ":";
   const homePath = os.homedir();
   // 读取浏览器 ID（优先环境变量 → data/browser-id.json → 默认值）
@@ -130,13 +129,32 @@ async function publishToPlatform(
     PATH: `${homePath}/.local/bin${sep}${process.env.PATH || ""}`,
   };
 
+  let log = "";
   runningJobs.set(jobId, { status: "running", log: "", startTime: Date.now() });
 
-  exec(cmd, { cwd: getPublisherDir(), env }, (error, stdout, stderr) => {
+  const child = spawn("node", args, {
+    cwd: getPublisherDir(),
+    env,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  child.stdout.on("data", (data: Buffer) => {
+    log += data.toString();
+    const job = runningJobs.get(jobId);
+    if (job) job.log = log.slice(-5000);
+  });
+
+  child.stderr.on("data", (data: Buffer) => {
+    log += "[stderr] " + data.toString();
+    const job = runningJobs.get(jobId);
+    if (job) job.log = log.slice(-5000);
+  });
+
+  child.on("close", (code) => {
     const job = runningJobs.get(jobId);
     if (job) {
-      job.status = error ? "error" : "done";
-      job.log = ((stdout || "") + (stderr ? "[stderr] " + stderr : "")).slice(-5000);
+      job.status = code === 0 ? "done" : "error";
+      job.log = log.slice(-5000);
     }
     setTimeout(() => runningJobs.delete(jobId), 3600_000);
   });
