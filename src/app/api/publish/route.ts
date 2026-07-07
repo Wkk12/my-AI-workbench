@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exec, execSync } from "child_process";
+import { exec } from "child_process";
 import path from "path";
 import fs from "fs";
 import os from "os";
@@ -174,10 +174,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 检查 browser-act
-    try {
-      execSync("browser-act --version", { stdio: "pipe", timeout: 5000 });
-    } catch {
+    // 检查 browser-act（使用绝对路径）
+    const baBin = `${os.homedir()}/.local/bin/browser-act`;
+    if (!fs.existsSync(baBin)) {
       return NextResponse.json(
         { error: "browser-act 未安装。请运行: bash scripts/setup.sh" },
         { status: 500 }
