@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import AppShell from "@/components/layout/AppShell";
+import ClientProviders from "@/components/layout/ClientProviders";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,9 +29,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="h-full">
-        <TooltipProvider delay={300}>
-          <AppShell>{children}</AppShell>
-        </TooltipProvider>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

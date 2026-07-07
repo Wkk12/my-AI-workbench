@@ -1,0 +1,63 @@
+// ============================================================
+// 定时任务数据 CRUD
+// ============================================================
+
+import { readJSONSafe, writeJSON } from "./base";
+import type { SchedulerIndex, ScheduledTask } from "@/lib/types";
+
+const INDEX_PATH = "scheduler/index.json";
+
+function getIndex(): SchedulerIndex {
+  return readJSONSafe<SchedulerIndex>(INDEX_PATH, { tasks: [] });
+}
+
+function saveIndex(index: SchedulerIndex): void {
+  writeJSON(INDEX_PATH, index);
+}
+
+export function getAllTasks(): ScheduledTask[] {
+  return getIndex().tasks.sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  );
+}
+
+export function getTask(id: string): ScheduledTask | undefined {
+  return getIndex().tasks.find((t) => t.id === id);
+}
+
+export function saveTask(task: ScheduledTask): void {
+  const index = getIndex();
+  const idx = index.tasks.findIndex((t) => t.id === task.id);
+  if (idx >= 0) {
+    index.tasks[idx] = task;
+  } else {
+    index.tasks.push(task);
+  }
+  saveIndex(index);
+}
+
+export function deleteTask(id: string): void {
+  const index = getIndex();
+  index.tasks = index.tasks.filter((t) => t.id !== id);
+  saveIndex(index);
+}
+
+/** 获取当前应执行的任务 */
+export function getDueTasks(): ScheduledTask[] {
+  const now = new Date();
+  const timeKey = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const dayOfWeek = now.getDay();
+
+  return getAllTasks().filter((t) => {
+    if (!t.enabled) return false;
+    if (t.schedule !== timeKey) return false;
+    // daysOfWeek 为空或包含今天
+    if (t.daysOfWeek.length > 0 && !t.daysOfWeek.includes(dayOfWeek)) return false;
+    // 避免同一分钟重复执行
+    if (t.lastRun) {
+      const last = new Date(t.lastRun);
+      if (last.getTime() > Date.now() - 60_000) return false;
+    }
+    return true;
+  });
+}

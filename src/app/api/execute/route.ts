@@ -9,7 +9,7 @@ import type { DailyReportMeta } from "@/lib/types";
 const execFileAsync = promisify(execFile);
 
 export async function POST(request: NextRequest) {
-  const { date, localRoot, branch, author, source } = await request.json();
+  const { dateType, date, fromDate, toDate, localRoot, branch, author, source } = await request.json();
 
   const scriptPath = path.resolve(
     process.cwd(),
@@ -17,6 +17,11 @@ export async function POST(request: NextRequest) {
     "daily-report",
     "gitlab_daily_report.py"
   );
+
+  // 确定输出文件名和显示标签
+  const isRange = dateType === "range" && fromDate && toDate;
+  const reportId = isRange ? `${fromDate}_${toDate}` : date;
+  const displayLabel = isRange ? `${fromDate} ~ ${toDate}` : date;
 
   // 确保输出目录存在
   const outputDir = path.resolve(
@@ -26,12 +31,12 @@ export async function POST(request: NextRequest) {
     "reports"
   );
   fs.mkdirSync(outputDir, { recursive: true });
-  const outputPath = path.join(outputDir, `daily_report_${date}.md`);
+  const outputPath = path.join(outputDir, `daily_report_${reportId}.md`);
 
   // 检查 Python 脚本是否存在
   if (!fs.existsSync(scriptPath)) {
     // 如果没有 Python 脚本，生成示例日报
-    const exampleContent = `# 📋 ${date} 工作日报
+    const exampleContent = `# 📋 ${displayLabel} 工作日报
 
 > 生成时间：${new Date().toLocaleString("zh-CN")}
 
@@ -39,7 +44,7 @@ export async function POST(request: NextRequest) {
 
 ## 暂无提交记录
 
-今天没有新的 Git 提交记录，去写点代码吧！💪
+${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写点代码吧！💪
 
 ---
 
@@ -48,8 +53,8 @@ export async function POST(request: NextRequest) {
     fs.writeFileSync(outputPath, exampleContent, "utf-8");
 
     const meta: DailyReportMeta = {
-      id: date,
-      date,
+      id: reportId,
+      date: displayLabel,
       projectCount: 0,
       commitCount: 0,
       createdAt: new Date().toISOString(),
@@ -65,11 +70,14 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const args = [
-      scriptPath,
-      "--date", date,
-      "--output", outputPath,
-    ];
+    const args = [scriptPath];
+
+    if (isRange) {
+      args.push("--from-date", fromDate, "--to-date", toDate);
+    } else {
+      args.push("--date", date);
+    }
+    args.push("--output", outputPath);
 
     if (source === "local" || !source) {
       if (localRoot) args.push("--local-root", localRoot);
@@ -96,8 +104,8 @@ export async function POST(request: NextRequest) {
     const commitCount = commitMatches ? commitMatches.length : 0;
 
     const meta: DailyReportMeta = {
-      id: date,
-      date,
+      id: reportId,
+      date: displayLabel,
       projectCount,
       commitCount,
       createdAt: new Date().toISOString(),

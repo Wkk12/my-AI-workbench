@@ -20,12 +20,19 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Plus, Kanban, Edit, Trash2 } from "lucide-react";
 import { PROJECT_STATUS_MAP } from "@/lib/constants";
 import type { Project, ProjectStatus } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
+
+const STATUS_LABELS: Record<string, string> = {
+  idea: "💡 想法",
+  developing: "🚧 开发中",
+  launched: "🚀 已上线",
+  maintaining: "🔧 维护中",
+  archived: "📦 归档",
+};
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -149,7 +156,7 @@ export default function ProjectsPage() {
                       onValueChange={(v) => setStatus(v as ProjectStatus)}
                     >
                       <SelectTrigger>
-                        <SelectValue />
+                        {STATUS_LABELS[status] || "选择状态"}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="idea">💡 想法</SelectItem>

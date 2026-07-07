@@ -22,6 +22,7 @@ export default function SettingsPage() {
     DEFAULT_SETTINGS.gitlab.defaultAuthor
   );
   const [claudeApiKey, setClaudeApiKey] = useState("");
+  const [qwapiKey, setQwapiKey] = useState("");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function SettingsPage() {
         }
         if (data.claude) {
           setClaudeApiKey(data.claude.apiKey || "");
+          setQwapiKey(data.claude.qwapiKey || "");
         }
       })
       .catch(() => {});
@@ -61,6 +63,7 @@ export default function SettingsPage() {
         claude: {
           apiKey: claudeApiKey,
           model: DEFAULT_SETTINGS.claude.model,
+          qwapiKey,
         },
       }),
     });
@@ -171,7 +174,36 @@ export default function SettingsPage() {
             />
             <p className="text-xs text-muted-foreground">
               用于 AI 润色日报、生成周报、创意头脑风暴等功能。
-              不填则 AI 功能不可用。
+              不填则使用下方 QWAPI 作为备选。
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* QWAPI Key 设置 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            🔑 QWAPI 配置
+            <Badge variant="outline" className="text-xs">
+              推荐
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="qwapi-key">API Key</Label>
+            <Input
+              id="qwapi-key"
+              type="password"
+              value={qwapiKey}
+              onChange={(e) => setQwapiKey(e.target.value)}
+              placeholder="sk-xxxx..."
+            />
+            <p className="text-xs text-muted-foreground">
+              用于 AI 文案生成、AI 对话、内容发布等功能。
+              支持 DeepSeek 等 OpenAI 兼容接口。
+              配置后所有模块统一使用此 Key。
             </p>
           </div>
         </CardContent>

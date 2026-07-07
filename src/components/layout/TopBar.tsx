@@ -1,6 +1,7 @@
 "use client";
 
 import { getGreeting } from "@/lib/constants";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 export default function TopBar() {
   const greeting = getGreeting();
@@ -14,7 +15,8 @@ export default function TopBar() {
       </div>
 
       <div className="flex items-center gap-3">
-        <span className="text-xs text-muted-foreground">
+        <NotificationBell />
+        <span className="text-xs text-muted-foreground hidden sm:inline">
           {new Date().toLocaleDateString("zh-CN", {
             year: "numeric",
             month: "long",

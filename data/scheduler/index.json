@@ -1,0 +1,45 @@
+{
+  "tasks": [
+    {
+      "id": "314ba291-380f-4325-8af7-07e4b3f0d4b9",
+      "name": "每日早安",
+      "enabled": true,
+      "actionType": "ai_morning",
+      "schedule": "11:00",
+      "daysOfWeek": [],
+      "config": {
+        "city": "北京"
+      },
+      "createdAt": "2026-07-06T02:55:53.880Z",
+      "updatedAt": "2026-07-06T02:56:00.680Z",
+      "lastRun": "2026-07-06T03:11:04.334Z",
+      "lastResult": "美少女珂早安呀～☀️ 今天北京的天气还不错哦，阳光暖暖的，温度大概在20度左右，早晚会有点凉，记得带件薄外套呢～🧥\n\n穿搭建议可以试试轻薄针织衫配半身裙，既舒适又好看！✨\n\n今天也要像小太阳一样闪闪发光，加油哦！💖"
+    },
+    {
+      "id": "cb410b0e-c6c3-43c9-9206-a14d7e98e8b5",
+      "name": "下午生成日报",
+      "enabled": true,
+      "actionType": "generate_report",
+      "schedule": "17:00",
+      "daysOfWeek": [],
+      "config": {
+        "city": "北京"
+      },
+      "createdAt": "2026-07-06T02:56:24.224Z",
+      "updatedAt": "2026-07-06T02:56:24.224Z"
+    },
+    {
+      "id": "df25fab7-7fe2-492b-9982-48f96dd59887",
+      "name": "晚上发抖音",
+      "enabled": true,
+      "actionType": "publish_douyin",
+      "schedule": "20:00",
+      "daysOfWeek": [],
+      "config": {
+        "city": "北京"
+      },
+      "createdAt": "2026-07-06T02:56:37.392Z",
+      "updatedAt": "2026-07-06T02:56:37.392Z"
+    }
+  ]
+}

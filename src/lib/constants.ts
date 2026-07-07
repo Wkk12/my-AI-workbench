@@ -13,6 +13,7 @@ import {
   PencilRuler,
   Kanban,
   FlaskConical,
+  Clock,
   Bot,
   Settings,
   Wrench,
@@ -55,6 +56,7 @@ export const NAV_ITEMS: NavGroup[] = [
       { title: "内容创作", href: "/self-dev/content-creator", icon: PencilRuler },
       { title: "项目看板", href: "/self-dev/projects", icon: Kanban },
       { title: "创意实验室", href: "/self-dev/idea-lab", icon: FlaskConical },
+      { title: "定时任务", href: "/self-dev/scheduler", icon: Clock },
     ],
   },
   {
@@ -96,6 +98,7 @@ export const DEFAULT_SETTINGS = {
   claude: {
     apiKey: "",
     model: "claude-sonnet-4-20250514",
+    qwapiKey: "",
   },
   platforms: {},
 };

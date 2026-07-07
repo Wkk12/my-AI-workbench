@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { execSync } from "child_process";
+import { getSettings } from "@/lib/data/settings";
 
 /**
  * AI 内容生成 — 给定主题，返回标题/正文/标签
@@ -7,28 +7,12 @@ import { execSync } from "child_process";
  */
 
 function getApiKey(): string {
-  // 1. 直接环境变量
+  // 1. 环境变量
   if (process.env.QWAPI_API_KEY) return process.env.QWAPI_API_KEY;
-  // 2. 从 ~/.hermes/.env 读取（social-publisher 安装脚本写入的）
-  try {
-    const hermPath = require("path").join(
-      require("os").homedir(),
-      ".hermes",
-      ".env"
-    );
-    const hermContent = require("fs").readFileSync(hermPath, "utf-8");
-    const match = hermContent.match(/QWAPI_API_KEY=(.+)/);
-    if (match?.[1]) return match[1].trim();
-  } catch { /* ignore */ }
-  // 3. 从 zsh 环境获取
-  try {
-    const key = execSync(
-      'zsh -l -c \'echo "$QWAPI_API_KEY"\'',
-      { encoding: "utf8", timeout: 5000 }
-    ).trim();
-    if (key) return key;
-  } catch { /* ignore */ }
-  throw new Error("未找到 QWAPI_API_KEY。请运行: echo 'QWAPI_API_KEY=你的key' > ~/.hermes/.env");
+  // 2. 系统设置（用户可在「设置 → QWAPI 配置」中填写）
+  const key = getSettings().claude?.qwapiKey;
+  if (key) return key;
+  throw new Error("未配置 QWAPI_API_KEY。请在「系统设置 → QWAPI 配置」中填写 API Key。");
 }
 
 const BASE_URL = "https://qweapi.com/v1";

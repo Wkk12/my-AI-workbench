@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
+import os from "os";
+import { getSettings } from "@/lib/data/settings";
 
 /**
  * 发布内容到小红书/抖音
@@ -10,6 +12,15 @@ import fs from "fs";
 
 const LLM_BASE = "https://qweapi.com/v1";
 const LLM_MODELS = ["deepseek-v3.2", "deepseek-chat", "gpt-4o-mini"];
+
+function getPublisherDir(): string {
+  const home = os.homedir();
+  return path.join(home, ".openclaw", "workspace", "skills", "social-publisher");
+}
+
+function getHermesEnvPath(): string {
+  return path.join(os.homedir(), ".hermes", ".env");
+}
 
 /** 从内容自动生成生图 prompt */
 async function generateImagePrompt(
@@ -52,11 +63,6 @@ async function generateImagePrompt(
   return "";
 }
 
-const PUBLISHER_DIR = path.resolve(
-  process.env.HOME || "/Users/wkk",
-  ".openclaw/workspace/skills/social-publisher"
-);
-
 // 运行中的任务
 const runningJobs = new Map<
   string,
@@ -77,7 +83,7 @@ export async function POST(request: NextRequest) {
 
     const scriptName =
       platform === "xiaohongshu" ? "publish-xhs.js" : "publish-douyin.js";
-    const scriptPath = path.join(PUBLISHER_DIR, scriptName);
+    const scriptPath = path.join(getPublisherDir(), scriptName);
 
     if (!fs.existsSync(scriptPath)) {
       return NextResponse.json(
@@ -86,22 +92,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 获取 QWAPI_API_KEY（优先环境变量 → ~/.hermes/.env）
-    let apiKey = process.env.QWAPI_API_KEY || "";
-    if (!apiKey) {
-      try {
-        const hermPath = path.join(
-          process.env.HOME || "/Users/wkk",
-          ".hermes",
-          ".env"
-        );
-        if (fs.existsSync(hermPath)) {
-          const hermContent = fs.readFileSync(hermPath, "utf-8");
-          const match = hermContent.match(/QWAPI_API_KEY=(.+)/);
-          if (match?.[1]) apiKey = match[1].trim();
-        }
-      } catch { /* ignore */ }
-    }
+    // 获取 QWAPI_API_KEY（优先环境变量 → 系统设置）
+    let apiKey = process.env.QWAPI_API_KEY || getSettings().claude?.qwapiKey || "";
 
     // 构建命令行参数
     const args = [scriptPath];
@@ -126,7 +118,7 @@ export async function POST(request: NextRequest) {
 
     const env = {
       ...process.env,
-      HOME: process.env.HOME || "/Users/wkk",
+      HOME: os.homedir(),
       QWAPI_API_KEY: apiKey,
       BROWSER_ID:
         process.env.BROWSER_ID || "chrome_local_104622926254309377",
@@ -136,7 +128,7 @@ export async function POST(request: NextRequest) {
     let log = "";
 
     const child = spawn("node", args, {
-      cwd: PUBLISHER_DIR,
+      cwd: getPublisherDir(),
       env,
       stdio: ["ignore", "pipe", "pipe"],
     });

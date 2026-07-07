@@ -30,7 +30,10 @@ export default function DailyReportPage() {
 
   // 生成参数
   const today = new Date().toISOString().split("T")[0];
+  const [dateType, setDateType] = useState<"single" | "range">("single");
   const [date, setDate] = useState(today);
+  const [fromDate, setFromDate] = useState(today);
+  const [toDate, setToDate] = useState(today);
   const [source, setSource] = useState<"local" | "gitlab">("local");
   const [localRoot, setLocalRoot] = useState("F:\\RY");
   const [branch, setBranch] = useState("dev_wkk");
@@ -73,7 +76,10 @@ export default function DailyReportPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          date,
+          dateType,
+          date: dateType === "single" ? date : undefined,
+          fromDate: dateType === "range" ? fromDate : undefined,
+          toDate: dateType === "range" ? toDate : undefined,
           localRoot,
           branch,
           author,
@@ -157,13 +163,51 @@ export default function DailyReportPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>日期</Label>
-                <Input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                />
+                <Label>日期类型</Label>
+                <Tabs
+                  value={dateType}
+                  onValueChange={(v) => setDateType(v as "single" | "range")}
+                >
+                  <TabsList className="w-full">
+                    <TabsTrigger value="single" className="flex-1">
+                      📅 单天
+                    </TabsTrigger>
+                    <TabsTrigger value="range" className="flex-1">
+                      📆 范围
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
+
+              {dateType === "single" ? (
+                <div className="space-y-2">
+                  <Label>日期</Label>
+                  <Input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                  />
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label>开始日期</Label>
+                    <Input
+                      type="date"
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>结束日期</Label>
+                    <Input
+                      type="date"
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>数据来源</Label>

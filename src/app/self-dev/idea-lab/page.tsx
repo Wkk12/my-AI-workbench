@@ -20,11 +20,18 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Plus, FlaskConical, Edit, Trash2, Lightbulb } from "lucide-react";
 import type { Idea, IdeaCategory, IdeaStatus } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
+
+const CATEGORY_LABELS: Record<string, string> = {
+  project: "💡 项目点子",
+  content: "📝 内容创意",
+  tool: "🔧 工具想法",
+  learning: "📚 学习方向",
+  other: "📌 其他",
+};
 
 const CATEGORY_MAP: Record<string, string> = {
   project: "💡 项目",
@@ -142,7 +149,7 @@ export default function IdeaLabPage() {
                       onValueChange={(v) => setCategory(v as IdeaCategory)}
                     >
                       <SelectTrigger>
-                        <SelectValue />
+                        {CATEGORY_LABELS[category] || "选择分类"}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="project">💡 项目点子</SelectItem>

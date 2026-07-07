@@ -20,7 +20,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -40,6 +39,19 @@ import { CONTENT_STATUS_MAP } from "@/lib/constants";
 import type { ContentItem, Platform, ContentStatus, MonitorPlatform } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
 
+const PLATFORM_LABELS: Record<string, string> = {
+  xiaohongshu: "📕 小红书",
+  douyin: "🎵 抖音",
+  both: "📱 双平台",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  draft: "草稿",
+  scheduled: "已排期",
+  published: "已发布",
+  failed: "发布失败",
+};
+
 export default function ContentCreatorPage() {
   const [contents, setContents] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +67,6 @@ export default function ContentCreatorPage() {
 
   // AI 生成状态
   const [aiTopic, setAiTopic] = useState("");
-  const [aiPlatform, setAiPlatform] = useState<Platform>("xiaohongshu");
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiError, setAiError] = useState("");
 
@@ -198,7 +209,7 @@ export default function ContentCreatorPage() {
       const res = await fetch("/api/ai/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: aiTopic, platform: aiPlatform }),
+        body: JSON.stringify({ topic: aiTopic, platform: platform === "both" ? "xiaohongshu" : platform }),
       });
 
       const data = await res.json();
@@ -206,7 +217,6 @@ export default function ContentCreatorPage() {
         setTitle(data.title || "");
         setDescription(data.content || "");
         setTags((data.tags || []).join(", "));
-        setPlatform(aiPlatform);
         setAiGenerating(false);
         setAiTopic("");
       } else {
@@ -336,21 +346,9 @@ export default function ContentCreatorPage() {
                         value={aiTopic}
                         onChange={(e) => setAiTopic(e.target.value)}
                         placeholder="输入主题，如「新手养猫必看」"
-                        className="h-8 text-sm"
+                        className="h-8 text-sm flex-1"
                         onKeyDown={(e) => e.key === "Enter" && handleAiGenerate()}
                       />
-                      <Select
-                        value={aiPlatform}
-                        onValueChange={(v) => setAiPlatform(v as Platform)}
-                      >
-                        <SelectTrigger className="h-8 w-28 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="xiaohongshu">📕 小红书</SelectItem>
-                          <SelectItem value="douyin">🎵 抖音</SelectItem>
-                        </SelectContent>
-                      </Select>
                       <Button
                         size="sm"
                         className="h-8 gap-1 shrink-0"
@@ -396,7 +394,7 @@ export default function ContentCreatorPage() {
                       onValueChange={(v) => setPlatform(v as Platform)}
                     >
                       <SelectTrigger>
-                        <SelectValue />
+                        {PLATFORM_LABELS[platform] || "选择平台"}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="xiaohongshu">📕 小红书</SelectItem>
@@ -412,7 +410,7 @@ export default function ContentCreatorPage() {
                       onValueChange={(v) => setStatus(v as ContentStatus)}
                     >
                       <SelectTrigger>
-                        <SelectValue />
+                        {STATUS_LABELS[status] || "选择状态"}
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="draft">草稿</SelectItem>

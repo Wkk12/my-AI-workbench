@@ -11,7 +11,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger,
 } from "@/components/ui/select";
 import { Plus, Wallet, Edit, Trash2, RefreshCw, Copy } from "lucide-react";
 import type { Subscription, SubCategory, SubCycle } from "@/lib/types";
@@ -159,13 +159,13 @@ export default function WalletPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1"><Label>分类</Label>
                     <Select value={fCategory} onValueChange={(v) => setFCategory(v as SubCategory)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger>{catInfo(fCategory).icon} {catInfo(fCategory).label}</SelectTrigger>
                       <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.icon} {c.label}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1"><Label>周期</Label>
                     <Select value={fCycle} onValueChange={(v) => setFCycle(v as SubCycle)}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger>{cycleLabel(fCycle)}</SelectTrigger>
                       <SelectContent>{CYCLES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>

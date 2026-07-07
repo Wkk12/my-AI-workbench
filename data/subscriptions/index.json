@@ -4,10 +4,10 @@
       "id": "1fe7321d-0b3a-4897-9e1e-efeba34628ad",
       "name": "腾讯视频VIP",
       "category": "video",
-      "cycle": "month",
-      "amount": 25,
-      "startDate": "2026-06-15",
-      "expireDate": "2026-07-07",
+      "cycle": "year",
+      "amount": 238,
+      "startDate": "2025-08-02",
+      "expireDate": "2026-08-02",
       "autoRenew": true,
       "provider": "腾讯视频",
       "notes": "",
@@ -20,17 +20,17 @@
         }
       ],
       "createdAt": "2026-07-05T14:35:26.849Z",
-      "updatedAt": "2026-07-05T14:35:26.849Z"
+      "updatedAt": "2026-07-06T03:29:16.996Z"
     },
     {
       "id": "3f696544-e4e1-40a7-b340-5679ff105247",
       "name": "网易云音乐",
       "category": "music",
-      "cycle": "year",
-      "amount": 88,
-      "startDate": "2025-12-30",
-      "expireDate": "2026-12-30",
-      "autoRenew": false,
+      "cycle": "month",
+      "amount": 45,
+      "startDate": "2025-05-19",
+      "expireDate": "2026-08-19",
+      "autoRenew": true,
       "provider": "网易云音乐",
       "notes": "",
       "history": [
@@ -39,98 +39,83 @@
           "amount": 88,
           "date": "2025-12-30",
           "expireDate": "2026-12-30"
+        },
+        {
+          "action": "续费",
+          "plan": "year",
+          "amount": 88,
+          "date": "2026-07-06",
+          "expireDate": "2027-12-29"
         }
       ],
       "createdAt": "2026-07-05T14:35:26.859Z",
-      "updatedAt": "2026-07-05T14:35:26.859Z"
+      "updatedAt": "2026-07-06T03:21:39.682Z"
     },
     {
-      "id": "6aec2677-3331-48b8-89d4-78c8282be6e3",
-      "name": "iCloud 50G",
-      "category": "cloud",
-      "cycle": "month",
-      "amount": 6,
-      "startDate": "2026-01-01",
-      "expireDate": "2026-07-20",
-      "autoRenew": true,
-      "provider": "Apple",
-      "notes": "",
-      "history": [
-        {
-          "action": "开通",
-          "amount": 6,
-          "date": "2026-01-01",
-          "expireDate": "2026-07-20"
-        }
-      ],
-      "createdAt": "2026-07-05T14:35:26.868Z",
-      "updatedAt": "2026-07-05T14:35:26.868Z"
-    },
-    {
-      "id": "55f7991b-e75c-4eb9-9433-a47f389b537b",
-      "name": "百万医疗险",
+      "id": "c88820d3-d3a3-4db7-b4a1-37075e12cbf1",
+      "name": "奶油保险",
       "category": "insurance",
-      "cycle": "year",
-      "amount": 380,
-      "startDate": "2026-01-01",
-      "expireDate": "2027-01-01",
+      "cycle": "month",
+      "amount": 33.25,
+      "startDate": "2025-09-01",
+      "expireDate": "2026-08-31",
       "autoRenew": true,
-      "provider": "平安保险",
+      "provider": "支付宝",
       "notes": "",
       "history": [
         {
           "action": "开通",
-          "amount": 380,
-          "date": "2026-01-01",
-          "expireDate": "2027-01-01"
+          "amount": 33.25,
+          "date": "2025-09-01",
+          "expireDate": "2026-08-31"
         }
       ],
-      "createdAt": "2026-07-05T14:35:26.879Z",
-      "updatedAt": "2026-07-05T14:35:26.879Z"
+      "createdAt": "2026-07-06T03:19:48.627Z",
+      "updatedAt": "2026-07-06T03:19:48.627Z"
     },
     {
-      "id": "3b1a9c3c-974c-4007-ba59-741db2e1a321",
-      "name": "ExpressVPN",
-      "category": "vpn",
-      "cycle": "quarter",
-      "amount": 99,
-      "startDate": "2026-04-01",
-      "expireDate": "2026-07-05",
+      "id": "b9c88cd3-f96f-4185-95b9-0e6a425815a2",
+      "name": "cursor 会员",
+      "category": "software",
+      "cycle": "once",
+      "amount": 39.9,
+      "startDate": "2026-06-15",
+      "expireDate": "2026-07-15",
       "autoRenew": false,
-      "provider": "ExpressVPN",
+      "provider": "淘宝",
       "notes": "",
       "history": [
         {
           "action": "开通",
-          "amount": 99,
-          "date": "2026-04-01",
-          "expireDate": "2026-07-05"
+          "amount": 39.9,
+          "date": "2026-06-15",
+          "expireDate": "2026-07-15"
         }
       ],
-      "createdAt": "2026-07-05T14:35:26.888Z",
-      "updatedAt": "2026-07-05T14:35:26.888Z"
+      "createdAt": "2026-07-06T03:23:10.457Z",
+      "updatedAt": "2026-07-06T03:23:10.457Z"
     },
     {
-      "id": "84e8fa5a-24ed-4212-97b4-67f0a704b804",
-      "name": "京东PLUS",
-      "category": "shopping",
-      "cycle": "year",
-      "amount": 99,
-      "startDate": "2026-03-01",
-      "expireDate": "2027-03-01",
+      "id": "cb212964-67c5-49d4-96d9-ac1505a391fd",
+      "name": "醒图",
+      "category": "software",
+      "cycle": "month",
+      "amount": 28,
+      "startDate": "2026-07-06",
+      "expireDate": "2026-07-14",
       "autoRenew": true,
-      "provider": "京东",
+      "provider": "APP",
       "notes": "",
       "history": [
         {
           "action": "开通",
-          "amount": 99,
-          "date": "2026-03-01",
-          "expireDate": "2027-03-01"
+          "amount": 28,
+          "date": "2026-07-06",
+          "expireDate": "2026-07-14"
         }
       ],
-      "createdAt": "2026-07-05T14:35:26.897Z",
-      "updatedAt": "2026-07-05T14:35:26.897Z"
+      "createdAt": "2026-07-06T03:24:31.462Z",
+      "updatedAt": "2026-07-06T03:24:31.462Z"
     }
   ]
 }

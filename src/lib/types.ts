@@ -145,6 +145,7 @@ export interface GitLabSettings {
 export interface ClaudeSettings {
   apiKey: string;
   model: string;
+  qwapiKey: string;
 }
 
 export interface PlatformSettings {
@@ -285,7 +286,34 @@ export interface UserContext {
   notes: string[];
 }
 
-// --- Legacy AI types ---
+// --- 定时任务调度器 ---
+
+export type SchedulerActionType =
+  | "publish_xhs"        // 发布小红书
+  | "publish_douyin"     // 发布抖音
+  | "generate_report"    // 生成日报
+  | "ai_morning"         // AI 早安问候（天气+穿搭）
+  | "custom";            // 自定义
+
+export interface ScheduledTask {
+  id: string;
+  name: string;                      // 任务名称
+  enabled: boolean;                  // 是否启用
+  actionType: SchedulerActionType;   // 动作类型
+  schedule: string;                  // cron 时间 HH:mm
+  daysOfWeek: number[];              // 执行日 0=周日 1-6，空=每天
+  config: Record<string, string>;    // 动作配置（平台/主题等）
+  lastRun?: string;                  // 上次执行时间
+  lastResult?: string;               // 上次执行结果
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SchedulerIndex {
+  tasks: ScheduledTask[];
+}
+
+// --- AI ---
 
 export interface AIInsightRequest {
   type: "polish_report" | "weekly_summary" | "brainstorm" | "copywriting" | "chat";
