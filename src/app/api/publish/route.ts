@@ -83,7 +83,19 @@ async function publishToPlatform(
   opts: { title?: string; content?: string; tags?: string[]; topic?: string; imagePath?: string }
 ): Promise<{ success: true; jobId: string; script: string } | { success: false; error: string }> {
   const { title, content, tags, topic, imagePath } = opts;
-  const scriptName = platform === "xiaohongshu" ? "publish-xhs.js" : "publish-douyin.js";
+  const isWin = process.platform === "win32";
+  let scriptName = platform === "xiaohongshu" ? "publish-xhs" : "publish-douyin";
+  // Windows 使用适配版脚本（如果存在），否则回退到原版
+  if (isWin) {
+    const winScript = scriptName + "-win.js";
+    if (fs.existsSync(path.join(getPublisherDir(), winScript))) {
+      scriptName = winScript;
+    } else {
+      scriptName += ".js";
+    }
+  } else {
+    scriptName += ".js";
+  }
   const scriptPath = path.join(getPublisherDir(), scriptName);
 
   if (!fs.existsSync(scriptPath)) {
