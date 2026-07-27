@@ -64,9 +64,10 @@ export default function LoginPage() {
         <p style={{ fontSize: 12, color: "#999", marginBottom: 20 }}>
           请输入管理员密码
         </p>
-        <form onSubmit={handleSubmit}>
+        <form action="/api/auth/login-form" method="POST" onSubmit={handleSubmit}>
           <input
             type="password"
+            name="password"
             placeholder="密码"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
