@@ -38,7 +38,9 @@ export async function POST(request: NextRequest) {
 
       // 浏览器表单提交 → 302 跳转
       if (ct.includes("application/x-www-form-urlencoded")) {
-        const res = NextResponse.redirect(new URL("/", request.url));
+        const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "39.96.82.43";
+        const proto = request.headers.get("x-forwarded-proto") || "http";
+        const res = NextResponse.redirect(new URL(proto + "://" + host + "/"));
         res.cookies.set("wb_token", token, {
           httpOnly: true, secure: false, sameSite: "lax", path: "/",
           maxAge: 7 * 24 * 60 * 60,
