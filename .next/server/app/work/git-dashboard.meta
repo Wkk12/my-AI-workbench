@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/work/layout,_N_T_/work/git-dashboard/layout,_N_T_/work/git-dashboard/page,_N_T_/work/git-dashboard"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/work/git-dashboard/__PAGE__",
+    "/work/git-dashboard",
+    "/work",
+    "/_index",
+    "/_head"
+  ]
+}

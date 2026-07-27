@@ -1,0 +1,3 @@
+{
+  "/api/ips/image/[name]/route": "app/api/ips/image/[name]/route.js"
+}

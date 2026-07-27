@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/self-dev/layout,_N_T_/self-dev/scheduler/layout,_N_T_/self-dev/scheduler/page,_N_T_/self-dev/scheduler"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/self-dev/scheduler/__PAGE__",
+    "/self-dev/scheduler",
+    "/self-dev",
+    "/_index",
+    "/_head"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/work/layout,_N_T_/work/daily-report/layout,_N_T_/work/daily-report/page,_N_T_/work/daily-report"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/work/daily-report/__PAGE__",
+    "/work/daily-report",
+    "/work",
+    "/_index",
+    "/_head"
+  ]
+}
