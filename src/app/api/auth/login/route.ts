@@ -35,6 +35,18 @@ export async function POST(request: NextRequest) {
     if (validatePassword(password)) {
       attempts.delete(ip);
       const token = await signToken("admin");
+
+      // 浏览器表单提交 → 302 跳转
+      if (ct.includes("application/x-www-form-urlencoded")) {
+        const res = NextResponse.redirect(new URL("/", request.url));
+        res.cookies.set("wb_token", token, {
+          httpOnly: true, secure: false, sameSite: "lax", path: "/",
+          maxAge: 7 * 24 * 60 * 60,
+        });
+        return res;
+      }
+
+      // JS fetch → 返回 JSON
       await setAuthCookie(token);
       return NextResponse.json({ success: true, redirect: "/" });
     }
