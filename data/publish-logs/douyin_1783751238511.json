@@ -1,0 +1,29 @@
+{
+  "jobId": "douyin_1783751238511",
+  "platform": "douyin",
+  "title": "姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 抖音 | 主题: 姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+      "timestamp": 1783751238512
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-douyin.js --topic 姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+      "timestamp": 1783751238513
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: Error 230301: No active session 'dy_persist'. | 💥 失败: Command failed: browser-act --session dy_persist wait stable --timeout 60000 | Error 230301: No active session 'dy_persist'.",
+      "timestamp": 1783751319927
+    }
+  ],
+  "startTime": 1783751238511,
+  "endTime": 1783751319927,
+  "result": "🎵 抖音全自动发布 v2\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 抖音文案...\n  主题: 姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲\n\n  ✅ 标题: 猫生理想：睡到自然醒，随心所欲的慵懒生活\n  ✅ 正文: 64 字符\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A cute cat stretching lazily in warm sunlight, cozy indoor setting, soft focus, \n\n🎨 AI 生成封面图...\n🎨 AI 生成封面图...\n  提示词: A cute cat stretching lazily in warm sunlight, cozy indoor s...\n  尺寸: 1024x1536\n  张数: 1\n  ✅ 第 1 张 2142KB\n  🎉 全部生成完成 25.0s\n\n🎵 开始发布到抖音\n  标题: 猫生理想：睡到自然醒，随心所欲的慵懒生活\n  正文: 67 字符\n  标签: 猫生理想, 慵懒生活, 治愈日常, 随心所欲, 理想生活\n  图片: 1 张\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ wait stable\n🔐 检查登录状态...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n📤 上传图片（CDP 批量上传 1 张）...\n  CDP port: 52321\n  ▶ node cdp-multi-upload.cjs ... 1 files\n  ✅ CDP 上传成功: OK\n  ▶ wait stable --timeout 60000\n  ▶ session close dy_persist\n  CDP: 7 page targets to scan\n  CDP: 1 file(s) → #1198 (creator.xiaohongshu.com)\n  CDP events: OK: 1 files (dy_cover_1783751247806.png)\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\n\n💥 失败: Command failed: browser-act --session dy_persist wait stable --timeout 60000\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\n\n"
+}

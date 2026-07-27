@@ -1,0 +1,36 @@
+{
+  "jobId": "xiaohongshu_1783687307594",
+  "platform": "xiaohongshu",
+  "title": "🐾今日份的可爱，请查收～",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 标题: 🐾今日份的可爱，请查收～",
+      "timestamp": 1783687307595
+    },
+    {
+      "step": "使用已有图片",
+      "status": "done",
+      "detail": "共 2 张图片: /Users/wkk/Desktop/my-AI-workbench/public/data/images/ai_gen_1783667665188_0.png, /Users/wkk/Desktop/my-AI-workbench/public/data/images/ai_gen_1783667838369_1.png",
+      "timestamp": 1783687307596
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js",
+      "timestamp": 1783687307598
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 1835 字符",
+      "timestamp": 1783687394821,
+      "durationMs": 87223
+    }
+  ],
+  "startTime": 1783687307594,
+  "endTime": 1783687394821,
+  "result": "🦐 小红书图文发布\n\n🦐 开始发布到小红书\n  标题: 🐾今日份的可爱，请查收～\n  正文: 139 字符\n  标签: 布偶猫, 高冷喵星人, 萌宠日常, 猫奴必备, 可爱暴击\n  图片: 2 张\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ wait stable\n🔐 检查登录...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n🖼️  切换上传图文...\n  ▶ eval \"var t=[...document.querySelectorAll('.creator-...\n  ▶ wait stable\n📤 上传图片...\n  📤 CDP 批量上传 2 张图片...\n  CDP port: 62544\n  ▶ node cdp-multi-upload.cjs ... 2 files\n  ✅ CDP 上传成功: OK\n  ▶ wait stable --timeout 60000\n✏️  填写标题...\n  ▶ state --format text\n  ▶ input 74 \"🐾今日份的可爱，请查收～\"\n📝 填写正文...\n  ▶ eval \"var c=decodeURIComponent('%E9%AB%98%E5%86%B7%E...\n🏷️  添加标签...\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"布偶猫\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"高冷喵星人\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"萌宠日常\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"猫奴必备\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"可爱暴击\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ✅ 已添加 5/5 个标签\n🚀 发布...\n  ▶ eval \"window.scrollTo(0,document.body.scrollHeight)\"\n  ▶ state --format text\n  ▶ click 130\n  ▶ eval \"window.location.href\"\n\n🎉 发布成功！\n  ▶ session close xhs_mrexdawy\n  CDP: 7 page targets to scan\n  CDP: 2 file(s) → #832 (creator.xiaohongshu.com)\n  CDP events: OK: 2 files (ai_gen_1783667665188_0.png, ai_gen_1783667838369_1.png)\n"
+}

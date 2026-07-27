@@ -1,0 +1,30 @@
+{
+  "jobId": "douyin_1783751549440",
+  "platform": "douyin",
+  "title": "姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 抖音 | 主题: 姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+      "timestamp": 1783751549441
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-douyin.js --topic 姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+      "timestamp": 1783751549443
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 2391 字符",
+      "timestamp": 1783751679287,
+      "durationMs": 129843
+    }
+  ],
+  "startTime": 1783751549440,
+  "endTime": 1783751679287,
+  "result": "🎵 抖音全自动发布 v2\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 抖音文案...\n  主题: 姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲\n\n  ✅ 标题: 猫生哲学：睡到自然醒，饿了就吃饭，困了就睡觉\n  ✅ 正文: 64 字符\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A cute cat stretching lazily in warm sunlight, minimalist flat illustration styl\n\n🎨 AI 生成封面图...\n🎨 AI 生成封面图...\n  提示词: A cute cat stretching lazily in warm sunlight, minimalist fl...\n  尺寸: 1024x1536\n  张数: 1\n  ✅ 第 1 张 2052KB\n  🎉 全部生成完成 57.3s\n\n🎵 开始发布到抖音\n  标题: 猫生哲学：睡到自然醒，饿了就吃饭，困了就睡觉\n  正文: 67 字符\n  标签: 猫生哲学, 理想生活, 随心所欲\n  图片: 1 张\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ wait stable\n🔐 检查登录状态...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n📤 上传图片（CDP 批量上传 1 张）...\n  CDP port: 52321\n  ▶ node cdp-multi-upload.cjs ... 1 files\n  ✅ CDP 上传成功: OK\n  ▶ wait stable --timeout 60000\n✏️  填写标题...\n  ▶ eval \"var i=document.querySelector('input[placeholde...\n📝 填写正文...\n  ▶ eval \"window.__dyContent = \\\"姐妹们，谁不想过上猫生啊！\\n每天睡到自然醒，...\n  ▶ eval \"var ed=document.querySelector('[class*=\\\"zone-...\n🏷️  添加标签...\n  ▶ eval \"document.execCommand('insertText',false,' #猫生哲...\n  ▶ eval \"document.execCommand('insertText',false,' #理想生...\n  ▶ eval \"document.execCommand('insertText',false,' #随心所...\n  ▶ keys \"Escape\"\n🚀 发布...\n  ▶ eval \"window.scrollTo(0,document.body.scrollHeight)\"\n  ▶ eval \"var bs=[...document.querySelectorAll('button')...\n  ▶ state --format text\n  ▶ eval \"window.location.href\"\n\n✅ 流程结束，当前: \n  ▶ session close dy_persist\n  CDP: 23 page targets to scan\n  CDP: 1 file(s) → #831 (creator.xiaohongshu.com)\n  CDP events: OK: 1 files (dy_cover_1783751558507.png)\nError 210313: SyntaxError: Invalid or unexpected token\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\n"
+}

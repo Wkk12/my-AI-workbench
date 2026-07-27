@@ -1,0 +1,30 @@
+{
+  "jobId": "xiaohongshu_1783915200767",
+  "platform": "xiaohongshu",
+  "title": "夏天猫咪喝水量突然变少？3招让主子爱上喝水💧",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 夏天猫咪喝水量突然变少？3招让主子爱上喝水💧",
+      "timestamp": 1783915200768
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 夏天猫咪喝水量突然变少？3招让主子爱上喝水💧",
+      "timestamp": 1783915200769
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 2667 字符",
+      "timestamp": 1783915386699,
+      "durationMs": 185930
+    }
+  ],
+  "startTime": 1783915200767,
+  "endTime": 1783915386699,
+  "result": "🦐 小红书全自动发布 v2\n\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 文案...\n  主题: 夏天猫咪喝水量突然变少？3招让主子爱上喝水💧\n\n  ✅ 标题: 🐱猫咪不爱喝水？3招搞定夏日补水难题💧\n  ✅ 正文: 129 字符\n  ✅ 标签: #养猫经验分享,#猫咪喝水,#夏日养宠,#宠物健康,#新手养猫\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A cartoon illustration of a fluffy, round-faced Ragdoll cat with blue eyes and a...\n\n🎨 AI 生成封面图...\n🎨 AI 生成封面图...\n  提示词: A cartoon illustration of a fluffy, round-faced Ragdoll cat ...\n  尺寸: 768x1024\n  张数: 1\n  ✅ 第 1 张 1893KB\n  🎉 全部生成完成 72.9s\n\n🦐 开始发布到小红书\n  标题: 🐱猫咪不爱喝水？3招搞定夏日补水难题�\n  正文: 139 字符\n  标签: 养猫经验分享, 猫咪喝水, 夏日养宠, 宠物健康, 新手养猫, 奶油de日常\n  图片: 1 张\n  ▶ session close xhs_mrip1udz\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ eval \"location.reload()\"\n  ▶ wait stable\n  ▶ eval \"window.location.href\"\n🔐 检查登录...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n🖼️  检查上传图文tab...\n  ▶ eval \"var t=[...document.querySelectorAll('.creator-...\n  tab状态: \n  ▶ wait stable\n📤 上传图片...\n  📤 CDP 批量上传 1 张图片...\n  CDP port: 64764\n  ▶ node cdp-multi-upload.cjs ... 1 files\n  ✅ CDP 上传成功: OK\n  ▶ wait stable --timeout 60000\n⏳ 等待表单加载...\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ✅ 表单已加载 (inputs=7 ces=1 textboxes=1)\n✏️  填写标题...\n  ▶ eval \"var i=document.querySelector('input[placeholde...\n  ✅ 标题已填写 ()\n📝 填写正文...\n  ▶ eval \"var c=decodeURIComponent('%E5%A4%8F%E5%A4%A9%E...\n🏷️  添加标签...\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"养猫经验分享\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"猫咪喝水\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"夏日养宠\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"宠物健康\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"新手养猫\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"奶油de日常\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ✅ 已添加 6/6 个标签\n🚀 发布...\n  ▶ eval \"window.scrollTo(0,document.body.scrollHeight)\"\n  ▶ state --format text\n  ▶ click 121\n  ▶ eval \"window.location.href\"\n\n🎉 发布成功！\n  ▶ session close xhs_mrip1udz\n  CDP: 3 page targets to scan\n  CDP: 1 file(s) → #832 (creator.xiaohongshu.com)\n  CDP events: OK: 1 files (xhs_cover_1783915213672.png)\n"
+}

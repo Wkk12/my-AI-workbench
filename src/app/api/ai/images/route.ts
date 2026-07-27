@@ -1,126 +1,88 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSettings } from "@/lib/data/settings";
 import { getAllIPs } from "@/lib/data/ips";
 import fs from "fs";
 import path from "path";
-import os from "os";
+const JOB_DIR = path.join(process.cwd(), "data", "image-jobs");
 
-/**
- * AI 批量图片生成
- * POST /api/ai/images  { prompt, ipId?, count?, size? }
- *
- * 使用 qweapi gpt-image-2，循环生成多张
- * 风格统一：同一 prompt + 固定 seed（如果 API 支持）
- */
-
-const BASE_URL = "https://qweapi.com/v1";
-
-async function getApiKey(): Promise<string> {
-  if (process.env.QWAPI_API_KEY) return process.env.QWAPI_API_KEY;
-  const settings = await getSettings();
-  const key = settings.claude?.qwapiKey;
-  if (key) return key;
-  throw new Error("未配置 QWAPI_API_KEY");
-}
-
-async function generateOneImage(
-  prompt: string,
-  apiKey: string,
-  size: string
-): Promise<string> {
-  const resp = await fetch(`${BASE_URL}/images/generations`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-image-2",
-      prompt,
-      n: 1,
-      size,
-      response_format: "b64_json",
-    }),
-    signal: AbortSignal.timeout(120000),
-  });
-
-  if (!resp.ok) {
-    const errText = await resp.text();
-    throw new Error(`生图 API ${resp.status}: ${errText.slice(0, 200)}`);
-  }
-
-  const data = await resp.json();
-  if (!data.data?.[0]?.b64_json) {
-    throw new Error("API 返回格式异常");
-  }
-
-  return data.data[0].b64_json;
-}
-
-async function buildStylePrompt(
-  basePrompt: string,
-  ipId: string | undefined,
-  index: number,
-  total: number
-): Promise<string> {
-  let prompt = basePrompt;
-
-  // 融入 IP 风格描述
-  if (ipId) {
-    const ips = await getAllIPs();
-    const ip = ips.find((i) => i.id === ipId);
-    if (ip?.stylePrompt) {
-      prompt = `${prompt}. Style reference: ${ip.stylePrompt}`;
-    }
-    if (ip?.description) {
-      prompt = `Character/persona: ${ip.name} - ${ip.description}. ${prompt}`;
-    }
-  }
-
-  // 多张时加微调后缀，确保不是完全相同的图
-  if (total > 1) {
-    prompt = `${prompt}, variation ${index + 1} of ${total}`;
-  }
-
-  return prompt.slice(0, 1000); // 安全截断
-}
-
+// ── POST: 创建任务并启动后台 Worker ──
 export async function POST(request: NextRequest) {
   try {
-    const { prompt, ipId, count, size } = await request.json();
-
+    const { prompt, ipId, count, size, quality, perImagePrompts } = await request.json();
     if (!prompt || typeof prompt !== "string") {
-      return NextResponse.json(
-        { error: "缺少 prompt 参数" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "缺少 prompt 参数" }, { status: 400 });
     }
 
     const imageCount = Math.min(Math.max(count || 1, 1), 9);
-    const imageSize = size || "1024x1536";
+    // Quality → size mapping (size param takes precedence)
+    const qualityMap: Record<string, string> = { high: "1024x1536", medium: "768x1152", low: "512x768" };
+    const imageSize = size || qualityMap[quality] || "768x1152";
 
-    const apiKey = await getApiKey();
-    const images: string[] = [];
+    // 准备 prompt 列表
+    const ips = ipId ? await getAllIPs() : [];
+    const ip = ipId ? ips.find((i) => i.id === ipId) : undefined;
 
-    for (let i = 0; i < imageCount; i++) {
-      const fullPrompt = await buildStylePrompt(prompt, ipId, i, imageCount);
-      const b64 = await generateOneImage(fullPrompt, apiKey, imageSize);
+    const tasks: string[] = Array.from({ length: imageCount }, (_, i) => {
+      // 如果有每张图的独立 prompt，直接使用
+      if (perImagePrompts?.[i]) return perImagePrompts[i].slice(0, 1000);
+      let p = prompt;
+      if (ip?.stylePrompt) p = `${p}. Style: ${ip.stylePrompt}`;
+      if (ip?.description) p = `Character: ${ip.name} - ${ip.description}. ${p}`;
+      if (imageCount > 1) p = `${p}, variation ${i + 1}`;
+      return p.slice(0, 1000);
+    });
 
-      // 保存到 data/images/
-      const dir = path.join(process.cwd(), "data", "images");
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
-      const fileName = `ai_gen_${Date.now()}_${i}.png`;
-      const filePath = path.join(dir, fileName);
-      fs.writeFileSync(filePath, Buffer.from(b64, "base64"));
+    const jobId = `img_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-      images.push(`/data/images/${fileName}`);
-    }
+    // 写 job 文件
+    if (!fs.existsSync(JOB_DIR)) fs.mkdirSync(JOB_DIR, { recursive: true });
+    const job = {
+      id: jobId,
+      status: "processing",
+      images: [] as string[],
+      errors: [] as string[],
+      total: imageCount,
+      done: 0,
+      tasks,
+      size: imageSize,
+      ipId: ipId || null,
+      createdAt: Date.now(),
+    };
+    fs.writeFileSync(path.join(JOB_DIR, `${jobId}.json`), JSON.stringify(job));
 
-    return NextResponse.json({ success: true, images });
+    // 启动后台 Worker（spawn detached 模式）
+    // 启动后台 Worker（exec 字符串不触发 Turbopack 静态分析）
+    const cmd = "node " + path.join(process.cwd(), "scripts", "gen-images-worker.js") + " " + jobId;
+    const { exec } = await import("child_process");
+    exec(cmd, { cwd: process.cwd() }, (err, stdout, stderr) => {
+      if (err) console.error(`Worker ${jobId} failed:`, err.message);
+      if (stderr) console.error(`Worker ${jobId} err:`, stderr.toString().slice(0, 500));
+      if (stdout) console.log(`Worker ${jobId}:`, stdout.slice(0, 500));
+    });
+
+    return NextResponse.json({ success: true, jobId });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
+}
+
+// ── GET: 查询任务状态 ──
+export async function GET(request: NextRequest) {
+  const jobId = request.nextUrl.searchParams.get("jobId");
+  if (!jobId) return NextResponse.json({ error: "缺少 jobId" }, { status: 400 });
+
+  const jobFile = path.join(JOB_DIR, `${jobId}.json`);
+  if (!fs.existsSync(jobFile)) {
+    return NextResponse.json({ error: "任务不存在或已过期" }, { status: 404 });
+  }
+
+  const job = JSON.parse(fs.readFileSync(jobFile, "utf-8"));
+
+  return NextResponse.json({
+    status: job.status,
+    images: job.status === "done" ? job.images : undefined,
+    done: job.done,
+    total: job.total,
+    errors: job.errors.length > 0 ? job.errors : undefined,
+  });
 }

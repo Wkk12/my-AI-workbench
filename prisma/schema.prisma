@@ -140,6 +140,19 @@ model ChatSession {
   updatedAt String @default("")
 }
 
+// ── 抖音配置 ──
+model SparkContact {
+  id        String   @id @default(uuid())
+  name      String   @default("")
+  douyinId  String   @default("")
+  avatar    String   @default("")
+  selected  Boolean  @default(false)
+  sortOrder Int      @default(0)
+  lastSent  String?
+  createdAt String   @default("")
+  updatedAt String   @default("")
+}
+
 // ── IP 管理 ──
 model IPItem {
   id          String @id

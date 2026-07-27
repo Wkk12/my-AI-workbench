@@ -1,0 +1,30 @@
+{
+  "jobId": "xiaohongshu_1783758983929",
+  "platform": "xiaohongshu",
+  "title": "互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？",
+      "timestamp": 1783758983934
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？",
+      "timestamp": 1783758983935
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 2437 字符",
+      "timestamp": 1783759144964,
+      "durationMs": 161028
+    }
+  ],
+  "startTime": 1783758983929,
+  "endTime": 1783759144965,
+  "result": "🦐 小红书全自动发布 v2\n\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 文案...\n  主题: 互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？\n\n  ✅ 标题: 🐱猫咪夏日躺平大赛！你家主子pick谁？\n  ✅ 正文: 145 字符\n  ✅ 标签: #养猫日常,#猫咪的夏天,#宠物降温,#铲屎官必看,#萌宠生活\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A cute cat lying on cool floor tiles in summer, soft warm lighting, minimalist a...\n\n🎨 AI 生成封面图...\n🎨 AI 生成封面图...\n  提示词: A cute cat lying on cool floor tiles in summer, soft warm li...\n  尺寸: 1024x1536\n  张数: 1\n  ✅ 第 1 张 1908KB\n  🎉 全部生成完成 48.7s\n\n🦐 开始发布到小红书\n  标题: 🐱猫咪夏日躺平大赛！你家主子pick谁\n  正文: 154 字符\n  标签: 养猫日常, 猫咪的夏天, 宠物降温, 铲屎官必看, 萌宠生活\n  图片: 1 张\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ wait stable\n🔐 检查登录...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n🖼️  切换上传图文...\n  ▶ eval \"var t=[...document.querySelectorAll('.creator-...\n  ▶ wait stable\n📤 上传图片...\n  📤 CDP 批量上传 1 张图片...\n  CDP port: 52321\n  ▶ node cdp-multi-upload.cjs ... 1 files\n  ✅ CDP 上传成功: OK\n  ▶ wait stable --timeout 60000\n⏳ 等待表单加载...\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ✅ 表单已加载 (inputs=7 ces=1 textboxes=1)\n✏️  填写标题...\n  ▶ eval \"var i=document.querySelector('input[placeholde...\n  ✅ 标题已填写 ()\n📝 填写正文...\n  ▶ eval \"var c=decodeURIComponent('%E5%A4%8F%E5%A4%A9%E...\n🏷️  添加标签...\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"养猫日常\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"猫咪的夏天\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"宠物降温\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"铲屎官必看\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"萌宠生活\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ✅ 已添加 5/5 个标签\n🚀 发布...\n  ▶ eval \"window.scrollTo(0,document.body.scrollHeight)\"\n  ▶ state --format text\n  ▶ click 119\n  ▶ eval \"window.location.href\"\n\n🎉 发布成功！\n  ▶ session close xhs_mrg41kq8\n  CDP: 43 page targets to scan\n  CDP: 1 file(s) → #832 (creator.xiaohongshu.com)\n  CDP events: OK: 1 files (xhs_cover_1783758992509.png)\nError 210313: SyntaxError: Illegal return statement\n"
+}

@@ -1,0 +1,30 @@
+{
+  "jobId": "xiaohongshu_1783779824285",
+  "platform": "xiaohongshu",
+  "title": "奶油抱着冰垫打滚的清凉瞬间❄️",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 奶油抱着冰垫打滚的清凉瞬间❄️",
+      "timestamp": 1783779824286
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 奶油抱着冰垫打滚的清凉瞬间❄️",
+      "timestamp": 1783779824290
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 619 字符",
+      "timestamp": 1783779840812,
+      "durationMs": 16521
+    }
+  ],
+  "startTime": 1783779824286,
+  "endTime": 1783779840813,
+  "result": "🧪 DRY-RUN 模式 — 只生成内容，不实际发布\n\n🧠 主题 → 文案...\n  主题: 奶油抱着冰垫打滚的清凉瞬间❄️\n\n  ✅ 标题: 🐱夏日清凉神器！猫咪抱着冰垫打滚萌翻了❄️\n  ✅ 正文: 147 字符\n  ✅ 标签: #养猫日常 #猫咪的夏天 #宠物降温 #冰垫测评 #萌宠日记\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A cartoon illustration of a fluffy round-faced Ragdoll cat with blue eyes and gr...\n\n📝 标题: 🐱夏日清凉神器！猫咪抱着冰垫打滚萌翻了\n📄 内容: 救命！我家猫主子发现了夏日宝藏！\n\n🐾 奶油一看到冰垫就扑上去\n抱着它疯狂打滚 根本停不下来\n\n❄️ 凉凉的触感太舒服啦\n看它眯着眼睛享受的样子\n老母亲的心都化了\n\n💡 冰垫简直是夏日救星\n猫咪散热全靠它\n再也不怕主子中暑啦\n\n你们家毛孩子夏天最爱什么降温好物呀？\n评论区晒图让我羡慕一下！...\n🏷️ 标签: 养猫日常 #猫咪的夏天 #宠物降温 #冰垫测评 #萌宠日记\n🎨 图提示: A cartoon illustration of a fluffy round-faced Ragdoll cat with blue eyes and gray-white cream fur, ...\n\n✅ dry-run 完成，未实际发布\n"
+}

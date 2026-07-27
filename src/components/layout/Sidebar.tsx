@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS, CAT_QUOTES } from "@/lib/constants";
 import {
@@ -34,7 +34,11 @@ export default function Sidebar() {
     });
   };
 
-  const randomQuote = CAT_QUOTES[Math.floor(Math.random() * CAT_QUOTES.length)];
+  // 随机语录只在客户端选，避免 hydration mismatch
+  const [randomQuote, setRandomQuote] = useState(CAT_QUOTES[0]);
+  useEffect(() => {
+    setRandomQuote(CAT_QUOTES[Math.floor(Math.random() * CAT_QUOTES.length)]);
+  }, []);
 
   return (
     <aside

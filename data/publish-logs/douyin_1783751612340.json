@@ -1,0 +1,30 @@
+{
+  "jobId": "douyin_1783751612340",
+  "platform": "douyin",
+  "title": "姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 抖音 | 主题: 姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+      "timestamp": 1783751612340
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-douyin.js --topic 姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+      "timestamp": 1783751612341
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 3466 字符",
+      "timestamp": 1783751718905,
+      "durationMs": 106562
+    }
+  ],
+  "startTime": 1783751612340,
+  "endTime": 1783751718905,
+  "result": "55 字符\n  标签: 猫生理想, 随心所欲生活, 慵懒日常\n  图片: 1 张\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ wait stable\n🔐 检查登录状态...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n📤 上传图片（CDP 批量上传 1 张）...\n  CDP port: 52321\n  ▶ node cdp-multi-upload.cjs ... 1 files\n  ✅ CDP 上传成功: OK\n  ▶ wait stable --timeout 60000\n✏️  填写标题...\n  ▶ eval \"var i=document.querySelector('input[placeholde...\n📝 填写正文...\n  ▶ eval \"window.__dyContent = \\\"姐妹们，谁不想过上猫生啊！😻\\n每天睡到自然...\n  ▶ eval \"var ed=document.querySelector('[class*=\\\"zone-...\n🏷️  添加标签...\n  ▶ eval \"document.execCommand('insertText',false,' #猫生理...\n  ▶ eval \"document.execCommand('insertText',false,' #随心所...\n  ▶ eval \"document.execCommand('insertText',false,' #慵懒日...\n  ▶ keys \"Escape\"\n🚀 发布...\n  ▶ eval \"window.scrollTo(0,document.body.scrollHeight)\"\n  ▶ eval \"var bs=[...document.querySelectorAll('button')...\n  ▶ state --format text\n  ▶ eval \"window.location.href\"\n\n✅ 流程结束，当前: \n  ▶ session close dy_persist\n  CDP: 24 page targets to scan\n  CDP: 1 file(s) → #1328 (creator.douyin.com)\n  CDP events: WARN: no file input found after upload\nError 210313: SyntaxError: Invalid or unexpected token\nError 210313: Error: no editor\n    at <anonymous>:1:90\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\n"
+}

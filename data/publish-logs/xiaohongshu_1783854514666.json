@@ -1,0 +1,29 @@
+{
+  "jobId": "xiaohongshu_1783854514666",
+  "platform": "xiaohongshu",
+  "title": "猫咪迷惑行为大赏｜奶油今天又干了什么蠢事🤣",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 猫咪迷惑行为大赏｜奶油今天又干了什么蠢事🤣",
+      "timestamp": 1783854514668
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 猫咪迷惑行为大赏｜奶油今天又干了什么蠢事🤣",
+      "timestamp": 1783854514670
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: 💥 发布失败: LLM 403: {\"error\":{\"message\":\"预扣费额度失败, 用户剩余额度: ¥0.006042, 需要预扣费额度: ¥0.006500 (request id: 20260712110835553793949HggHBH65)\",\"type\":\"new_api_error\",\"param\":\"\",\"code\":\"insufficient_user_quota\"}}",
+      "timestamp": 1783854515921
+    }
+  ],
+  "startTime": 1783854514666,
+  "endTime": 1783854515922,
+  "result": "🦐 小红书全自动发布 v2\n\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 文案...\n  主题: 猫咪迷惑行为大赏｜奶油今天又干了什么蠢事🤣\n\n  ▶ session close xhs_mrhox4pl\n\n💥 发布失败: LLM 403: {\"error\":{\"message\":\"预扣费额度失败, 用户剩余额度: ¥0.006042, 需要预扣费额度: ¥0.006500 (request id: 20260712110835553793949HggHBH65)\",\"type\":\"new_api_error\",\"param\":\"\",\"code\":\"insufficient_user_quota\"}}\n"
+}

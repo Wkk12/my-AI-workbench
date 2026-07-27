@@ -23,7 +23,7 @@ function toTask(row: any): ScheduledTask {
 
 export async function getAllTasks(): Promise<ScheduledTask[]> {
   const rows = await prisma.scheduledTask.findMany({
-    orderBy: { updatedAt: "desc" },
+    orderBy: [{ enabled: "desc" }, { updatedAt: "desc" }],
   });
   return rows.map(toTask);
 }
@@ -90,7 +90,12 @@ export async function getDueTasks(): Promise<ScheduledTask[]> {
   const tasks = await getAllTasks();
   return tasks.filter((t) => {
     if (!t.enabled) return false;
-    if (t.schedule !== timeKey) return false;
+    // 改为 <= 匹配：任务时间已到或已过（容错10分钟窗口，防止心跳飘过整分钟漏执行）
+    if (t.schedule > timeKey) return false;
+    const [sh, sm] = t.schedule.split(":").map(Number);
+    const taskMin = sh * 60 + sm;
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    if (nowMin - taskMin > 10 || nowMin - taskMin < 0) return false; // 只追回最近10分钟
     if (t.daysOfWeek.length > 0 && !t.daysOfWeek.includes(dayOfWeek)) return false;
     if (t.lastRun) {
       const lastDate = new Date(t.lastRun);

@@ -1,0 +1,21 @@
+{
+  "jobId": "xiaohongshu_1783754068044",
+  "platform": "xiaohongshu",
+  "title": "测试",
+  "status": "running",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 测试",
+      "timestamp": 1783754068045
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 测试",
+      "timestamp": 1783754068053
+    }
+  ],
+  "startTime": 1783754068044
+}

@@ -49,7 +49,9 @@ export async function PUT(
 
     if (imageFile && imageFile.size > 0) {
       if (existing.imagePath) {
-        const oldPath = path.join(process.cwd(), existing.imagePath);
+        // Extract filename from URL /api/ips/image/xxx.jpeg → data/ips/images/xxx.jpeg
+        const oldName = existing.imagePath.replace('/api/ips/image/', '');
+        const oldPath = path.join(IMAGES_DIR, oldName);
         try { fs.unlinkSync(oldPath); } catch { /* ignore */ }
       }
 
@@ -62,7 +64,7 @@ export async function PUT(
       const buffer = Buffer.from(await imageFile.arrayBuffer());
       const newPath = path.join(IMAGES_DIR, imageName);
       fs.writeFileSync(newPath, buffer);
-      imagePath = `/data/ips/images/${imageName}`;
+      imagePath = `/api/ips/image/${imageName}`;
     }
 
     const updated = {
@@ -94,7 +96,8 @@ export async function DELETE(
   }
 
   if (ip.imagePath) {
-    const imgPath = path.join(process.cwd(), ip.imagePath);
+    const oldName = ip.imagePath.replace('/api/ips/image/', '');
+    const imgPath = path.join(IMAGES_DIR, oldName);
     try { fs.unlinkSync(imgPath); } catch { /* ignore */ }
   }
 

@@ -1,0 +1,29 @@
+{
+  "jobId": "xiaohongshu_1783758803924",
+  "platform": "xiaohongshu",
+  "title": "互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？",
+      "timestamp": 1783758803925
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？",
+      "timestamp": 1783758803927
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: Error 230301: No active session 'xhs_mrg3xptt'. | Error 230301: No active session 'xhs_mrg3xptt'. | ❌ 表单未出现（已等待60秒）。State: ",
+      "timestamp": 1783759085969
+    }
+  ],
+  "startTime": 1783758803924,
+  "endTime": 1783759085969,
+  "result": "(s) → #832 (creator.xiaohongshu.com)\n  CDP events: OK: 1 files (xhs_cover_1783758812509.png)\nError 230301: No active session 'xhs_mrg3xptt'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3xptt'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3xptt'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3xptt'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3xptt'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3xptt'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3xptt'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3xptt'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3xptt'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3xptt'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3xptt'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3xptt'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3xptt'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3xptt'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3xptt'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3xptt'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3xptt'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3xptt'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3xptt'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3xptt'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3xptt'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3xptt'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\n\n❌ 表单未出现（已等待60秒）。State: \n"
+}

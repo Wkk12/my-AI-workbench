@@ -7,60 +7,90 @@ import { getAllIPs } from "@/lib/data/ips";
  * POST /api/ai/generate  { topic, platform, ipId? }
  */
 
-async function getApiKey(): Promise<string> {
-  // 1. 环境变量
-  if (process.env.QWAPI_API_KEY) return process.env.QWAPI_API_KEY;
-  // 2. 系统设置（用户可在「设置 → QWAPI 配置」中填写）
-  const settings = await getSettings();
-  const key = settings.claude?.qwapiKey;
-  if (key) return key;
-  throw new Error("未配置 QWAPI_API_KEY。请在「系统设置 → QWAPI 配置」中填写 API Key。");
+/** API provider 定义（按优先级排列） */
+interface Provider {
+  name: string;
+  baseUrl: string;
+  apiKey: string;
+  models: string[];
 }
 
-const BASE_URL = "https://qweapi.com/v1";
-const MODELS = ["deepseek-v3.2", "deepseek-chat", "gpt-4o-mini"];
+async function getProviders(): Promise<Provider[]> {
+  const providers: Provider[] = [];
+  const settings = await getSettings();
+
+  // Provider 1: DeepSeek 官方 API（国内直连，优先）
+  const dsKey = process.env.DEEPSEEK_API_KEY || "";
+  if (dsKey) {
+    providers.push({
+      name: "DeepSeek",
+      baseUrl: "https://api.deepseek.com/v1",
+      apiKey: dsKey,
+      models: ["deepseek-chat", "deepseek-v3-0324"],
+    });
+  }
+
+  // Provider 2: qweapi（聚合代理）
+  const qwKey = process.env.QWAPI_API_KEY || settings.claude?.qwapiKey || "";
+  if (qwKey) {
+    providers.push({
+      name: "QWAPI",
+      baseUrl: "https://qweapi.com/v1",
+      apiKey: qwKey,
+      models: ["deepseek-v3.2", "deepseek-chat", "gpt-4o-mini"],
+    });
+  }
+
+  if (providers.length === 0) {
+    throw new Error("未配置任何 AI API Key。请在系统设置中配置 QWAPI Key。");
+  }
+  return providers;
+}
 
 async function callLLM(
-  apiKey: string,
   systemPrompt: string,
   userMessage: string
 ): Promise<string> {
+  const providers = await getProviders();
   let lastErr: Error | null = null;
-  for (const model of MODELS) {
-    try {
-      const resp = await fetch(`${BASE_URL}/chat/completions`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userMessage },
-          ],
-          temperature: 0.8,
-          max_tokens: 2000,
-        }),
-        signal: AbortSignal.timeout(30000),
-      });
 
-      if (!resp.ok) {
-        const errBody = await resp.text();
-        if (resp.status === 404 || errBody.includes("model")) {
-          lastErr = new Error(`Model ${model} not found`);
-          continue;
+  for (const provider of providers) {
+    for (const model of provider.models) {
+      try {
+        const resp = await fetch(`${provider.baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${provider.apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userMessage },
+            ],
+            temperature: 0.8,
+            max_tokens: 2000,
+          }),
+          signal: AbortSignal.timeout(30000),
+        });
+
+        if (!resp.ok) {
+          const errBody = await resp.text();
+          if (resp.status === 404 || errBody.includes("model") || resp.status === 401) {
+            lastErr = new Error(`[${provider.name}] ${model}: ${resp.status}`);
+            continue;
+          }
+          throw new Error(`[${provider.name}] ${resp.status}: ${errBody.slice(0, 200)}`);
         }
-        throw new Error(`LLM ${resp.status}: ${errBody.slice(0, 200)}`);
-      }
 
-      const data = await resp.json();
-      return data.choices[0].message.content;
-    } catch (e: unknown) {
-      if (e instanceof Error && e.message.startsWith("LLM ")) throw e;
-      lastErr = e instanceof Error ? e : new Error(String(e));
-      continue;
+        const data = await resp.json();
+        return data.choices[0].message.content;
+      } catch (e: unknown) {
+        if (e instanceof Error && e.message.startsWith("[")) throw e;
+        lastErr = e instanceof Error ? e : new Error(String(e));
+        continue;
+      }
     }
   }
   throw new Error(
@@ -101,7 +131,6 @@ const PROMPTS: Record<string, { system: string; template: (topic: string) => str
 
 async function generateImagePrompt(
   content: string,
-  apiKey: string,
   platform: string,
   ipId?: string
 ): Promise<string> {
@@ -129,27 +158,12 @@ async function generateImagePrompt(
 
 内容：${content.slice(0, 300)}`;
 
-  for (const model of MODELS) {
-    try {
-      const resp = await fetch(`${BASE_URL}/chat/completions`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: "你是AI图片提示词专家。只输出英文prompt，不要任何解释。" },
-            { role: "user", content: userMessage },
-          ],
-          max_tokens: 300,
-        }),
-        signal: AbortSignal.timeout(15000),
-      });
-      if (!resp.ok) continue;
-      const data = await resp.json();
-      return data.choices[0].message.content.trim();
-    } catch { continue; }
-  }
-  return "";
+  try {
+    return await callLLM(
+      "你是AI图片提示词专家。只输出英文prompt，不要任何解释。",
+      userMessage
+    );
+  } catch { return ""; }
 }
 
 export async function POST(request: NextRequest) {
@@ -176,9 +190,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const apiKey = await getApiKey();
     const raw = await callLLM(
-      apiKey,
       prompt.system,
       prompt.template(topic) + ipContext
     );
@@ -218,8 +230,18 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // 移除 tags 前的 # 号
-    const cleanTags = (parsed.tags || "")
+    // 移除 tags 前的 # 号并确保逗号分隔
+    let rawTags = parsed.tags || "";
+    // 如果原始 tags 不含逗号但包含 # 或空格，拆分为多个 tag
+    if (!rawTags.includes(",") && (rawTags.includes("#") || rawTags.includes(" "))) {
+      rawTags = rawTags
+        .replace(/[#＃]+/g, "#")          // 统一 # 号（全角→半角）
+        .split(/[\s#]+/)                  // 按空格或 # 拆分
+        .filter(Boolean)
+        .map((t) => t.trim())
+        .join(",");
+    }
+    const cleanTags = rawTags
       .split(",")
       .map((t) => t.trim().replace(/^#+/, ""))
       .filter(Boolean);
@@ -229,7 +251,7 @@ export async function POST(request: NextRequest) {
       title: parsed.title,
       content: parsed.content.replace(/\\n/g, "\n"),
       tags: cleanTags,
-      imagePrompt: await generateImagePrompt(parsed.content, apiKey, p, ipId),
+      imagePrompt: await generateImagePrompt(parsed.content, p, ipId),
     });
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);

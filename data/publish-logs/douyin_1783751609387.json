@@ -1,0 +1,30 @@
+{
+  "jobId": "douyin_1783751609387",
+  "platform": "douyin",
+  "title": "姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 抖音 | 主题: 姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+      "timestamp": 1783751609388
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-douyin.js --topic 姐妹们，谁不想过上猫生啊！\n每天睡到自然醒，伸个懒腰晒太阳☀️\n饿了就吃，困了就睡，主打一个随心所欲",
+      "timestamp": 1783751609390
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 4001 字符",
+      "timestamp": 1783751707107,
+      "durationMs": 97717
+    }
+  ],
+  "startTime": 1783751609387,
+  "endTime": 1783751707107,
+  "result": "  ▶ eval \"window.__dyContent = \\\"姐妹们谁不想过猫生啊！\\n每天自然醒伸懒腰晒太...\n  ▶ eval \"var ed=document.querySelector('[class*=\\\"zone-...\n🏷️  添加标签...\n  ▶ eval \"document.execCommand('insertText',false,' #理想生...\n  ▶ eval \"document.execCommand('insertText',false,' #猫生日...\n  ▶ eval \"document.execCommand('insertText',false,' #随心所...\n  ▶ eval \"document.execCommand('insertText',false,' #治愈系...\n  ▶ eval \"document.execCommand('insertText',false,' #躺平哲...\n  ▶ keys \"Escape\"\n🚀 发布...\n  ▶ eval \"window.scrollTo(0,document.body.scrollHeight)\"\n  ▶ eval \"var bs=[...document.querySelectorAll('button')...\n  ▶ state --format text\n  ▶ eval \"window.location.href\"\n\n✅ 流程结束，当前: https://creator.douyin.com/creator-micro/content/upload?default-tab=3\n  ▶ session close dy_persist\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\n  CDP: 23 page targets to scan\n  CDP: 1 file(s) → #1224 (creator.xiaohongshu.com)\n  CDP events: OK: 1 files (dy_cover_1783751618756.png)\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'dy_persist'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'dy_persist'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 210313: Error: no editor\n    at <anonymous>:1:90\n"
+}

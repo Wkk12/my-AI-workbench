@@ -67,9 +67,9 @@ export default function NotificationBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0">
+      <PopoverContent align="end" className="w-80 p-0 flex flex-col">
         {/* 头部 */}
-        <div className="flex items-center justify-between px-4 py-2.5">
+        <div className="flex items-center justify-between px-4 py-2.5 shrink-0">
           <span className="text-sm font-medium flex items-center gap-1.5">
             🔔 通知中心
             {unreadCount > 0 && (
@@ -86,7 +86,7 @@ export default function NotificationBell() {
                 className="h-7 text-xs border-amber-300 text-amber-600 hover:bg-amber-50"
                 onClick={requestPermission}
               >
-                {permission === "denied" ? "⚠️ 通知已阻止 (点此重试)" : "🔔 开启桌面通知"}
+                {permission === "denied" ? "⚠️ 已阻止" : "🔔 开启通知"}
               </Button>
             )}
             <Button
@@ -109,7 +109,7 @@ export default function NotificationBell() {
             </Button>
           </div>
         </div>
-        <Separator />
+        <Separator className="shrink-0" />
 
         {/* 列表 */}
         {notifications.length === 0 ? (
@@ -119,9 +119,9 @@ export default function NotificationBell() {
             <p className="text-xs mt-0.5">定时任务执行结果会出现在这里</p>
           </div>
         ) : (
-          <ScrollArea className="max-h-[400px]">
+          <ScrollArea className="flex-1" style={{ maxHeight: 320 }}>
             <div className="divide-y divide-border/50">
-              {notifications.slice(0, 30).map((n) => (
+              {notifications.map((n) => (
                 <div
                   key={n.id}
                   className={cn(
@@ -167,8 +167,8 @@ export default function NotificationBell() {
             </div>
           </ScrollArea>
         )}
-        {/* 权限状态 + 测试按钮 */}
-        <div className="px-4 py-2 border-t space-y-1.5">
+        {/* 权限状态 + 测试按钮 — 固定在底部 */}
+        <div className="px-4 py-2 border-t shrink-0 space-y-1.5 bg-background">
           <div className="flex items-center justify-between">
             <span className="text-[10px] text-muted-foreground flex items-center gap-1.5">
               <span className={`h-1.5 w-1.5 rounded-full ${permission === "granted" ? "bg-green-500" : permission === "denied" ? "bg-red-500" : "bg-amber-500"}`} />

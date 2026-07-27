@@ -1,0 +1,35 @@
+{
+  "jobId": "xiaohongshu_1783667970017",
+  "platform": "xiaohongshu",
+  "title": "🐾今日份的可爱，请查收～",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 标题: 🐾今日份的可爱，请查收～",
+      "timestamp": 1783667970018
+    },
+    {
+      "step": "使用已有图片",
+      "status": "done",
+      "detail": "共 2 张图片: /Users/wkk/Desktop/my-AI-workbench/public/data/images/ai_gen_1783667665188_0.png, /Users/wkk/Desktop/my-AI-workbench/public/data/images/ai_gen_1783667838369_1.png",
+      "timestamp": 1783667970020
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js",
+      "timestamp": 1783667970021
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: ❌ CDP 多文件上传失败",
+      "timestamp": 1783668005731
+    }
+  ],
+  "startTime": 1783667970017,
+  "endTime": 1783668005731,
+  "result": "🦐 小红书图文发布\n\n🦐 开始发布到小红书\n  标题: 🐾今日份的可爱，请查收～\n  正文: 139 字符\n  标签: 布偶猫, 高冷喵星人, 萌宠日常, 猫奴必备, 可爱暴击\n  图片: 2 张\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ wait stable\n🔐 检查登录...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n🖼️  切换上传图文...\n  ▶ eval \"var t=[...document.querySelectorAll('.creator-...\n  ▶ wait stable\n📤 上传图片...\n  📤 CDP 批量上传 2 张图片...\n  CDP port: 62414\n  ▶ node cdp-multi-upload.cjs ... 2 files\ngrep: invalid option -- P\nusage: grep [-abcdDEFGHhIiJLlMmnOopqRSsUVvwXxZz] [-A num] [-B num] [-C[num]]\n\t[-e pattern] [-f file] [--binary-files=value] [--color=when]\n\t[--context[=num]] [--directories=action] [--label] [--line-buffered]\n\t[--null] [pattern] [file ...]\nCannot connect to Chrome CDP at port 62414: fetch failed\n  CDP stderr: Cannot connect to Chrome CDP at port 62414: fetch failed | \n\n❌ CDP 多文件上传失败\n"
+}

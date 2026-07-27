@@ -44,12 +44,41 @@ const CONFIG = {
 
 // ── 工具函数 ──
 
+// ── 安全参数解析（不经过 shell，避免 () 等特殊字符被 bash 误解析）──
+function splitArgs(str) {
+  const args = [];
+  let cur = '', sq = false, dq = false;
+  for (const ch of str) {
+    if (sq) { if (ch === "'") sq = false; else cur += ch; }
+    else if (dq) { if (ch === '"') dq = false; else cur += ch; }
+    else if (ch === "'") sq = true;
+    else if (ch === '"') dq = true;
+    else if (ch === ' ') { if (cur) { args.push(cur); cur = ''; } }
+    else cur += ch;
+  }
+  if (cur) args.push(cur);
+  return args;
+}
+
 function bc(cmd, opts = {}) {
-  const full = 'browser-act --session ' + CONFIG.session + ' ' + cmd;
+  const { spawnSync } = require('child_process');
+  const subArgs = splitArgs(cmd);
+  const allArgs = ['--session', CONFIG.session, ...subArgs];
   const label = cmd.length > 55 ? cmd.slice(0, 52) + '...' : cmd;
   console.log('  ▶ ' + label);
   try {
-    return execSync(full, { encoding: 'utf8', timeout: 30000, maxBuffer: 10 * 1024 * 1024, ...opts }).trim();
+    const r = spawnSync('browser-act', allArgs, { encoding: 'utf8', timeout: 30000, maxBuffer: 10 * 1024 * 1024, ...opts });
+    if (r.error) {
+      if (opts.ignoreError) return '';
+      throw r.error;
+    }
+    if (r.stderr) {
+      const usefulStderr = r.stderr.split('\n')
+        .filter(l => l.trim() && !/^Error \d+:/.test(l.trim()) && !/SyntaxError/.test(l))
+        .join('\n').trim();
+      if (usefulStderr) console.error(usefulStderr);
+    }
+    return r.stdout.trim();
   } catch (e) {
     if (opts.ignoreError) return '';
     throw e;
@@ -57,7 +86,7 @@ function bc(cmd, opts = {}) {
 }
 
 function sleep(ms) { execSync('sleep ' + (ms / 1000).toFixed(1)); }
-function bail(msg) { console.error('\n❌ ' + msg); process.exit(1); }
+function bail(msg) { console.error('\n❌ ' + msg); try { bc('session close ' + CONFIG.session, { ignoreError: true }); } catch {} process.exit(1); }
 
 function parseArgs() {
   const args = {};
@@ -66,7 +95,13 @@ function parseArgs() {
     if (raw[i].startsWith('--')) {
       const key = raw[i].slice(2);
       const val = raw[i + 1] && !raw[i + 1].startsWith('--') ? raw[i + 1] : 'true';
-      args[key] = val;
+      // 支持多次 --image，合并为数组
+      if (key === 'image') {
+        if (!args.image) args.image = [];
+        args.image.push(val);
+      } else {
+        args[key] = val;
+      }
       if (val !== 'true') i++;
     }
   }
@@ -197,12 +232,13 @@ async function checkSmsDialog() {
 
 // ── 发布 ──
 
-async function publishDY(title, content, tags, imagePath) {
+async function publishDY(title, content, tags, imagePaths) {
+  if (!Array.isArray(imagePaths)) imagePaths = [imagePaths];
   console.log('🎵 开始发布到抖音');
   console.log('  标题: ' + title);
   console.log('  正文: ' + content.replace(/\n/g, '\\n').length + ' 字符');
   console.log('  标签: ' + (tags.join(', ') || '(无)'));
-  console.log('  图片: ' + imagePath + '\n');
+  console.log('  图片: ' + imagePaths.length + ' 张');
 
   console.log('📂 打开发布页...');
   bc('browser open ' + CONFIG.browserId + ' "' + CONFIG.publishUrl + '" --headed');
@@ -252,15 +288,34 @@ async function publishDY(title, content, tags, imagePath) {
     }
   }
 
-  console.log('📤 上传图片...');
-  const so = bc('state --format text');
-  const um = so.match(/\[(\d+)\][^\[]*button[^>]*上传/) || so.match(/\[(\d+)\][^\[]*container-drag/);
-  if (!um) bail('找不到上传按钮');
-  bc('upload ' + um[1] + ' "' + imagePath + '"');
+  console.log('📤 上传图片（CDP 批量上传 ' + imagePaths.length + ' 张）...');
+  
+  // Use CDP multi-file upload to avoid DOM index shifts between uploads
+  // Auto-detect CDP port from Chrome processes
+  let cdpPort = 62414; // fallback
+  try {
+    const portOut = execSync("lsof -iTCP -sTCP:LISTEN -P 2>/dev/null | grep 'Google' | sed -n 's/.*localhost:\\([0-9]*\\).*/\\1/p' | head -1 || echo 62414", { encoding: 'utf8', timeout: 5000 }).trim();
+    if (portOut && /^\d+$/.test(portOut)) cdpPort = parseInt(portOut, 10);
+  } catch (e) { /* keep fallback */ }
+  console.log('  CDP port: ' + cdpPort);
+  const helperPath = path.join(__dirname, 'cdp-multi-upload.cjs');
+  const uploadPaths = imagePaths.filter(p => fs.existsSync(path.resolve(p)));
+  if (uploadPaths.length === 0) bail('没有可上传的图片');
+  
+  const cdpArgs = [helperPath, String(cdpPort), 'input[type="file"]', ...uploadPaths.map(p => path.resolve(p))];
+  const cdpCmd = 'node ' + cdpArgs.map(a => '"' + a + '"').join(' ');
+  
+  console.log('  ▶ node cdp-multi-upload.cjs ... ' + uploadPaths.length + ' files');
+  try {
+    const cdpOut = execSync(cdpCmd, { encoding: 'utf8', timeout: 30000 });
+    console.log('  ✅ CDP 上传成功: ' + cdpOut.trim());
+  } catch (e) {
+    console.error('  CDP stderr: ' + ((e.stderr || e.message || '') + '').split('\n').slice(0, 3).join(' | '));
+    bail('CDP 多文件上传失败');
+  }
+  
   sleep(5000);
   bc('wait stable --timeout 60000');
-  sleep(3000);
-  bc('wait stable');
 
   console.log('✏️  填写标题...');
   bc('eval "var i=document.querySelector(\'input[placeholder*=\\\"标题\\\"]\')||document.querySelector(\'input[placeholder*=\\\"作品\\\"]\');if(!i)throw new Error(\'no title\');i.value=\'' + title.replace(/'/g, "\\'") + '\';i.dispatchEvent(new Event(\'input\',{bubbles:true}))"');
@@ -283,8 +338,13 @@ async function publishDY(title, content, tags, imagePath) {
 
   if (tags.length > 0) {
     console.log('🏷️  添加标签...');
-    const tt = ' ' + tags.map(function(t) { return '#' + t; }).join(' ');
-    bc('eval "document.execCommand(\'insertText\',false,\'' + tt + '\')"');
+    // 每个标签单独插入，# 号 + 空格分隔，避免 Slate.js 把连续标签合并成文本
+    for (let i = 0; i < tags.length; i++) {
+      const tag = tags[i];
+      const sep = i < tags.length - 1 ? ' ' : '';
+      bc('eval "document.execCommand(\'insertText\',false,\' #' + tag + sep + '\')"');
+      sleep(300);
+    }
     sleep(1000);
     bc('keys "Escape"', { ignoreError: true });
     sleep(500);
@@ -320,6 +380,22 @@ async function publishDY(title, content, tags, imagePath) {
 async function main() {
   const args = parseArgs();
 
+  // 🛡️ dry-run: 只生成内容不发布
+  if (args['dry-run'] || args.dryRun) {
+    console.log('🧪 DRY-RUN 模式 — 只生成内容，不实际发布\n');
+    if (args.topic && args.topic !== 'true') {
+      const gen = await generateFromTopic(args.topic);
+      console.log('📝 标题:', gen.title);
+      console.log('📄 内容:', gen.content.slice(0, 200) + '...');
+      console.log('🏷️ 标签:', gen.tags.join(' '));
+      console.log('🎨 图提示:', gen.imagePrompt.slice(0, 100) + '...');
+      console.log('\n✅ dry-run 完成，未实际发布');
+    } else {
+      console.log('✅ dry-run 完成');
+    }
+    process.exit(0);
+  }
+
   let title, content, tags, imagePath;
 
   if (args.topic && args.topic !== 'true') {
@@ -331,7 +407,7 @@ async function main() {
 
     console.log('🎨 AI 生成封面图...');
     imagePath = path.join(os.tmpdir(), 'dy_cover_' + Date.now() + '.png');
-    try { await generateCover(gen.imagePrompt, imagePath, { size: '1024x1536' }); console.log(''); }
+    try { await generateCover(gen.imagePrompt, imagePath, {}); console.log(''); }
     catch (e) { bail(e.message); }
   } else {
     if (!args.title) bail('缺少 --title（或使用 --topic 全自动模式）');
@@ -345,11 +421,21 @@ async function main() {
     if (args.prompt && !args.image) {
       console.log('🎵 抖音图文发布\n🎨 AI 生成封面图...');
       imagePath = path.join(os.tmpdir(), 'dy_cover_' + Date.now() + '.png');
-      try { await generateCover(args.prompt, imagePath, { size: '1024x1536' }); console.log(''); }
+      try { await generateCover(args.prompt, imagePath, {}); console.log(''); }
       catch (e) { bail(e.message); }
     } else {
-      imagePath = path.resolve(args.image);
-      if (!fs.existsSync(imagePath)) bail('图片不存在: ' + imagePath);
+      // args.image 现在是数组（多图）或单图
+      const rawImages = Array.isArray(args.image) ? args.image : [args.image];
+      imagePath = [];
+      for (const img of rawImages) {
+        const resolved = path.resolve(img);
+        if (!fs.existsSync(resolved)) {
+          console.log('  ⚠️  图片不存在，跳过: ' + img);
+          continue;
+        }
+        imagePath.push(resolved);
+      }
+      if (imagePath.length === 0) bail('没有找到有效图片');
       console.log('🎵 抖音图文发布\n');
     }
   }

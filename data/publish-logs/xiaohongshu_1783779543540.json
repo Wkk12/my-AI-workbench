@@ -1,0 +1,29 @@
+{
+  "jobId": "xiaohongshu_1783779543540",
+  "platform": "xiaohongshu",
+  "title": "奶油抱着冰垫打滚的清凉瞬间❄️",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 奶油抱着冰垫打滚的清凉瞬间❄️",
+      "timestamp": 1783779543541
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 奶油抱着冰垫打滚的清凉瞬间❄️",
+      "timestamp": 1783779543554
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: SyntaxError: missing ) after argument list",
+      "timestamp": 1783779543588
+    }
+  ],
+  "startTime": 1783779543540,
+  "endTime": 1783779543588,
+  "result": "/Users/wkk/Desktop/my-AI-workbench/scripts/publisher/publish-xhs.js:249\n    bc('eval \"document.location.href=\\\\'' + CONFIG.publishUrl + '?from=tab_switch&target=image' + '\\'\"');\n       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nSyntaxError: missing ) after argument list\n    at wrapSafe (node:internal/modules/cjs/loader:1638:18)\n    at Module._compile (node:internal/modules/cjs/loader:1680:20)\n    at Object..js (node:internal/modules/cjs/loader:1839:10)\n    at Module.load (node:internal/modules/cjs/loader:1441:32)\n    at Function._load (node:internal/modules/cjs/loader:1263:12)\n    at TracingChannel.traceSync (node:diagnostics_channel:322:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)\n    at node:internal/main/run_main_module:36:49\n\nNode.js v22.19.0\n"
+}

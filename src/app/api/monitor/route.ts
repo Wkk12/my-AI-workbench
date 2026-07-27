@@ -13,16 +13,19 @@ function getPublisherDir(): string {
 
 const PUBLISHER_DIR = getPublisherDir();
 
-interface MonitorState {
-  [platform: string]: {
-    lastCount: number;
-    lastTotal: number;
-    lastCheck: string | null;
-  };
+interface PlatformState {
+  fansCount: number;
+  likeCount: number;
+  commentCount: number;
+  lastCheck: string | null;
 }
 
-function loadState(): MonitorState {
-  const stateFile = path.join(PUBLISHER_DIR, ".monitor-state.json");
+interface MonitorState {
+  [platform: string]: PlatformState;
+}
+
+function loadState(file: string): MonitorState {
+  const stateFile = path.join(PUBLISHER_DIR, file);
   try {
     if (fs.existsSync(stateFile)) {
       return JSON.parse(fs.readFileSync(stateFile, "utf-8"));
@@ -31,41 +34,39 @@ function loadState(): MonitorState {
   return {};
 }
 
-const PLATFORMS = ["douyin", "xhs", "xianyu"] as const;
-type Platform = (typeof PLATFORMS)[number];
-
-function getDefaultState(): MonitorState {
-  const state: MonitorState = {};
-  for (const p of PLATFORMS) {
-    state[p] = { lastCount: 0, lastTotal: 0, lastCheck: null };
-  }
-  return state;
-}
+const PLATFORMS = [
+  { key: "douyin", label: "抖音", icon: "🎵", stateFile: ".monitor-state.json", stateKey: "douyin", hasMonitor: true },
+  { key: "xhs", label: "小红书", icon: "📕", stateFile: ".monitor-xhs-state.json", stateKey: "xhs", hasMonitor: true },
+  { key: "xianyu", label: "闲鱼", icon: "🐟", stateFile: ".monitor-state.json", stateKey: "xianyu", hasMonitor: false },
+];
 
 /**
  * 读取监控状态
  * GET /api/monitor
  */
 export async function GET() {
-  const raw = loadState();
-  const merged = { ...getDefaultState(), ...raw };
+  const platforms = PLATFORMS.map((p) => {
+    const state = loadState(p.stateFile);
+    const platformState = state[p.stateKey];
 
-  return NextResponse.json({
-    platforms: PLATFORMS.map((platform) => ({
-      platform,
-      label:
-        platform === "douyin"
-          ? "抖音"
-          : platform === "xhs"
-            ? "小红书"
-            : "闲鱼",
-      icon: platform === "douyin" ? "🎵" : platform === "xhs" ? "📕" : "🐟",
-      ...merged[platform],
-      hasNew: merged[platform]?.lastCount > 0,
-      supported: platform === "douyin",
-    })),
-    checkedAt: merged.douyin?.lastCheck || null,
+    return {
+      platform: p.key,
+      label: p.label,
+      icon: p.icon,
+      supported: p.hasMonitor,
+      // Douyin legacy fields
+      lastCount: 0,
+      lastTotal: 0,
+      hasNew: false,
+      // Unified fields
+      fansCount: platformState?.fansCount ?? 0,
+      likeCount: platformState?.likeCount ?? 0,
+      commentCount: platformState?.commentCount ?? 0,
+      lastCheck: platformState?.lastCheck || null,
+    };
   });
+
+  return NextResponse.json({ platforms });
 }
 
 /**

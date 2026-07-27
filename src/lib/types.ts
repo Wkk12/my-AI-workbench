@@ -10,7 +10,7 @@ export interface DailyReportMeta {
   projectCount: number;
   commitCount: number;
   createdAt: string; // ISO datetime
-  source: "local" | "gitlab";
+  source: "local" | "gitlab" | "github";
   summary?: string; // AI 生成的摘要
 }
 
@@ -314,6 +314,7 @@ export type SchedulerActionType =
   | "publish_douyin"     // 发布抖音
   | "generate_report"    // 生成日报
   | "ai_morning"         // AI 早安问候（天气+穿搭）
+  | "spark_renew"        // 抖音续火花
   | "custom";            // 自定义
 
 export interface ScheduledTask {
@@ -332,6 +333,24 @@ export interface ScheduledTask {
 
 export interface SchedulerIndex {
   tasks: ScheduledTask[];
+}
+
+// --- 抖音续火花 ---
+
+export interface SparkContact {
+  id: string;
+  name: string;
+  douyinId: string;
+  avatar: string;
+  selected: boolean;  // 是否加入续火花名单
+  sortOrder: number;
+  lastSent?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DouyinConfig {
+  contacts: SparkContact[];
 }
 
 // --- AI ---

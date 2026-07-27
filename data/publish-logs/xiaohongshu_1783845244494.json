@@ -1,0 +1,29 @@
+{
+  "jobId": "xiaohongshu_1783845244494",
+  "platform": "xiaohongshu",
+  "title": "互动｜你家猫咪夏天最爱待的避暑角落是？",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 互动｜你家猫咪夏天最爱待的避暑角落是？",
+      "timestamp": 1783845244494
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 互动｜你家猫咪夏天最爱待的避暑角落是？",
+      "timestamp": 1783845244495
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: Error 210313: SyntaxError: Illegal return statement | ❌ 表单未出现（已等待60秒）。State: url=https://creator.xiaohongshu.com/publish/publish?from=tab_switch&target=image title=小红书创作服务平台  [1]<div id=creator-feedback-wrapper /> \t[2]<span /> \t[3]<div class=problem /> \t\t遇到问题 [4]<div class=title /> \t创作服务平台 [5]<div c",
+      "timestamp": 1783845792910
+    }
+  ],
+  "startTime": 1783845244494,
+  "endTime": 1783845792910,
+  "result": "🦐 小红书全自动发布 v2\n\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 文案...\n  主题: 互动｜你家猫咪夏天最爱待的避暑角落是？\n\n  ✅ 标题: 🐱猫咪夏日避暑地图大公开！\n  ✅ 正文: 113 字符\n  ✅ 标签: #猫咪避暑,#养猫日常,#夏日养猫攻略,#宠物降温,#铲屎官必备\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: Cartoon illustration of a fluffy Ragdoll cat with blue eyes, gray-white cream fu...\n\n🎨 AI 生成封面图...\n🎨 AI 生成封面图...\n  提示词: Cartoon illustration of a fluffy Ragdoll cat with blue eyes,...\n  尺寸: 1024x1536\n  张数: 1\n  ✅ 第 1 张 1940KB\n  🎉 全部生成完成 54.6s\n\n🦐 开始发布到小红书\n  标题: 🐱猫咪夏日避暑地图大公开！\n  正文: 117 字符\n  标签: 猫咪避暑, 养猫日常, 夏日养猫攻略, 宠物降温, 铲屎官必备\n  图片: 1 张\n  ▶ session close xhs_mrhjefsh\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ eval \"location.reload()\"\n  ▶ wait stable\n  ▶ eval \"window.location.href\"\n🔐 检查登录...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n🖼️  检查上传图文tab...\n  ▶ eval \"var t=[...document.querySelectorAll('.creator-...\n  tab状态: \n  ▶ wait stable\n📤 上传图片...\n  📤 CDP 批量上传 1 张图片...\n  CDP port: 52321\n  ▶ node cdp-multi-upload.cjs ... 1 files\n  ✅ CDP 上传成功: OK\n  ▶ wait stable --timeout 60000\n⏳ 等待表单加载...\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (5s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (10s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (15s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (20s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (25s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (30s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (35s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (40s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (45s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (50s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (55s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ▶ state --format text\n  ▶ session close xhs_mrhjefsh\nError 210313: SyntaxError: Illegal return statement\n  CDP: 24 page targets to scan\n  CDP: 1 file(s) → #832 (creator.xiaohongshu.com)\n  CDP events: WARN: no file input found after upload\n\n❌ 表单未出现（已等待60秒）。State: url=https://creator.xiaohongshu.com/publish/publish?from=tab_switch&target=image title=小红书创作服务平台  [1]<div id=creator-feedback-wrapper /> \t[2]<span /> \t[3]<div class=problem /> \t\t遇到问题 [4]<div class=title /> \t创作服务平台 [5]<div class=user-info /> \t[6]<img class=user_avatar /> \t[7]<span class=name-box /> \t\tO椰 \t[8]<img class=arrow /> [9]<div class=btn-wrapper /> \t[10]<div class=btn-inner /> \t\t[11]<svg /> \t\t[12]<span class=btn-text /> \t\t\t发布笔记 \t\t[13]<svg class=dropdownBtn /> [14]<div class=d-new-menu d-me\n"
+}

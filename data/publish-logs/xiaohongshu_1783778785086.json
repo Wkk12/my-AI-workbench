@@ -1,0 +1,30 @@
+{
+  "jobId": "xiaohongshu_1783778785086",
+  "platform": "xiaohongshu",
+  "title": "奶油睡前小剧场",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 奶油睡前小剧场",
+      "timestamp": 1783778785087
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 奶油睡前小剧场",
+      "timestamp": 1783778785100
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 625 字符",
+      "timestamp": 1783778829131,
+      "durationMs": 44030
+    }
+  ],
+  "startTime": 1783778785086,
+  "endTime": 1783778829132,
+  "result": "🧪 DRY-RUN 模式 — 只生成内容，不实际发布\n\n🧠 主题 → 文案...\n  主题: 奶油睡前小剧场\n\n  ✅ 标题: 🎬 睡前仪式感｜奶油小剧场治愈你\n  ✅ 正文: 161 字符\n  ✅ 标签: #睡前仪式感 #治愈系生活 #奶油系卧室 #居家幸福感 #生活仪式感\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: Cozy bedtime ritual scene, soft cream-toned lighting, scented candle flickering,...\n\n📝 标题: 🎬 睡前仪式感｜奶油小剧场治愈你\n📄 内容: 姐妹们！今天分享我的治愈系睡前仪式✨\n\n点上香薰蜡烛🕯️ 氛围感瞬间拉满\n再泡一杯热牛奶🥛 暖胃又暖心\n\n打开投影仪🎞️ 选一部治愈系电影\n窝在软fufu的被子里🛏️ 幸福感爆棚\n\n奶油色调的灯光💡 温柔了整个夜晚\n偶尔还能看到窗外星星🌟 太浪漫啦\n\n你们睡前都喜欢做什么呢？快来评论区分享你的治愈小仪式吧💕...\n🏷️ 标签: 睡前仪式感 #治愈系生活 #奶油系卧室 #居家幸福感 #生活仪式感\n🎨 图提示: Cozy bedtime ritual scene, soft cream-toned lighting, scented candle flickering, warm milk in mug, f...\n\n✅ dry-run 完成，未实际发布\n"
+}

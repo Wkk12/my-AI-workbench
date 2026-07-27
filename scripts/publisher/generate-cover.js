@@ -46,7 +46,7 @@ function loadApiKey() {
 // ── 主函数 ──
 async function generateCover(prompt, outputPath, options) {
   options = options || {};
-  const size = options.size || '1024x1536'; // 默认竖版 3:4
+  const size = options.size || '768x1024'; // 默认竖版 3:4（降分辨率省钱）
   const n = options.n || 1; // 生成张数，1-9
   const outputPaths = options.outputPaths; // 数组输出路径（多张时）
 
@@ -161,8 +161,8 @@ async function main() {
     console.log('参数:');
     console.log('  --prompt   必填，图片描述');
     console.log('  --output   输出路径，默认 ./cover-{timestamp}.png');
-    console.log('  --size     尺寸，默认 1024x1536 (竖版)');
-    console.log('              可选: 1024x1024 (方形) / 1536x1024 (横版)');
+    console.log('  --size     尺寸，默认 768x1024 (竖版)');
+    console.log('              可选: 512x768 / 1024x1024 (方形) / 1024x1536 (高清)');
     process.exit(1);
   }
 

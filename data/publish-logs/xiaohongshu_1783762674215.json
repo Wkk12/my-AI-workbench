@@ -1,0 +1,29 @@
+{
+  "jobId": "xiaohongshu_1783762674215",
+  "platform": "xiaohongshu",
+  "title": "奶油日记：今天铲屎官开了空调，但我还是觉得西瓜更凉快🍉",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 奶油日记：今天铲屎官开了空调，但我还是觉得西瓜更凉快🍉",
+      "timestamp": 1783762674217
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 奶油日记：今天铲屎官开了空调，但我还是觉得西瓜更凉快🍉",
+      "timestamp": 1783762674218
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: 💥 发布失败: Cannot access 'curUrl' before initialization",
+      "timestamp": 1783762819978
+    }
+  ],
+  "startTime": 1783762674215,
+  "endTime": 1783762819978,
+  "result": "🦐 小红书全自动发布 v2\n\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 文案...\n  主题: 奶油日记：今天铲屎官开了空调，但我还是觉得西瓜更凉快🍉\n\n  ✅ 标题: 🐱喵星人避暑指南：空调不如西瓜香！🍉\n  ✅ 正文: 104 字符\n  ✅ 标签: #奶油日记,#猫咪日常,#夏日避暑,#养猫心得,#喵星人\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A cute cat happily eating a chilled watermelon slice, summer cooling scene, clea...\n\n🎨 AI 生成封面图...\n🎨 AI 生成封面图...\n  提示词: A cute cat happily eating a chilled watermelon slice, summer...\n  尺寸: 1024x1536\n  张数: 1\n  ✅ 第 1 张 2016KB\n  🎉 全部生成完成 51.4s\n\n🦐 开始发布到小红书\n  标题: 🐱喵星人避暑指南：空调不如西瓜香！🍉\n  正文: 112 字符\n  标签: 奶油日记, 猫咪日常, 夏日避暑, 养猫心得, 喵星人\n  图片: 1 张\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ eval \"location.reload()\"\n  ▶ wait stable\n  ▶ eval \"window.location.href\"\n  ▶ session close xhs_mrg68o5p\n\n💥 发布失败: Cannot access 'curUrl' before initialization\n"
+}

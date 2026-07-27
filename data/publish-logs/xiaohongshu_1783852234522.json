@@ -1,0 +1,29 @@
+{
+  "jobId": "xiaohongshu_1783852234522",
+  "platform": "xiaohongshu",
+  "title": "夏天猫咪喝水量突然变少？3招让主子爱上喝水💧",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 夏天猫咪喝水量突然变少？3招让主子爱上喝水💧",
+      "timestamp": 1783852234524
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 夏天猫咪喝水量突然变少？3招让主子爱上喝水💧",
+      "timestamp": 1783852234526
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: ❌ 生图失败: API 返回 403: {\"error\":{\"message\":\"预扣费额度失败, 用户剩余额度: ¥0.050738, 需要预扣费额度: ¥0.350000 (request id: 20260712103046554790619JyYIFwA3)\",\"type\":\"new_api_error\",\"param\":\"\",\"code\":\"insufficient_user_quota\"}}",
+      "timestamp": 1783852246871
+    }
+  ],
+  "startTime": 1783852234522,
+  "endTime": 1783852246871,
+  "result": "🦐 小红书全自动发布 v2\n\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 文案...\n  主题: 夏天猫咪喝水量突然变少？3招让主子爱上喝水💧\n\n  ✅ 标题: 🐱猫咪不爱喝水？3招搞定夏日补水难题💦\n  ✅ 正文: 189 字符\n  ✅ 标签: #养猫经验分享,#猫咪喝水,#夏日养宠,#宠物健康,#新手养猫\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A cartoon illustration of a fluffy, round-faced Ragdoll cat with blue eyes and g...\n\n🎨 AI 生成封面图...\n🎨 AI 生成封面图...\n  提示词: A cartoon illustration of a fluffy, round-faced Ragdoll cat ...\n  尺寸: 1024x1536\n  张数: 1\n  ▶ session close xhs_mrhnk9c9\n\n❌ 生图失败: API 返回 403: {\"error\":{\"message\":\"预扣费额度失败, 用户剩余额度: ¥0.050738, 需要预扣费额度: ¥0.350000 (request id: 20260712103046554790619JyYIFwA3)\",\"type\":\"new_api_error\",\"param\":\"\",\"code\":\"insufficient_user_quota\"}}\n  提示: 确保 Clash 代理 7890 已开启\n"
+}

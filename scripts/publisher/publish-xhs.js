@@ -41,12 +41,43 @@ const CONFIG = {
 
 // ── 工具函数 ──
 
+// ── 安全参数解析（不经过 shell，避免 () 等特殊字符被 bash 误解析）──
+function splitArgs(str) {
+  const args = [];
+  let cur = '', sq = false, dq = false;
+  for (const ch of str) {
+    if (sq) { if (ch === "'") sq = false; else cur += ch; }
+    else if (dq) { if (ch === '"') dq = false; else cur += ch; }
+    else if (ch === "'") sq = true;
+    else if (ch === '"') dq = true;
+    else if (ch === ' ') { if (cur) { args.push(cur); cur = ''; } }
+    else cur += ch;
+  }
+  if (cur) args.push(cur);
+  return args;
+}
+
 function bc(cmd, opts = {}) {
-  const full = 'browser-act --session ' + CONFIG.session + ' ' + cmd;
+  const { spawnSync } = require('child_process');
+  const subArgs = splitArgs(cmd);
+  const allArgs = ['--session', CONFIG.session, ...subArgs];
   const label = cmd.length > 55 ? cmd.slice(0, 52) + '...' : cmd;
   console.log('  ▶ ' + label);
   try {
-    return execSync(full, { encoding: 'utf8', timeout: 30000, maxBuffer: 10 * 1024 * 1024, ...opts }).trim();
+    const r = spawnSync('browser-act', allArgs, { encoding: 'utf8', timeout: 30000, maxBuffer: 10 * 1024 * 1024, ...opts });
+    if (r.error) {
+      if (opts.ignoreError) return '';
+      throw r.error;
+    }
+    // browser-act eval 在非交互式上下文中可能输出 SyntaxError，但不影响实际执行结果
+    // 只在非 ignoreError 模式下打印 stderr 中真正有用的行
+    if (r.stderr) {
+      const usefulStderr = r.stderr.split('\n')
+        .filter(l => l.trim() && !/^Error \d+:/.test(l.trim()) && !/SyntaxError/.test(l))
+        .join('\n').trim();
+      if (usefulStderr) console.error(usefulStderr);
+    }
+    return r.stdout.trim();
   } catch (e) {
     if (opts.ignoreError) return '';
     throw e;
@@ -54,7 +85,7 @@ function bc(cmd, opts = {}) {
 }
 
 function sleep(ms) { execSync('sleep ' + (ms / 1000).toFixed(1)); }
-function bail(msg) { console.error('\n❌ ' + msg); process.exit(1); }
+function bail(msg) { console.error('\n❌ ' + msg); try { bc('session close ' + CONFIG.session, { ignoreError: true }); } catch {} process.exit(1); }
 
 function parseArgs() {
   const args = {};
@@ -63,7 +94,12 @@ function parseArgs() {
     if (raw[i].startsWith('--')) {
       const key = raw[i].slice(2);
       const val = raw[i + 1] && !raw[i + 1].startsWith('--') ? raw[i + 1] : 'true';
-      args[key] = val;
+      if (key === 'image') {
+        if (!args.image) args.image = [];
+        args.image.push(val);
+      } else {
+        args[key] = val;
+      }
       if (val !== 'true') i++;
     }
   }
@@ -160,10 +196,17 @@ async function generateFromTopic(topic) {
 
   // Step 2: 根据正文生成图片 prompt
   console.log('🧠 文案 → 生图提示词...');
+  const isCat = /奶油|猫|喵|猫咪|英短|萌宠|宠物/.test(parsed.title + parsed.content);
+  const catContext = isCat
+    ? '【重要】图片主角必须是一只布偶猫（Ragdoll cat），蓝眼睛，灰白奶油色配色，卡通插画风格（cartoon illustration），不是真实照片。'
+    : '';
+  const style = isCat
+    ? '卡通插画风，蓝眼睛灰白布偶猫，圆脸毛茸茸，奶油色配色，温暖小清新'
+    : '干净、小清新、适合小红书审美';
   const imgPromptRaw = await callLLM(
     '你是一个AI图片提示词专家。将内容转化为英文图片生成prompt。只输出prompt本身，不要任何解释。',
-    `根据以下小红书笔记内容，生成一个AI封面图英文prompt。要求：
-- 风格：干净、小清新、适合小红书审美
+    `${catContext}根据以下小红书笔记内容，生成一个AI封面图英文prompt。要求：
+- 风格：${style}
 - 画面：竖版3:4比例，适合手机封面
 - 颜色：温暖柔和
 - 英文输出，不超过150字符
@@ -185,21 +228,38 @@ ${parsed.content}`
 
 // ── 浏览器发布 ──
 
-async function publishXHS(title, content, tags, imagePath) {
+async function publishXHS(title, content, tags, imagePaths) {
+  if (!Array.isArray(imagePaths)) imagePaths = [imagePaths];
   console.log('🦐 开始发布到小红书');
   console.log('  标题: ' + title);
   console.log('  正文: ' + content.replace(/\n/g, '\\n').length + ' 字符');
   console.log('  标签: ' + (tags.join(', ') || '(无)'));
-  console.log('  图片: ' + imagePath + '\n');
+  console.log('  图片: ' + imagePaths.length + ' 张');
 
-  // Step 1+2: 打开 + 登录
+  // Step 0: 关闭上一轮残留的 session，保证每次发布都从干净状态开始
+  try { bc('session close ' + CONFIG.session, { ignoreError: true }); } catch {}
+  sleep(1000);
+
+  // Step 1+2: 打开 + 登录（强制刷新页面，清除上一轮的残留状态）
   console.log('📂 打开发布页...');
-  bc('browser open ' + CONFIG.browserId + ' "' + CONFIG.publishUrl + '" --headed');
+  bc('browser open ' + CONFIG.browserId + ' "' + CONFIG.publishUrl + '?from=tab_switch&target=image"');
   sleep(5000);
+  // 强制刷新确保页面干净
+  bc('eval "location.reload()"', { ignoreError: true });
+  sleep(3000);
   bc('wait stable');
 
-  console.log('🔐 检查登录...');
+  // 再次确认 URL
   let curUrl = bc('eval "window.location.href"');
+  if (!curUrl.includes('target=image')) {
+    console.log('  🔄 页面未加载 target=image，强制导航...');
+    bc(`eval "location.href = '${CONFIG.publishUrl}?from=tab_switch&target=image'"`);
+    sleep(5000);
+    bc('wait stable');
+  }
+
+  console.log('🔐 检查登录...');
+  curUrl = bc('eval "window.location.href"');
   if (curUrl.includes('/login') || curUrl.includes('/signin')) {
     console.log('[NEED_LOGIN] 请在浏览器窗口中扫码或验证码登录，登录后会自动继续...');
     console.log('[NEED_LOGIN] 等待中...（最多等待 5 分钟）');
@@ -223,30 +283,85 @@ async function publishXHS(title, content, tags, imagePath) {
   }
   console.log('  ✅ 已登录');
 
-  // Step 3: 切图文
-  console.log('🖼️  切换上传图文...');
-  bc('eval "var t=[...document.querySelectorAll(\'.creator-tab\')].find(function(x){return x.textContent.includes(\'上传图文\')});if(t)t.click()"');
+  // Step 3: 切图文（检查是否已在正确 tab）
+  console.log('🖼️  检查上传图文tab...');
+  const tabOk = bc('eval "var t=[...document.querySelectorAll(\'.creator-tab\')].find(function(x){return x.textContent.includes(\'上传图文\')});return t?(t.classList.contains(\'active\')||t.classList.contains(\'selected\')?\'already_active\':(t.click(),\'clicked\')):\'no_tab\'"');
+  console.log('  tab状态: ' + tabOk);
+  if (tabOk === 'no_tab') {
+    // 可能页面仍在加载，等待后重试
+    sleep(5000);
+    bc('eval "var t=[...document.querySelectorAll(\'.creator-tab\')].find(function(x){return x.textContent.includes(\'上传图文\')});if(t)t.click();else throw new Error(\'no tab\')"');
+  }
   sleep(2000);
   bc('wait stable');
 
-  // Step 4: 上传图片
+  // Step 4: 上传图片（CDP 多文件批量上传，无 file:// 跳转问题）
   console.log('📤 上传图片...');
-  const st = bc('state --format text').replace(/\n/g, ' ');
-  let um = st.match(/\[(\d+)\][^\[]*button[^>]*>[^<]*上传图片/);
-  if (!um) um = st.match(/\[(\d+)\]\s*<button[^>]*上传/);
-  if (!um) bail('找不到上传按钮');
-  bc('upload ' + um[1] + ' "' + imagePath + '"');
+  const uploadPaths = imagePaths.filter(p => fs.existsSync(path.resolve(p)));
+  if (uploadPaths.length === 0) bail('没有可上传的图片');
+  
+  console.log('  📤 CDP 批量上传 ' + uploadPaths.length + ' 张图片...');
+  
+  // CDP port for Chrome (browser-act uses this port)
+  // Auto-detect CDP port from Chrome processes
+  let cdpPort = 62414; // fallback
+  try {
+    const portOut = execSync("lsof -iTCP -sTCP:LISTEN -P 2>/dev/null | grep 'Google' | sed -n 's/.*localhost:\\([0-9]*\\).*/\\1/p' | head -1 || echo 62414", { encoding: 'utf8', timeout: 5000 }).trim();
+    if (portOut && /^\d+$/.test(portOut)) cdpPort = parseInt(portOut, 10);
+  } catch (e) { /* keep fallback */ }
+  console.log('  CDP port: ' + cdpPort);
+  const helperPath = path.join(__dirname, 'cdp-multi-upload.cjs');
+  
+  // Build the command with all image paths
+  const cdpArgs = [helperPath, String(cdpPort), 'input[type="file"]', ...uploadPaths.map(p => path.resolve(p))];
+  const cdpCmd = 'node ' + cdpArgs.map(a => '"' + a + '"').join(' ');
+  
+  console.log('  ▶ node cdp-multi-upload.cjs ... ' + uploadPaths.length + ' files');
+  try {
+    const cdpOut = execSync(cdpCmd, { encoding: 'utf8', timeout: 30000 });
+    console.log('  ✅ CDP 上传成功: ' + cdpOut.trim());
+  } catch (e) {
+    console.error('  CDP stderr: ' + ((e.stderr || e.message || '') + '').split('\n').slice(0, 3).join(' | '));
+    bail('CDP 多文件上传失败');
+  }
+  
   sleep(3000);
   bc('wait stable --timeout 60000');
 
-  // Step 5: 标题
+  // Step 4.5: 等待新UI加载表单（上传后React需要时间渲染）
+  console.log('⏳ 等待表单加载...');
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const check = bc('eval "JSON.stringify({inputs:document.querySelectorAll(\'input:not([type=file])\').length,ces:document.querySelectorAll(\'[contenteditable=true]\').length,textboxes:document.querySelectorAll(\'[role=textbox]\').length})"');
+    try {
+      const s = JSON.parse(check);
+      if (s.inputs > 0 || s.ces > 0 || s.textboxes > 0) {
+        console.log('  ✅ 表单已加载 (inputs=' + s.inputs + ' ces=' + s.ces + ' textboxes=' + s.textboxes + ')');
+        break;
+      }
+    } catch {}
+    if (attempt >= 11) {
+      const fullState = bc('state --format text').replace(/\n/g, ' ');
+      bail('表单未出现（已等待60秒）。State: ' + fullState.substring(0, 500));
+    }
+    console.log('  ⏳ 等待中... (' + ((attempt + 1) * 5) + 's)');
+    sleep(5000);
+  }
+
+  // Step 5: 标题 — 用 eval 直接操作DOM（兼容新旧UI）
   console.log('✏️  填写标题...');
-  const safeTitle = title.replace(/'/g, "'\\''");
-  const ts = bc('state --format text').replace(/\n/g, ' ');
-  let tm = ts.match(/\[(\d+)\]\s*<input[^>]*placeholder[^>]*标题/);
-  if (!tm) tm = ts.match(/\[(\d+)\]\s*<input[^>]*placeholder/);
-  if (!tm) bail('找不到标题输入框。State: ' + ts.substring(0, 500));
-  bc('input ' + tm[1] + ' "' + safeTitle + '"');
+  const safeTitle = title.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const titleOk = bc('eval "' +
+    'var i=document.querySelector(\'input[placeholder*=\\"标题\\"]\')' +
+    '||document.querySelector(\'input[placeholder*=\\"添加\\"]\')' +
+    '||document.querySelector(\'[contenteditable=true][aria-label*=\\"标题\\"]\')' +
+    '||document.querySelector(\'[role=textbox]\');' +
+    'if(!i)return\'NO_TITLE_INPUT\';' +
+    'if(i.tagName===\'INPUT\'||i.tagName===\'TEXTAREA\'){i.value=\'' + safeTitle + '\';i.dispatchEvent(new Event(\'input\',{bubbles:true}));i.dispatchEvent(new Event(\'change\',{bubbles:true}));}' +
+    'else{i.focus();i.textContent=\'' + safeTitle + '\';i.dispatchEvent(new Event(\'input\',{bubbles:true}));}' +
+    'return\'OK:\'+i.tagName' +
+  '"');
+  if (titleOk === 'NO_TITLE_INPUT') bail('找不到标题输入框');
+  console.log('  ✅ 标题已填写 (' + titleOk + ')');
   sleep(500);
 
   // Step 6: 正文
@@ -313,6 +428,22 @@ async function publishXHS(title, content, tags, imagePath) {
 async function main() {
   const args = parseArgs();
 
+  // 🛡️ dry-run: 只生成内容不发布
+  if (args['dry-run'] || args.dryRun) {
+    console.log('🧪 DRY-RUN 模式 — 只生成内容，不实际发布\n');
+    if (args.topic && args.topic !== 'true') {
+      const gen = await generateFromTopic(args.topic);
+      console.log('📝 标题:', gen.title);
+      console.log('📄 内容:', gen.content.slice(0, 200) + '...');
+      console.log('🏷️ 标签:', gen.tags.join(' '));
+      console.log('🎨 图提示:', gen.imagePrompt.slice(0, 100) + '...');
+      console.log('\n✅ dry-run 完成，未实际发布');
+    } else {
+      console.log('✅ dry-run 完成');
+    }
+    process.exit(0);
+  }
+
   let title, content, tags, imagePath;
 
   // ── 路径1: 全自动模式（--topic）────
@@ -330,7 +461,7 @@ async function main() {
     console.log('🎨 AI 生成封面图...');
     imagePath = path.join(os.tmpdir(), 'xhs_cover_' + Date.now() + '.png');
     try {
-      await generateCover(gen.imagePrompt, imagePath, { size: '1024x1536' });
+      await generateCover(gen.imagePrompt, imagePath);
       console.log('');
     } catch (e) {
       bail(e.message);
@@ -351,16 +482,31 @@ async function main() {
       console.log('🎨 AI 生成封面图...');
       imagePath = path.join(os.tmpdir(), 'xhs_cover_' + Date.now() + '.png');
       try {
-        await generateCover(args.prompt, imagePath, { size: '1024x1536' });
+        await generateCover(args.prompt, imagePath);
         console.log('');
       } catch (e) {
         bail(e.message);
       }
     } else {
-      imagePath = path.resolve(args.image);
-      if (!fs.existsSync(imagePath)) bail('图片不存在: ' + imagePath);
+      // args.image 现在是数组（多图）或单图
+      const rawImages = Array.isArray(args.image) ? args.image : [args.image];
+      imagePath = [];
+      for (const img of rawImages) {
+        const resolved = path.resolve(img);
+        if (!fs.existsSync(resolved)) {
+          console.log('  ⚠️  图片不存在，跳过: ' + img);
+          continue;
+        }
+        imagePath.push(resolved);
+      }
+      if (imagePath.length === 0) bail('没有找到有效图片');
       console.log('🦐 小红书图文发布\n');
     }
+  }
+
+  // 🆕 追加品牌标签
+  if (!tags.includes('奶油de日常')) {
+    tags.push('奶油de日常');
   }
 
   // 发布

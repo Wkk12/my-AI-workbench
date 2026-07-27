@@ -1,0 +1,30 @@
+{
+  "jobId": "xiaohongshu_1783779965799",
+  "platform": "xiaohongshu",
+  "title": "夏日饮品推荐：3款超简单自制冰饮",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 夏日饮品推荐：3款超简单自制冰饮",
+      "timestamp": 1783779965800
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 夏日饮品推荐：3款超简单自制冰饮",
+      "timestamp": 1783779965804
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 646 字符",
+      "timestamp": 1783779979737,
+      "durationMs": 13930
+    }
+  ],
+  "startTime": 1783779965799,
+  "endTime": 1783779979738,
+  "result": "🧪 DRY-RUN 模式 — 只生成内容，不实际发布\n\n🧠 主题 → 文案...\n  主题: 夏日饮品推荐：3款超简单自制冰饮\n\n  ✅ 标题: 🔥3款神仙冰饮！5分钟搞定夏日续命水\n  ✅ 正文: 179 字符\n  ✅ 标签: #夏日饮品 #自制饮料 #神仙喝法 #冰饮教程 #居家美食\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A refreshing summer drink collage, watermelon yogurt drink, lemon passionfruit h...\n\n📝 标题: 🔥3款神仙冰饮！5分钟搞定夏日续命水\n📄 内容: 姐妹们！热到融化的时候来一杯自制冰饮真的太爽啦！\n\n🍉西瓜养乐多特调\n西瓜捣碎+冰块+养乐多+雪碧\n清甜气泡感直接拉满！一口降温10度～\n\n🍋柠檬百香果蜜\n提前冻好百香果冰球\n柠檬片+蜂蜜+气泡水\n酸酸甜甜维C爆表！美白又解渴✨\n\n🥥生椰拿铁冰沙\n冰块+椰奶+浓缩咖啡\n破壁机打成冰沙！丝滑浓郁绝绝子\n\n你们夏天最爱喝哪款自制饮料呀？快在评论区告诉我！...\n🏷️ 标签: 夏日饮品 #自制饮料 #神仙喝法 #冰饮教程 #居家美食\n🎨 图提示: A refreshing summer drink collage, watermelon yogurt drink, lemon passionfruit honey tea, and coconu...\n\n✅ dry-run 完成，未实际发布\n"
+}

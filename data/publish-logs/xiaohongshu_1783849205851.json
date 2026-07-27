@@ -1,0 +1,29 @@
+{
+  "jobId": "xiaohongshu_1783849205851",
+  "platform": "xiaohongshu",
+  "title": "奶油日记：今天偷喝妈妈杯子里的凉白开被抓包了…",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 奶油日记：今天偷喝妈妈杯子里的凉白开被抓包了…",
+      "timestamp": 1783849205852
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 奶油日记：今天偷喝妈妈杯子里的凉白开被抓包了…",
+      "timestamp": 1783849205853
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: ❌ 生图失败: API 返回 403: {\"error\":{\"message\":\"预扣费额度失败, 用户剩余额度: ¥0.113408, 需要预扣费额度: ¥0.350000 (request id: 20260712094018277233415MQBotpcl)\",\"type\":\"new_api_error\",\"param\":\"\",\"code\":\"insufficient_user_quota\"}}",
+      "timestamp": 1783849218718
+    }
+  ],
+  "startTime": 1783849205851,
+  "endTime": 1783849218718,
+  "result": "🦐 小红书全自动发布 v2\n\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 文案...\n  主题: 奶油日记：今天偷喝妈妈杯子里的凉白开被抓包了…\n\n  ✅ 标题: 偷喝妈妈凉白开被抓包😝\n  ✅ 正文: 101 字符\n  ✅ 标签: #奶油日记 #萌娃日常 #亲子时光 #童年趣事 #带娃日常\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A fluffy round-faced Ragdoll cat with blue eyes, grey-white cream fur, cartoon i...\n\n🎨 AI 生成封面图...\n🎨 AI 生成封面图...\n  提示词: A fluffy round-faced Ragdoll cat with blue eyes, grey-white ...\n  尺寸: 1024x1536\n  张数: 1\n  ▶ session close xhs_mrhlrcem\n\n❌ 生图失败: API 返回 403: {\"error\":{\"message\":\"预扣费额度失败, 用户剩余额度: ¥0.113408, 需要预扣费额度: ¥0.350000 (request id: 20260712094018277233415MQBotpcl)\",\"type\":\"new_api_error\",\"param\":\"\",\"code\":\"insufficient_user_quota\"}}\n  提示: 确保 Clash 代理 7890 已开启\n"
+}

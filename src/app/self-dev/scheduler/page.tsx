@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
@@ -18,9 +17,9 @@ import { Switch } from "@/components/ui/switch";
 import {
   Plus, Clock, Play, Trash2, Edit, RefreshCw, CheckCircle2,
   XCircle, Loader2, Bell, FileText, Send, Sunrise, Wrench,
-  History, AlertTriangle, ExternalLink,
+  History, AlertTriangle, ExternalLink, Flame,
 } from "lucide-react";
-import type { ScheduledTask, SchedulerActionType, ContentItem } from "@/lib/types";
+import type { ScheduledTask, SchedulerActionType, SparkContact } from "@/lib/types";
 import { useNotifications } from "@/components/notifications/NotificationProvider";
 import { v4 as uuidv4 } from "uuid";
 
@@ -31,6 +30,7 @@ const ACTION_TYPES: { value: SchedulerActionType; label: string; icon: string }[
   { value: "publish_douyin", label: "发布抖音", icon: "🎵" },
   { value: "generate_report", label: "生成日报", icon: "📋" },
   { value: "ai_morning", label: "AI 早安问候", icon: "🌅" },
+  { value: "spark_renew", label: "续火花", icon: "🔥" },
   { value: "custom", label: "自定义", icon: "🔧" },
 ];
 
@@ -41,6 +41,7 @@ const ACTION_LABELS: Record<string, string> = {
   publish_douyin: "🎵 发布抖音",
   generate_report: "📋 生成日报",
   ai_morning: "🌅 AI 早安",
+  spark_renew: "🔥 续火花",
   custom: "🔧 自定义",
 };
 
@@ -48,6 +49,7 @@ const ACTION_LABELS: Record<string, string> = {
 const QUICK_PRESETS = [
   { name: "每日早安", actionType: "ai_morning" as SchedulerActionType, schedule: "08:00", config: { city: "北京" } },
   { name: "早上发小红书", actionType: "publish_xhs" as SchedulerActionType, schedule: "08:30", config: {} },
+  { name: "续火花", actionType: "spark_renew" as SchedulerActionType, schedule: "10:00", config: {} },
   { name: "下午生成日报", actionType: "generate_report" as SchedulerActionType, schedule: "17:00", config: {} },
   { name: "晚上发抖音", actionType: "publish_douyin" as SchedulerActionType, schedule: "20:00", config: {} },
 ];
@@ -77,8 +79,10 @@ export default function SchedulerPage() {
   const [fConfigCity, setFConfigCity] = useState("北京");
   const [fConfigContentId, setFConfigContentId] = useState("");
 
-  // 内容列表（用于选择已有内容发布）
-  const [contentList, setContentList] = useState<ContentItem[]>([]);
+  // 续火花联系人
+  const [sparkContacts, setSparkContacts] = useState<SparkContact[]>([]);
+  const [fSparkTargets, setFSparkTargets] = useState<string[]>([]); // 选中的联系人 name
+  const [fSparkMessage, setFSparkMessage] = useState("美少女珂来续火花啦~");
 
   const fetchTasks = useCallback(async () => {
     const res = await fetch("/api/scheduler");
@@ -89,10 +93,12 @@ export default function SchedulerPage() {
 
   useEffect(() => {
     fetchTasks();
-    // 检查发布环境配置
     fetch("/api/setup").then(r => r.json()).then(d => setSetupCompleted(d.setupCompleted ?? false)).catch(() => setSetupCompleted(false));
-    // 加载内容列表（供发布任务选择）
-    fetch("/api/content").then(r => r.json()).then(d => setContentList(d.contents || [])).catch(() => {});
+    // 加载联系人（续火花用）
+    fetch("/api/settings/douyin/contacts")
+      .then(r => r.json())
+      .then(d => setSparkContacts(d.contacts || []))
+      .catch(() => {});
   }, [fetchTasks]);
 
   const resetForm = () => {
@@ -104,6 +110,8 @@ export default function SchedulerPage() {
     setFConfigTopic("");
     setFConfigCity("北京");
     setFConfigContentId("");
+    setFSparkTargets([]);
+    setFSparkMessage("美少女珂来续火花啦~");
     setEditingId(null);
   };
 
@@ -117,11 +125,12 @@ export default function SchedulerPage() {
     setFConfigTopic(t.config?.topic || "");
     setFConfigCity(t.config?.city || "北京");
     setFConfigContentId(t.config?.contentId || "");
+    setFSparkTargets(t.config?.targets ? JSON.parse(t.config.targets) : []);
+    setFSparkMessage(t.config?.message || "美少女珂来续火花啦~");
     setDialogOpen(true);
   };
 
   const handleSave = async () => {
-    // 发布类任务需要环境配置
     if ((fActionType === "publish_xhs" || fActionType === "publish_douyin") && !setupCompleted) {
       setSetupWarnOpen(true);
       return;
@@ -132,6 +141,13 @@ export default function SchedulerPage() {
     if (fConfigTopic) config.topic = fConfigTopic;
     if (fConfigCity) config.city = fConfigCity;
     if (fConfigContentId && fConfigContentId !== "none") config.contentId = fConfigContentId;
+    if (fActionType === "spark_renew") {
+      // 如果没选联系人，默认用配置中勾选的
+      config.targets = JSON.stringify(fSparkTargets.length > 0 ? fSparkTargets : []);
+      if (fSparkMessage && fSparkMessage !== "美少女珂来续火花啦~") {
+        config.message = fSparkMessage;
+      }
+    }
 
     const task: ScheduledTask = {
       id: editingId || uuidv4(),
@@ -165,7 +181,6 @@ export default function SchedulerPage() {
 
   const handleRun = async (taskId: string) => {
     setRunningTaskId(taskId);
-    // 利用用户点击手势请求通知权限
     if ("Notification" in window && Notification.permission === "default") {
       await Notification.requestPermission();
     }
@@ -245,11 +260,24 @@ export default function SchedulerPage() {
     return days.map((d) => `周${WEEKDAYS[d]}`).join("、");
   };
 
+  // 切换续火花联系人
+  const toggleSparkTarget = (name: string) => {
+    setFSparkTargets((prev) =>
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
+    );
+  };
+
+  // 选择所有已勾选的联系人
+  const useDefaultContacts = () => {
+    const selected = sparkContacts.filter((c) => c.selected).map((c) => c.name);
+    setFSparkTargets(selected);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="⏰ 定时任务"
-        description="设定自动化任务 — 定时发布、自动日报、早安问候"
+        description="设定自动化任务 — 定时发布、自动日报、早安问候、续火花"
         action={
           <div className="flex gap-2">
             <Button variant="outline" className="gap-1" onClick={handleCheckAll} disabled={checking}>
@@ -325,54 +353,90 @@ export default function SchedulerPage() {
                     </div>
                   </div>
 
-                  {/* 动作配置 */}
+                  {/* 发布动作配置 */}
                   {(fActionType === "publish_xhs" || fActionType === "publish_douyin") && (
                     <div className="space-y-3">
-                      {/* 选择已有内容 */}
                       <div className="space-y-2">
-                        <Label>选择内容（可选）</Label>
-                        <Select value={fConfigContentId} onValueChange={(v) => {
-                          const val = v || "";
-                          setFConfigContentId(val);
-                          if (val && val !== "none") {
-                            const selected = contentList.find((c) => c.id === val);
-                            if (selected) {
-                              if (selected.title) setFName(selected.title);
-                              if (selected.description && !fConfigTopic) setFConfigTopic(selected.description.slice(0, 50));
-                            }
-                          }
-                        }}>
-                          <SelectTrigger>
-                            {fConfigContentId && fConfigContentId !== "none"
-                              ? (contentList.find(c => c.id === fConfigContentId)?.title || "已选择内容")
-                              : "不使用已有内容（按主题生成）"}
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">不使用已有内容（按主题生成）</SelectItem>
-                            {contentList.map((c) => (
-                              <SelectItem key={c.id} value={c.id}>
-                                {c.title || "无标题"} {c.platform === "xiaohongshu" ? "📕" : c.platform === "douyin" ? "🎵" : "📱"}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {fConfigContentId && fConfigContentId !== "none" && (
-                          <p className="text-xs text-muted-foreground">
-                            将发布已选内容，标题为空时自动 AI 生成
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label>发布主题（可选，无内容时使用）</Label>
+                        <Label>发布主题（可选）</Label>
                         <Input value={fConfigTopic} onChange={(e) => setFConfigTopic(e.target.value)} placeholder="如：每日精选话题" />
                       </div>
                     </div>
                   )}
 
+                  {/* AI 早安配置 */}
                   {fActionType === "ai_morning" && (
                     <div className="space-y-2">
                       <Label>所在城市</Label>
                       <Input value={fConfigCity} onChange={(e) => setFConfigCity(e.target.value)} placeholder="北京" />
+                    </div>
+                  )}
+
+                  {/* 🔥 续火花配置 */}
+                  {fActionType === "spark_renew" && (
+                    <div className="space-y-3 border rounded-lg p-3 bg-muted/30">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-sm font-medium">🔥 发送目标</Label>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 text-xs gap-1"
+                          onClick={useDefaultContacts}
+                        >
+                          使用默认联系人
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        选择要给哪些好友发送续火花消息。不选则使用设置页中勾选的默认联系人。
+                      </p>
+
+                      {sparkContacts.length === 0 ? (
+                        <div className="text-xs text-muted-foreground py-2 text-center">
+                          暂无联系人，请先在「系统设置 → 抖音模块」中添加
+                        </div>
+                      ) : (
+                        <div className="space-y-1 max-h-48 overflow-y-auto">
+                          {sparkContacts.map((c) => (
+                            <label
+                              key={c.id}
+                              className={`flex items-center gap-2 py-1.5 px-2 rounded cursor-pointer hover:bg-accent ${
+                                fSparkTargets.includes(c.name) ? "bg-primary/10" : ""
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={fSparkTargets.includes(c.name)}
+                                onChange={() => toggleSparkTarget(c.name)}
+                                className="rounded"
+                              />
+                              <span className="text-sm">{c.name}</span>
+                              {c.selected && (
+                                <Badge variant="secondary" className="text-[10px] h-4">
+                                  默认
+                                </Badge>
+                              )}
+                            </label>
+                          ))}
+                        </div>
+                      )}
+
+                      {fSparkTargets.length > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          已选 {fSparkTargets.length} 人: {fSparkTargets.join("、")}
+                        </p>
+                      )}
+
+                      <div className="space-y-2 pt-2">
+                        <Label className="text-xs">💬 发送文案</Label>
+                        <Input
+                          value={fSparkMessage}
+                          onChange={(e) => setFSparkMessage(e.target.value)}
+                          placeholder="美少女珂来续火花啦~"
+                          className="h-8 text-sm"
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          不填则使用系统设置中的默认文案
+                        </p>
+                      </div>
                     </div>
                   )}
 
@@ -455,11 +519,13 @@ export default function SchedulerPage() {
                   </div>
                 )}
 
-                {/* 任务配置摘要 */}
-                {task.config?.contentId && (
+                {/* 续火花联系人摘要 */}
+                {task.actionType === "spark_renew" && task.config?.targets && (
                   <div className="mb-3 text-xs text-muted-foreground">
-                    📝 内容：
-                    {contentList.find(c => c.id === task.config.contentId)?.title || task.config.contentId}
+                    🔥 联系人：{(() => {
+                      const t = JSON.parse(task.config.targets);
+                      return t.length > 0 ? t.join("、") : "使用默认联系人";
+                    })()}
                   </div>
                 )}
 
@@ -510,6 +576,7 @@ export default function SchedulerPage() {
           <p>• 点击「立即执行」可手动触发任意任务（不受每日一次限制）</p>
           <p>• 点击「立即检查」可一次性运行所有到期任务</p>
           <p>• AI 功能需要在「系统设置」中配置 Claude API Key 或 QWAPI Key</p>
+          <p>• 🔥 续火花需要在「系统设置 → 抖音模块」中配置联系人</p>
         </CardContent>
       </Card>
 

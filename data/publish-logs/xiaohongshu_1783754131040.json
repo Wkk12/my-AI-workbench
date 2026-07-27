@@ -1,0 +1,30 @@
+{
+  "jobId": "xiaohongshu_1783754131040",
+  "platform": "xiaohongshu",
+  "title": "测试",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 测试",
+      "timestamp": 1783754131042
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 测试",
+      "timestamp": 1783754131052
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 550 字符",
+      "timestamp": 1783754142049,
+      "durationMs": 10996
+    }
+  ],
+  "startTime": 1783754131041,
+  "endTime": 1783754142050,
+  "result": "🧪 DRY-RUN 模式 — 只生成内容，不实际发布\n\n🧠 主题 → 文案...\n  主题: 测试\n\n  ✅ 标题: 🔍测试达人必备！超实用技巧分享\n  ✅ 正文: 101 字符\n  ✅ 标签: #测试技巧 #实用干货 #生活小妙招 #经验分享 #学习笔记\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A clean, minimalist illustration of a girl holding a notebook with testing tips,...\n\n📝 标题: 🔍测试达人必备！超实用技巧分享\n📄 内容: 姐妹们！今天来聊聊测试那些事儿～\n\n📌掌握这些方法，轻松搞定各种测试难题！\n\n✨实测有效的技巧，让你事半功倍！\n\n💡偷偷告诉你，这些方法真的超好用！\n\n大家平时都用什么测试方法呀？快来评论区分享吧！...\n🏷️ 标签: 测试技巧 #实用干货 #生活小妙招 #经验分享 #学习笔记\n🎨 图提示: A clean, minimalist illustration of a girl holding a notebook with testing tips, warm pastel colors,...\n\n✅ dry-run 完成，未实际发布\n"
+}

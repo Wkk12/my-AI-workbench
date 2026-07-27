@@ -1,0 +1,37 @@
+{
+  "jobId": "douyin_1783560534458",
+  "batchId": "batch_1783560534453",
+  "platform": "douyin",
+  "title": "房租太贵？我替主人睡回来😼",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 抖音 | 标题: 房租太贵？我替主人睡回来😼",
+      "timestamp": 1783560534459
+    },
+    {
+      "step": "使用已有图片",
+      "status": "done",
+      "detail": "共 2 张图片: /Users/wkk/Desktop/my-AI-workbench/public/data/images/ai_gen_1783560352525_0.png, /Users/wkk/Desktop/my-AI-workbench/public/data/images/ai_gen_1783560356775_1.png",
+      "timestamp": 1783560534459
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-douyin.js",
+      "timestamp": 1783560534460
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 741 字符",
+      "timestamp": 1783560566930,
+      "durationMs": 32470
+    }
+  ],
+  "startTime": 1783560534458,
+  "endTime": 1783560566930,
+  "result": "🎵 抖音图文发布\n\n🎵 开始发布到抖音\n  标题: 房租太贵？我替主人睡回来😼\n  正文: 170 字符\n  标签: 布偶猫日常, 高冷猫主子, 猫奴必看, 猫咪睡姿, 养猫趣事\n  图片: 2 张\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ wait stable\n🔐 检查登录状态...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n📤 上传图片（CDP 批量上传 2 张）...\n  CDP port: 62414\n  ▶ node cdp-multi-upload.cjs ... 2 files\ngrep: invalid option -- P\nusage: grep [-abcdDEFGHhIiJLlMmnOopqRSsUVvwXxZz] [-A num] [-B num] [-C[num]]\n\t[-e pattern] [-f file] [--binary-files=value] [--color=when]\n\t[--context[=num]] [--directories=action] [--label] [--line-buffered]\n\t[--null] [pattern] [file ...]\nCannot connect to Chrome CDP at port 62414: fetch failed\n  CDP stderr: Cannot connect to Chrome CDP at port 62414: fetch failed | \n\n❌ CDP 多文件上传失败\n"
+}

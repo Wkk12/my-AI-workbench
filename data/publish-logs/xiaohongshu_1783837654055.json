@@ -1,0 +1,30 @@
+{
+  "jobId": "xiaohongshu_1783837654055",
+  "platform": "xiaohongshu",
+  "title": "姐妹们！发现一个宝藏海报设计服务！\n\n只要15元一张，还免费修改1次！💰\n\n虽然不提供源文件，但这",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 姐妹们！发现一个宝藏海报设计服务！\n\n只要15元一张，还免费修改1次！💰\n\n虽然不提供源文件，但这",
+      "timestamp": 1783837654057
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 姐妹们！发现一个宝藏海报设计服务！\n\n只要15元一张，还免费修改1次！💰\n\n虽然不提供源文件，但这",
+      "timestamp": 1783837654059
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 1961 字符",
+      "timestamp": 1783837981561,
+      "durationMs": 327502
+    }
+  ],
+  "startTime": 1783837654055,
+  "endTime": 1783837981562,
+  "result": "🦐 小红书全自动发布 v2\n\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 文案...\n  主题: 姐妹们！发现一个宝藏海报设计服务！\n\n只要15元一张，还免费修改1次！💰\n\n虽然不提供源文件，但这\n\n  ✅ 标题: 15元海报设计！宝藏服务被我挖到啦🎨\n  ✅ 正文: 114 字符\n  ✅ 标签: #海报设计 #设计服务 #省钱攻略 #创业必备 #活动策划\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A clean, minimalist poster design service advertisement, warm pastel colors, sof...\n\n🎨 AI 生成封面图...\n🎨 AI 生成封面图...\n  提示词: A clean, minimalist poster design service advertisement, war...\n  尺寸: 1024x1536\n  张数: 1\n  ✅ 第 1 张 1617KB\n  🎉 全部生成完成 54.4s\n\n🦐 开始发布到小红书\n  标题: 15元海报设计！宝藏服务被我挖到啦🎨\n  正文: 124 字符\n  标签: 海报设计 #设计服务 #省钱攻略 #创业必备 #活动策划\n  图片: 1 张\n  ▶ session close xhs_mrhevqze\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ eval \"location.reload()\"\n  ▶ wait stable\n  ▶ eval \"window.location.href\"\n🔐 检查登录...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n🖼️  检查上传图文tab...\n  ▶ eval \"var t=[...document.querySelectorAll('.creator-...\n  tab状态: \n  ▶ wait stable\n📤 上传图片...\n  📤 CDP 批量上传 1 张图片...\n  CDP port: 52321\n  ▶ node cdp-multi-upload.cjs ... 1 files\n  ✅ CDP 上传成功: OK\n  ▶ wait stable --timeout 60000\n⏳ 等待表单加载...\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ✅ 表单已加载 (inputs=7 ces=1 textboxes=1)\n✏️  填写标题...\n  ▶ eval \"var i=document.querySelector('input[placeholde...\n  ✅ 标题已填写 ()\n📝 填写正文...\n  ▶ eval \"var c=decodeURIComponent('%E5%A7%90%E5%A6%B9%E...\n🏷️  添加标签...\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"海报设计 #设计服务 #省钱攻略 #创业必备 #活动策划\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ✅ 已添加 1/1 个标签\n🚀 发布...\n  ▶ eval \"window.scrollTo(0,document.body.scrollHeight)\"\n  ▶ state --format text\n  ▶ click 118\n  ▶ eval \"window.location.href\"\n\n🎉 发布成功！\n  ▶ session close xhs_mrhevqze\nError 210313: SyntaxError: Illegal return statement\n  CDP: 22 page targets to scan\n  CDP: 1 file(s) → #1201 (creator.xiaohongshu.com)\n  CDP events: WARN: 0 files on input, but change event dispatched\nError 210313: SyntaxError: Illegal return statement\n"
+}

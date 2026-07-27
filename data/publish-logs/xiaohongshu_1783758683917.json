@@ -1,0 +1,29 @@
+{
+  "jobId": "xiaohongshu_1783758683917",
+  "platform": "xiaohongshu",
+  "title": "互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？",
+      "timestamp": 1783758683919
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？",
+      "timestamp": 1783758683921
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: Error 230301: No active session 'xhs_mrg3v581'. | Error 230301: No active session 'xhs_mrg3v581'. | ❌ 找不到发布按钮",
+      "timestamp": 1783758993791
+    }
+  ],
+  "startTime": 1783758683917,
+  "endTime": 1783758993791,
+  "result": " eval \"JSON.stringify({inputs:document.querySelectorA...\n  ✅ 表单已加载 (inputs=7 ces=1 textboxes=1)\n✏️  填写标题...\n  ▶ eval \"var i=document.querySelector('input[placeholde...\n  ✅ 标题已填写 ()\n📝 填写正文...\n  ▶ eval \"var c=decodeURIComponent('%E4%B8%80%E5%88%B0%E...\n🏷️  添加标签...\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"养猫日常\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"猫咪避暑\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"宠物降温\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"夏日养猫\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ▶ eval \"var b=document.querySelector('#topicBtn')||[.....\n  ▶ keys \"猫咪迷惑行为\"\n  ▶ eval \"(function(){var s=['#creator-editor-topic-cont...\n  ▶ keys \"Enter\"\n  ▶ keys \"Escape\"\n  ✅ 已添加 5/5 个标签\n🚀 发布...\n  ▶ eval \"window.scrollTo(0,document.body.scrollHeight)\"\n  ▶ state --format text\n  CDP: 34 page targets to scan\n  CDP: 1 file(s) → #832 (creator.xiaohongshu.com)\n  CDP events: OK: 1 files (xhs_cover_1783758695793.png)\nError 210313: SyntaxError: Illegal return statement\nError 230301: No active session 'xhs_mrg3v581'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3v581'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3v581'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3v581'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3v581'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3v581'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3v581'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3v581'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3v581'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3v581'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3v581'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3v581'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\n\n❌ 找不到发布按钮\n"
+}

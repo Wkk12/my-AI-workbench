@@ -1,0 +1,29 @@
+{
+  "jobId": "xiaohongshu_1783852625698",
+  "platform": "xiaohongshu",
+  "title": "夏天猫咪喝水量突然变少？3招让主子爱上喝水💧",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 夏天猫咪喝水量突然变少？3招让主子爱上喝水💧",
+      "timestamp": 1783852625698
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 夏天猫咪喝水量突然变少？3招让主子爱上喝水💧",
+      "timestamp": 1783852625700
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: 💥 发布失败: LLM 403: {\"error\":{\"message\":\"用户额度不足, 剩余额度: ¥0.000000 (request id: 2026071210370657220323143zhDk8G)\",\"type\":\"new_api_error\",\"param\":\"\",\"code\":\"insufficient_user_quota\"}}",
+      "timestamp": 1783852626919
+    }
+  ],
+  "startTime": 1783852625698,
+  "endTime": 1783852626919,
+  "result": "🦐 小红书全自动发布 v2\n\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 文案...\n  主题: 夏天猫咪喝水量突然变少？3招让主子爱上喝水💧\n\n  ▶ session close xhs_mrhnsn6f\n\n💥 发布失败: LLM 403: {\"error\":{\"message\":\"用户额度不足, 剩余额度: ¥0.000000 (request id: 2026071210370657220323143zhDk8G)\",\"type\":\"new_api_error\",\"param\":\"\",\"code\":\"insufficient_user_quota\"}}\n"
+}

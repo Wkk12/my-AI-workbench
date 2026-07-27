@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       id,
       name: name.trim(),
       description: description.trim(),
-      imagePath: imagePath ? `/data/ips/images/${imageName}` : "",
+      imagePath: imagePath ? `/api/ips/image/${imageName}` : "",
       stylePrompt: stylePrompt.trim(),
       createdAt: now,
       updatedAt: now,

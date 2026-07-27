@@ -138,7 +138,7 @@ def get_local_commits(repo_path, since, until, branch):
         since,
         "--until",
         until,
-        "--pretty=format:%H%x1f%h%x1f%an%x1f%ae%x1f%ad%x1f%s%x1e",
+        "--pretty=format:%H%x1f%h%x1f%an%x1f%ae%x1f%ad%x1f%s%x1f%b%x1e",
         "--date=iso",
     ]
     try:
@@ -156,7 +156,7 @@ def get_local_commits(repo_path, since, until, branch):
     for item in text.strip("\x1e\n").split("\x1e"):
         if not item.strip():
             continue
-        parts = item.strip().split("\x1f")
+        parts = item.split("\x1f")
         if len(parts) < 6:
             continue
         commits.append(
@@ -167,6 +167,7 @@ def get_local_commits(repo_path, since, until, branch):
                 "author_email": parts[3],
                 "created_at": parts[4],
                 "title": parts[5],
+                "body": parts[6] if len(parts) > 6 else "",
             }
         )
     return commits
@@ -317,7 +318,11 @@ def format_markdown(report_date, current_user, grouped_commits):
         lines.append(f"## {project_name}")
         for idx, commit in enumerate(commits, start=1):
             title = commit.get("title") or "(无提交信息)"
+            body = commit.get("body", "")
             lines.append(f"{idx}. {title}")
+            if body:
+                for body_line in body.strip().split("\n"):
+                    lines.append(f"    {body_line}")
         lines.append("")
     return "\n".join(lines)
 
@@ -331,7 +336,11 @@ def format_text(report_date, current_user, grouped_commits):
         lines.append(f"{project_name}")
         for idx, commit in enumerate(commits, start=1):
             title = commit.get("title") or "(无提交信息)"
+            body = commit.get("body", "")
             lines.append(f"{idx}. {title}")
+            if body:
+                for body_line in body.strip().split("\n"):
+                    lines.append(f"    {body_line}")
         lines.append("")
     return "\n".join(lines)
 

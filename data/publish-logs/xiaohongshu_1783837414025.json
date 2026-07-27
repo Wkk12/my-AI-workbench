@@ -1,0 +1,29 @@
+{
+  "jobId": "xiaohongshu_1783837414025",
+  "platform": "xiaohongshu",
+  "title": "姐妹们！发现一个宝藏海报设计服务！\n\n只要15元一张，还免费修改1次！💰\n\n虽然不提供源文件，但这",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 姐妹们！发现一个宝藏海报设计服务！\n\n只要15元一张，还免费修改1次！💰\n\n虽然不提供源文件，但这",
+      "timestamp": 1783837414026
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 姐妹们！发现一个宝藏海报设计服务！\n\n只要15元一张，还免费修改1次！💰\n\n虽然不提供源文件，但这",
+      "timestamp": 1783837414028
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: Error 210313: SyntaxError: Illegal return statement | ❌ 表单未出现（已等待60秒）。State: url=https://creator.xiaohongshu.com/publish/publish?from=tab_switch&target=image title=小红书创作服务平台  [1]<div id=creator-feedback-wrapper /> \t[2]<span /> \t[3]<div class=problem /> \t\t遇到问题 [4]<div class=title /> \t创作服务平台 [5]<div c",
+      "timestamp": 1783837882364
+    }
+  ],
+  "startTime": 1783837414025,
+  "endTime": 1783837882367,
+  "result": "🦐 小红书全自动发布 v2\n\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 文案...\n  主题: 姐妹们！发现一个宝藏海报设计服务！\n\n只要15元一张，还免费修改1次！💰\n\n虽然不提供源文件，但这\n\n  ✅ 标题: 15元海报设计！宝藏服务被我挖到啦🎨\n  ✅ 正文: 126 字符\n  ✅ 标签: #海报设计,#宝藏店铺,#性价比之王,#设计分享,#学生党福利\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A clean, minimalist poster design service advertisement, warm pastel colors, sof...\n\n🎨 AI 生成封面图...\n🎨 AI 生成封面图...\n  提示词: A clean, minimalist poster design service advertisement, war...\n  尺寸: 1024x1536\n  张数: 1\n  ✅ 第 1 张 1586KB\n  🎉 全部生成完成 58.0s\n\n🦐 开始发布到小红书\n  标题: 15元海报设计！宝藏服务被我挖到啦🎨\n  正文: 136 字符\n  标签: 海报设计, 宝藏店铺, 性价比之王, 设计分享, 学生党福利\n  图片: 1 张\n  ▶ session close xhs_mrheqlrs\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ eval \"location.reload()\"\n  ▶ wait stable\n  ▶ eval \"window.location.href\"\n🔐 检查登录...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n🖼️  检查上传图文tab...\n  ▶ eval \"var t=[...document.querySelectorAll('.creator-...\n  tab状态: \n  ▶ wait stable\n📤 上传图片...\n  📤 CDP 批量上传 1 张图片...\n  CDP port: 52321\n  ▶ node cdp-multi-upload.cjs ... 1 files\n  ✅ CDP 上传成功: OK\n  ▶ wait stable --timeout 60000\n⏳ 等待表单加载...\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (5s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (10s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (15s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (20s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (25s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (30s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (35s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (40s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (45s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (50s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (55s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ▶ state --format text\n  ▶ session close xhs_mrheqlrs\nError 210313: SyntaxError: Illegal return statement\n  CDP: 9 page targets to scan\n  CDP: 1 file(s) → #832 (creator.xiaohongshu.com)\n  CDP events: OK: 1 files (xhs_cover_1783837392614.png)\n\n❌ 表单未出现（已等待60秒）。State: url=https://creator.xiaohongshu.com/publish/publish?from=tab_switch&target=image title=小红书创作服务平台  [1]<div id=creator-feedback-wrapper /> \t[2]<span /> \t[3]<div class=problem /> \t\t遇到问题 [4]<div class=title /> \t创作服务平台 [5]<div class=user-info /> \t[6]<img class=user_avatar /> \t[7]<span class=name-box /> \t\tO椰 \t[8]<img class=arrow /> [9]<div class=btn-wrapper /> \t[10]<div class=btn-inner /> \t\t[11]<svg /> \t\t[12]<span class=btn-text /> \t\t\t发布笔记 \t\t[13]<svg class=dropdownBtn /> [14]<div class=d-new-menu d-me\n"
+}

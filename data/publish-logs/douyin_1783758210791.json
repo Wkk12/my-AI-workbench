@@ -1,0 +1,30 @@
+{
+  "jobId": "douyin_1783758210791",
+  "platform": "douyin",
+  "title": "测试",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 抖音 | 主题: 测试",
+      "timestamp": 1783758210792
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-douyin.js --topic 测试",
+      "timestamp": 1783758210795
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 442 字符",
+      "timestamp": 1783758219842,
+      "durationMs": 9045
+    }
+  ],
+  "startTime": 1783758210791,
+  "endTime": 1783758219842,
+  "result": "🧪 DRY-RUN 模式 — 只生成内容，不实际发布\n\n🧠 主题 → 抖音文案...\n  主题: 测试\n\n  ✅ 标题: 测试不是随便点点！这些隐藏功能90%的人不知道\n  ✅ 正文: 35 字符\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: Dynamic vertical cover for TikTok: \"Testing Secrets Revealed\" text in bold, vibr\n\n📝 标题: 测试不是随便点点！这些隐藏功能90%的人不知道\n📄 内容: 原来测试有这么多门道🧐\n掌握技巧效率翻倍💪\n评论区说说你踩过哪些坑...\n🏷️ 标签: 软件测试 效率提升 职场干货\n🎨 图提示: Dynamic vertical cover for TikTok: \"Testing Secrets Revealed\" text in bold, vibrant colors. Icons of...\n\n✅ dry-run 完成，未实际发布\n"
+}

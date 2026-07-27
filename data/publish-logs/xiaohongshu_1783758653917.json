@@ -1,0 +1,29 @@
+{
+  "jobId": "xiaohongshu_1783758653917",
+  "platform": "xiaohongshu",
+  "title": "互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？",
+      "timestamp": 1783758653917
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？",
+      "timestamp": 1783758653919
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: Error 230301: No active session 'xhs_mrg3ui2t'. | Error 230301: No active session 'xhs_mrg3ui2t'. | ❌ 表单未出现（已等待60秒）。State: ",
+      "timestamp": 1783758992981
+    }
+  ],
+  "startTime": 1783758653917,
+  "endTime": 1783758992981,
+  "result": "🦐 小红书全自动发布 v2\n\n📡 模式: 全自动（主题→文案→生图→发布）\n\n🧠 主题 → 文案...\n  主题: 互动投票｜你家猫夏天最爱躺哪里？地板/瓷砖/凉席？\n\n  ✅ 标题: 🐱猫咪夏日躺平大赏！你家主子pick哪？\n  ✅ 正文: 129 字符\n  ✅ 标签: #养猫日常,#猫咪避暑,#夏日养猫,#宠物降温,#铲屎官交流\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A cute cat lying on cool bathroom tiles in summer, liquid cat mode, fluffy and r...\n\n🎨 AI 生成封面图...\n🎨 AI 生成封面图...\n  提示词: A cute cat lying on cool bathroom tiles in summer, liquid ca...\n  尺寸: 1024x1536\n  张数: 1\n  ✅ 第 1 张 1812KB\n  🎉 全部生成完成 54.5s\n\n🦐 开始发布到小红书\n  标题: 🐱猫咪夏日躺平大赏！你家主子pick哪\n  正文: 139 字符\n  标签: 养猫日常, 猫咪避暑, 夏日养猫, 宠物降温, 铲屎官交流\n  图片: 1 张\n📂 打开发布页...\n  ▶ browser open chrome_local_104622926254309377 \"https:...\n  ▶ wait stable\n🔐 检查登录...\n  ▶ eval \"window.location.href\"\n  ✅ 已登录\n🖼️  切换上传图文...\n  ▶ eval \"var t=[...document.querySelectorAll('.creator-...\n  ▶ wait stable\n📤 上传图片...\n  📤 CDP 批量上传 1 张图片...\n  CDP port: 52321\n  ▶ node cdp-multi-upload.cjs ... 1 files\n  ✅ CDP 上传成功: OK\n  ▶ wait stable --timeout 60000\n⏳ 等待表单加载...\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (5s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (10s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (15s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (20s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (25s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (30s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (35s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (40s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (45s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (50s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (55s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ▶ state --format text\n  CDP: 34 page targets to scan\n  CDP: 1 file(s) → #831 (creator.xiaohongshu.com)\n  CDP events: OK: 1 files (xhs_cover_1783758723397.png)\nError 230301: No active session 'xhs_mrg3ui2t'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3ui2t'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3ui2t'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3ui2t'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrg3ui2t'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrg3ui2t'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\n\n❌ 表单未出现（已等待60秒）。State: \n"
+}

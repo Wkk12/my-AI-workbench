@@ -9,7 +9,11 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import { v4 as uuidv4 } from "uuid";
+
+let _idCounter = 0;
+function genId(): string {
+  return `n_${Date.now()}_${++_idCounter}`;
+}
 
 // ── 类型 ──
 
@@ -147,9 +151,7 @@ export default function NotificationProvider({ children }: { children: ReactNode
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   // ── 核心：发送桌面通知 ──
-  // 优先通过 ServiceWorkerRegistration.showNotification() 发送
-  // （不依赖 navigator.serviceWorker.controller，SW 注册完即可用）
-  // 降级方案：直接使用 window.Notification
+  // 策略：1. SW postMessage（最可靠） 2. Registration.showNotification 3. 直接 Notification
   const sendNativeNotification = useCallback((title: string, body: string): boolean => {
     if (typeof window === "undefined") {
       diag("SSR 环境，跳过", false);
@@ -161,27 +163,36 @@ export default function NotificationProvider({ children }: { children: ReactNode
     }
 
     const p = Notification.permission;
-    diag(`权限="${p}"`, p === "granted");
-
-    if (p === "denied") {
-      diag("权限被拒。系统设置→通知→允许浏览器通知", false);
-      return false;
-    }
-    if (p === "default") {
-      diag("权限未决定，需用户手势授权（点击铃铛→测试通知）", false);
+    if (p !== "granted") {
+      diag(`权限="${p}"，需授权`, false);
       return false;
     }
 
     const fullTitle = `🐱 ${title}`;
     const trimmedBody = body.slice(0, 200);
 
-    // 通过 ServiceWorkerRegistration.showNotification() 发送
-    // 不需要 controller 已激活，SW registration 对象可直接调用
+    // 方式1: Service Worker postMessage（最可靠，免用户手势）
+    if (navigator.serviceWorker?.controller) {
+      try {
+        navigator.serviceWorker.controller.postMessage({
+          type: "SHOW_NOTIFICATION",
+          title: fullTitle,
+          body: trimmedBody,
+          requireInteraction: false,
+        });
+        diag(`SW消息: ${title.slice(0, 20)}`, true);
+        return true;
+      } catch (e: unknown) {
+        diag(`SW消息异常: ${String(e)}`, false);
+      }
+    }
+
+    // 方式2: Registration.showNotification
     if (swRef.current) {
       try {
         swRef.current.showNotification(fullTitle, {
           body: trimmedBody,
-          requireInteraction: true,
+          requireInteraction: false,
           icon: "/file.svg",
           badge: "/file.svg",
           tag: "meow-workbench",
@@ -193,13 +204,11 @@ export default function NotificationProvider({ children }: { children: ReactNode
       }
     }
 
-    // 降级：直接使用 Notification API（Safari 无用户手势时可能被忽略）
+    // 方式3: 直接 Notification（Safari 需要 HTTPS + 用户手势，可能被忽略）
     try {
       new window.Notification(fullTitle, {
         body: trimmedBody,
-        requireInteraction: true,
         icon: "/file.svg",
-        badge: "/file.svg",
         tag: "meow-workbench",
       });
       diag(`直接发送: ${title.slice(0, 20)}`, true);
@@ -213,14 +222,23 @@ export default function NotificationProvider({ children }: { children: ReactNode
 
   const addNotification = useCallback(
     (n: Omit<AppNotification, "id" | "read" | "createdAt">) => {
-      // 先加入应用内通知列表（铃铛）
-      const item: AppNotification = {
-        ...n,
-        id: uuidv4(),
-        read: false,
-        createdAt: new Date().toISOString(),
-      };
-      setNotifications((prev) => [item, ...prev]);
+      // 去重：同一 taskId 的最近一条与当前内容相同 → 跳过
+      setNotifications((prev) => {
+        if (n.taskId) {
+          const lastSame = prev.find((existing) => existing.taskId === n.taskId);
+          if (lastSame && lastSame.body === n.body && lastSame.type === n.type) {
+            // 内容完全一样，不重复添加
+            return prev;
+          }
+        }
+        const item: AppNotification = {
+          ...n,
+          id: genId(),
+          read: false,
+          createdAt: new Date().toISOString(),
+        };
+        return [item, ...prev];
+      });
 
       // 再尝试桌面通知
       const sent = sendNativeNotification(n.title, n.body);
@@ -273,43 +291,25 @@ export default function NotificationProvider({ children }: { children: ReactNode
     }
   }, [sendNativeNotification, addNotification, diag]);
 
-  const testDesktopNotification = useCallback(() => {
-    diag("=== 手动测试 ===", true);
-    const p = window.Notification?.permission || "unsupported";
-
-    if (p === "granted") {
-      const ok = sendNativeNotification("测试通知", `喵站工作台通知正常！${now()}`);
-      addNotification({
-        title: ok ? "✅ 通知已发送" : "❌ 发送失败",
-        body: ok ? "检查屏幕右上角（Mac）或右下角（Win）" : "查看诊断日志",
-        type: ok ? "success" : "error",
-      });
-    } else if (p === "denied") {
-      addNotification({
-        title: "❌ 权限被阻止",
-        body: "Mac: 系统设置→通知→浏览器→允许 / Win: 地址栏锁图标→通知→允许",
-        type: "error",
-      });
-    } else if (p === "default") {
-      window.Notification.requestPermission().then((newP) => {
-        setPermission(newP);
-        if (newP === "granted") {
-          sendNativeNotification("喵站工作台", "通知已开启！");
-          addNotification({ title: "✅ 通知已开启", body: "桌面通知现在可用了", type: "success" });
-        } else {
-          addNotification({ title: "⚠️ 未授权", body: "需要允许通知权限才能弹窗", type: "error" });
-        }
-      });
-    } else {
-      addNotification({ title: "❌ 不支持", body: "请使用 Chrome 或 Safari 浏览器", type: "error" });
+  const testDesktopNotification = useCallback(async () => {
+    try {
+      const resp = await fetch("/api/notify-test", { method: "POST", credentials: "include" });
+      const data = await resp.json();
+      if (data.success) {
+        addNotification({ title: "✅ 通知已发送", body: "检查屏幕右上角（Mac）通知中心", type: "success" });
+      } else {
+        addNotification({ title: "❌ 通知失败", body: data.error || "未知错误", type: "error" });
+      }
+    } catch {
+      addNotification({ title: "❌ 请求失败", body: "无法连接到服务端", type: "error" });
     }
-  }, [sendNativeNotification, addNotification, diag]);
+  }, [addNotification]);
 
   // 自动轮询
   useEffect(() => {
     const poll = async () => {
       try {
-        const res = await fetch("/api/scheduler/run");
+        const res = await fetch("/api/scheduler/run", { credentials: "include" });
         const data = await res.json();
         if (data.executed > 0 && Array.isArray(data.results)) {
           for (const r of data.results) {

@@ -1,0 +1,30 @@
+{
+  "jobId": "douyin_1783758210814",
+  "platform": "douyin",
+  "title": "测试",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 抖音 | 主题: 测试",
+      "timestamp": 1783758210815
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-douyin.js --topic 测试",
+      "timestamp": 1783758210816
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 412 字符",
+      "timestamp": 1783758220366,
+      "durationMs": 9549
+    }
+  ],
+  "startTime": 1783758210814,
+  "endTime": 1783758220367,
+  "result": "🧪 DRY-RUN 模式 — 只生成内容，不实际发布\n\n🧠 主题 → 抖音文案...\n  主题: 测试\n\n  ✅ 标题: 测试，你真的会吗？\n  ✅ 正文: 33 字符\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: Vibrant vertical cover for TikTok, showcasing \"Stop Blind Testing! Master 3 Skil\n\n📝 标题: 测试，你真的会吗？\n📄 内容: 别再盲目测试啦！\n掌握这3个技巧，效率翻倍💪\n轻松搞定各种难题✨...\n🏷️ 标签: 测试技巧 效率提升 职场干货\n🎨 图提示: Vibrant vertical cover for TikTok, showcasing \"Stop Blind Testing! Master 3 Skills, Double Efficienc...\n\n✅ dry-run 完成，未实际发布\n"
+}

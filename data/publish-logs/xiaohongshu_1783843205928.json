@@ -1,0 +1,29 @@
+{
+  "jobId": "xiaohongshu_1783843205928",
+  "platform": "xiaohongshu",
+  "title": "奶油の夏日限定：抱着冰垫打滚的清凉瞬间❄️",
+  "status": "error",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 奶油の夏日限定：抱着冰垫打滚的清凉瞬间❄️",
+      "timestamp": 1783843205929
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 奶油の夏日限定：抱着冰垫打滚的清凉瞬间❄️",
+      "timestamp": 1783843205930
+    },
+    {
+      "step": "发布脚本执行",
+      "status": "error",
+      "detail": "进程异常退出: Error 230301: No active session 'xhs_mrhi6qu9'. | Error 230301: No active session 'xhs_mrhi6qu9'. | ❌ 表单未出现（已等待60秒）。State: ",
+      "timestamp": 1783843493768
+    }
+  ],
+  "startTime": 1783843205928,
+  "endTime": 1783843493769,
+  "result": "(35s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (40s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (45s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (50s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ⏳ 等待中... (55s)\n  ▶ eval \"JSON.stringify({inputs:document.querySelectorA...\n  ▶ state --format text\n  ▶ session close xhs_mrhi6qu9\nError 210313: SyntaxError: Illegal return statement\n  CDP: 7 page targets to scan\n  CDP: 1 file(s) → #832 (creator.xiaohongshu.com)\n  CDP events: OK: 1 files (xhs_cover_1783843218981.png)\nError 230301: No active session 'xhs_mrhi6qu9'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrhi6qu9'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrhi6qu9'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrhi6qu9'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrhi6qu9'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrhi6qu9'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrhi6qu9'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrhi6qu9'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrhi6qu9'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrhi6qu9'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrhi6qu9'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrhi6qu9'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrhi6qu9'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrhi6qu9'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrhi6qu9'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrhi6qu9'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\nError 230301: No active session 'xhs_mrhi6qu9'.\n\nStart a browser first:\n  browser-act browser open <browser_id> <url> --session 'xhs_mrhi6qu9'\n\nCheck available browsers:\n  browser-act browser list\n\nNo browser yet? Create one:\n  browser-act browser create --help\n\n❌ 表单未出现（已等待60秒）。State: \n"
+}

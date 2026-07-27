@@ -1,0 +1,30 @@
+{
+  "jobId": "xiaohongshu_1783754848778",
+  "platform": "xiaohongshu",
+  "title": "【夏日午后】奶油在空调房揣手手发呆的治愈瞬间",
+  "status": "done",
+  "steps": [
+    {
+      "step": "准备发布",
+      "status": "done",
+      "detail": "目标平台: 小红书 | 主题: 【夏日午后】奶油在空调房揣手手发呆的治愈瞬间",
+      "timestamp": 1783754848779
+    },
+    {
+      "step": "执行发布脚本",
+      "status": "done",
+      "detail": "启动 publish-xhs.js --topic 【夏日午后】奶油在空调房揣手手发呆的治愈瞬间",
+      "timestamp": 1783754848781
+    },
+    {
+      "step": "发布完成",
+      "status": "done",
+      "detail": "脚本执行完成，输出 615 字符",
+      "timestamp": 1783754861432,
+      "durationMs": 12649
+    }
+  ],
+  "startTime": 1783754848778,
+  "endTime": 1783754861433,
+  "result": "🧪 DRY-RUN 模式 — 只生成内容，不实际发布\n\n🧠 主题 → 文案...\n  主题: 【夏日午后】奶油在空调房揣手手发呆的治愈瞬间\n\n  ✅ 标题: 🐱空调房里的奶油猫，治愈一整个夏天！\n  ✅ 正文: 132 字符\n  ✅ 标签: #猫咪日常 #治愈系小猫咪 #夏日萌宠 #空调房里的快乐 #宠物摄影\n\n🧠 文案 → 生图提示词...\n  ✅ 提示词: A fluffy cat curled up in a sunlit room, paws tucked neatly, yawning lazily on a...\n\n📝 标题: 🐱空调房里的奶油猫，治愈一整个夏天！\n📄 内容: 夏日午后，奶油在空调房里揣手手发呆～\n\n阳光透过窗帘洒进来，它眯着眼睛一脸享受😌\n\n毛茸茸的小爪子揣得整整齐齐，像个小面包🍞\n\n偶尔打个哈欠伸个懒腰，又继续进入发呆模式💤\n\n看着它悠闲的样子，感觉时间都慢下来了✨\n\n你家主子夏天也喜欢这样揣手手吗？快来晒图！...\n🏷️ 标签: 猫咪日常 #治愈系小猫咪 #夏日萌宠 #空调房里的快乐 #宠物摄影\n🎨 图提示: A fluffy cat curled up in a sunlit room, paws tucked neatly, yawning lazily on a soft bed. Warm afte...\n\n✅ dry-run 完成，未实际发布\n"
+}
