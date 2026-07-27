@@ -23,8 +23,7 @@ import {
   ChevronRight,
   SaveAll,
   AlertTriangle,
-  Github,
-  RefreshCw,
+  GitFork,
   Check,
   X,
 } from "lucide-react";
@@ -603,7 +602,7 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
                 >
                   <TabsList className="w-full">
                     <TabsTrigger value="github" className="flex-1">
-                      <Github className="h-3.5 w-3.5 mr-1" />
+                      <GitFork className="h-3.5 w-3.5 mr-1" />
                       GitHub
                     </TabsTrigger>
                     <TabsTrigger value="local" className="flex-1">
