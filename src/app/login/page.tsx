@@ -50,28 +50,29 @@ export default function LoginPage() {
         width: 320,
         maxWidth: "90vw",
         boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+        textAlign: "center",
       }}>
-        
-        <h1 style={{
-          fontSize: 22, fontWeight: 700, marginBottom: 4,
-          color: "#1a1a1a", textAlign: "center",
-        }}>
+        <div style={{
+          width: 48, height: 48, borderRadius: "50%",
+          background: "#f0f0ff", display: "flex",
+          alignItems: "center", justifyContent: "center",
+          margin: "0 auto 12px", fontSize: 24,
+        }}>#</div>
+        <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4, color: "#1a1a1a" }}>
           喵站工作台
         </h1>
-        <p style={{
-          fontSize: 13, color: "#888", marginBottom: 24,
-          textAlign: "center",
-        }}>
+        <p style={{ fontSize: 12, color: "#999", marginBottom: 20 }}>
           请输入管理员密码
         </p>
         <form action="/api/auth/login" method="POST" onSubmit={handleSubmit}>
           <input
             type="password"
             name="password"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="密码"
             autoFocus
+            disabled={loading}
             style={{
               width: "100%",
               padding: "10px 14px",
@@ -82,38 +83,34 @@ export default function LoginPage() {
               outline: "none",
               boxSizing: "border-box",
             }}
-            onFocus={(e) => e.target.style.borderColor = "#6c5ce7"}
-            onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
           />
-          {error ? (
-            <p style={{
-              color: "#e74c3c", fontSize: 12, marginTop: 8,
-              textAlign: "center",
-            }}>
+          {error && (
+            <p style={{ color: "#e74c3c", fontSize: 12, marginTop: 6 }}>
               {error}
             </p>
-          ) : null}
+          )}
           <button
             type="submit"
             disabled={loading}
             style={{
               width: "100%",
-              marginTop: 14,
+              marginTop: 16,
               padding: "10px 14px",
-              background: loading ? "#b4a5f0" : "#6c5ce7",
+              background: "#6c5ce7",
               color: "white",
               border: "none",
               borderRadius: 10,
               fontSize: 15,
               fontWeight: 600,
               cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.6 : 1,
             }}
           >
             {loading ? "验证中..." : "登录"}
           </button>
         </form>
-        <p style={{ fontSize: 11, color: "#aaa", marginTop: 16, textAlign: "center" }}>
-          JS 未加载时表单会直接提交
+        <p style={{ fontSize: 11, color: "#999", marginTop: 14 }}>
+          推荐使用 Safari 或 Chrome 浏览器
         </p>
       </div>
     </div>
