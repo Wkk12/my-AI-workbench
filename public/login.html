@@ -12,11 +12,10 @@ h1{font-size:24px;font-weight:700;margin-bottom:8px;color:#1a1a1a}
 p{font-size:14px;color:#666;margin-bottom:28px}
 input{width:100%;padding:10px 14px;border:1px solid #d9d9d9;border-radius:10px;font-size:15px;text-align:center;outline:none}
 input:focus{border-color:#6c5ce7}
-.msg{font-size:12px;margin-top:8px}
-.error{color:#e74c3c}
-.success{color:#27ae60}
+.err{color:#e74c3c;font-size:12px;margin-top:8px;min-height:20px}
 button{width:100%;margin-top:14px;padding:10px;background:#6c5ce7;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
 button:hover{background:#5b4bd5}
+button:disabled{background:#b2a3f2;cursor:not-allowed}
 .tip{font-size:11px;color:#aaa;margin-top:20px}
 </style>
 </head>
@@ -24,17 +23,42 @@ button:hover{background:#5b4bd5}
 <div class="card">
 <h1>喵站工作台</h1>
 <p>请输入管理员密码</p>
-<form method="POST" action="/api/auth/login" enctype="application/x-www-form-urlencoded">
-<input type="password" name="password" placeholder="密码" autofocus required>
-<div class="msg" id="msg"></div>
-<button type="submit">登录</button>
+<form id="loginForm" onsubmit="handleSubmit(event)">
+<input type="password" id="password" placeholder="密码" autofocus required>
+<div class="err" id="error"></div>
+<button type="submit" id="submitBtn">登录</button>
 </form>
-<p class="tip">纯 HTML 登录，无需等待 JS 加载</p>
+<p class="tip">无 React 依赖，秒开即用</p>
 </div>
 <script>
-// Check for error from redirect
-if(location.search.includes('error')) document.getElementById('msg').className='msg error';
-document.getElementById('msg').textContent = location.search.includes('error') ? '密码错误，请重试' : '';
+async function handleSubmit(e){
+  e.preventDefault();
+  var btn=document.getElementById('submitBtn');
+  var err=document.getElementById('error');
+  var pw=document.getElementById('password').value;
+  btn.disabled=true;
+  btn.textContent='登录中...';
+  err.textContent='';
+  try{
+    var r=await fetch('/api/auth/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:'password='+encodeURIComponent(pw)
+    });
+    var d=await r.json();
+    if(d.success){
+      window.location.href=d.redirect||'/';
+    }else{
+      err.textContent=d.error||'密码错误';
+      btn.disabled=false;
+      btn.textContent='登录';
+    }
+  }catch(ex){
+    err.textContent='网络错误，请重试';
+    btn.disabled=false;
+    btn.textContent='登录';
+  }
+}
 </script>
 </body>
 </html>
