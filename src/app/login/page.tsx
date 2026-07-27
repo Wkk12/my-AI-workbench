@@ -57,7 +57,7 @@ export default function LoginPage() {
           background: "#f0f0ff", display: "flex",
           alignItems: "center", justifyContent: "center",
           margin: "0 auto 12px", fontSize: 24,
-        }}>#</div>
+        }}>🛡️</div>
         <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4, color: "#1a1a1a" }}>
           喵站工作台
         </h1>
@@ -68,7 +68,7 @@ export default function LoginPage() {
           <input
             type="password"
             name="password"
-            placeholder="Password"
+            placeholder="密码"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoFocus
