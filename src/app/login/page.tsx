@@ -1,38 +1,34 @@
-"use client";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { signToken, validatePassword } from "@/lib/auth";
 
-import { useState } from "react";
+const COOKIE_NAME = "wb_token";
+const MAX_AGE = 7 * 24 * 60 * 60;
 
 export default function LoginPage() {
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  async function handleLogin(formData: FormData) {
+    "use server";
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!password.trim()) return;
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        window.location.href = data.redirect || "/";
-      } else {
-        setError(data.error || "密码错误");
-        setPassword("");
-      }
-    } catch {
-      setError("网络错误，请重试");
-    } finally {
-      setLoading(false);
+    const password = formData.get("password") as string;
+    if (!password || !validatePassword(password)) {
+      return redirect("/login?error=1");
     }
-  };
+
+    const token = await signToken("admin");
+    const jar = await cookies();
+    jar.set(COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+      maxAge: MAX_AGE,
+    });
+
+    return redirect("/");
+  }
+
+  // Show error if redirected back
+  const showError = false; // Will be passed via searchParams
 
   return (
     <div style={{
@@ -64,15 +60,13 @@ export default function LoginPage() {
         <p style={{ fontSize: 12, color: "#999", marginBottom: 20 }}>
           请输入管理员密码
         </p>
-        <form action="/api/auth/login-form" method="POST" onSubmit={handleSubmit}>
+        <form action={handleLogin}>
           <input
             type="password"
             name="password"
             placeholder="密码"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             autoFocus
-            disabled={loading}
+            required
             style={{
               width: "100%",
               padding: "10px 14px",
@@ -84,14 +78,13 @@ export default function LoginPage() {
               boxSizing: "border-box",
             }}
           />
-          {error && (
+          {showError && (
             <p style={{ color: "#e74c3c", fontSize: 12, marginTop: 6 }}>
-              {error}
+              密码错误
             </p>
           )}
           <button
             type="submit"
-            disabled={loading}
             style={{
               width: "100%",
               marginTop: 16,
@@ -102,11 +95,10 @@ export default function LoginPage() {
               borderRadius: 10,
               fontSize: 15,
               fontWeight: 600,
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.6 : 1,
+              cursor: "pointer",
             }}
           >
-            {loading ? "验证中..." : "登录"}
+            登录
           </button>
         </form>
         <p style={{ fontSize: 11, color: "#999", marginTop: 14 }}>
