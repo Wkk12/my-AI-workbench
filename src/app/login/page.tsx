@@ -51,12 +51,7 @@ export default function LoginPage() {
         maxWidth: "90vw",
         boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
       }}>
-        <div style={{
-          width: 48, height: 48, borderRadius: "50%",
-          background: "#f0f0ff", display: "flex",
-          alignItems: "center", justifyContent: "center",
-          margin: "0 auto 16px", fontSize: 24,
-        }}>🛡️</div>
+        <div style={width: 48, height: 48, borderRadius: "50%", background: "#f0f0ff", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 24}}>🛡</div>
         <h1 style={{
           fontSize: 22, fontWeight: 700, marginBottom: 4,
           color: "#1a1a1a", textAlign: "center",
