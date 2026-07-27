@@ -1,34 +1,38 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { signToken, validatePassword } from "@/lib/auth";
+"use client";
 
-const COOKIE_NAME = "wb_token";
-const MAX_AGE = 7 * 24 * 60 * 60;
+import { useState } from "react";
 
 export default function LoginPage() {
-  async function handleLogin(formData: FormData) {
-    "use server";
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const password = formData.get("password") as string;
-    if (!password || !validatePassword(password)) {
-      return redirect("/login?error=1");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password.trim()) return;
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = data.redirect || "/";
+      } else {
+        setError(data.error || "密码错误");
+        setPassword("");
+      }
+    } catch {
+      setError("网络错误，请重试");
+    } finally {
+      setLoading(false);
     }
-
-    const token = await signToken("admin");
-    const jar = await cookies();
-    jar.set(COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      path: "/",
-      maxAge: MAX_AGE,
-    });
-
-    return redirect("/");
-  }
-
-  // Show error if redirected back
-  const showError = false; // Will be passed via searchParams
+  };
 
   return (
     <div style={{
@@ -46,27 +50,33 @@ export default function LoginPage() {
         width: 320,
         maxWidth: "90vw",
         boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
-        textAlign: "center",
       }}>
         <div style={{
           width: 48, height: 48, borderRadius: "50%",
           background: "#f0f0ff", display: "flex",
           alignItems: "center", justifyContent: "center",
-          margin: "0 auto 12px", fontSize: 24,
+          margin: "0 auto 16px", fontSize: 24,
         }}>🛡️</div>
-        <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4, color: "#1a1a1a" }}>
+        <h1 style={{
+          fontSize: 22, fontWeight: 700, marginBottom: 4,
+          color: "#1a1a1a", textAlign: "center",
+        }}>
           喵站工作台
         </h1>
-        <p style={{ fontSize: 12, color: "#999", marginBottom: 20 }}>
+        <p style={{
+          fontSize: 13, color: "#888", marginBottom: 24,
+          textAlign: "center",
+        }}>
           请输入管理员密码
         </p>
-        <form action={handleLogin}>
+        <form action="/api/auth/login" method="POST" onSubmit={handleSubmit}>
           <input
             type="password"
             name="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="密码"
             autoFocus
-            required
             style={{
               width: "100%",
               padding: "10px 14px",
@@ -77,32 +87,38 @@ export default function LoginPage() {
               outline: "none",
               boxSizing: "border-box",
             }}
+            onFocus={(e) => e.target.style.borderColor = "#6c5ce7"}
+            onBlur={(e) => e.target.style.borderColor = "#e0e0e0"}
           />
-          {showError && (
-            <p style={{ color: "#e74c3c", fontSize: 12, marginTop: 6 }}>
-              密码错误
+          {error ? (
+            <p style={{
+              color: "#e74c3c", fontSize: 12, marginTop: 8,
+              textAlign: "center",
+            }}>
+              {error}
             </p>
-          )}
+          ) : null}
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: "100%",
-              marginTop: 16,
+              marginTop: 14,
               padding: "10px 14px",
-              background: "#6c5ce7",
+              background: loading ? "#b4a5f0" : "#6c5ce7",
               color: "white",
               border: "none",
               borderRadius: 10,
               fontSize: 15,
               fontWeight: 600,
-              cursor: "pointer",
+              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            登录
+            {loading ? "验证中..." : "登录"}
           </button>
         </form>
-        <p style={{ fontSize: 11, color: "#999", marginTop: 14 }}>
-          推荐使用 Safari 或 Chrome 浏览器
+        <p style={{ fontSize: 11, color: "#aaa", marginTop: 16, textAlign: "center" }}>
+          JS 未加载时表单会直接提交
         </p>
       </div>
     </div>
