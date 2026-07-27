@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>喵站工作台 - 登录</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f0f2f5;font-family:-apple-system,sans-serif}
+.card{background:white;border-radius:12px;padding:40px 32px;width:360px;max-width:90vw;box-shadow:0 2px 12px rgba(0,0,0,.08);text-align:center}
+h1{font-size:24px;font-weight:700;margin-bottom:8px;color:#1a1a1a}
+p{font-size:14px;color:#666;margin-bottom:28px}
+input{width:100%;padding:10px 14px;border:1px solid #d9d9d9;border-radius:10px;font-size:15px;text-align:center;outline:none}
+input:focus{border-color:#6c5ce7}
+.msg{font-size:12px;margin-top:8px}
+.error{color:#e74c3c}
+.success{color:#27ae60}
+button{width:100%;margin-top:14px;padding:10px;background:#6c5ce7;color:white;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
+button:hover{background:#5b4bd5}
+.tip{font-size:11px;color:#aaa;margin-top:20px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>喵站工作台</h1>
+<p>请输入管理员密码</p>
+<form method="POST" action="/api/auth/login" enctype="application/x-www-form-urlencoded">
+<input type="password" name="password" placeholder="密码" autofocus required>
+<div class="msg" id="msg"></div>
+<button type="submit">登录</button>
+</form>
+<p class="tip">纯 HTML 登录，无需等待 JS 加载</p>
+</div>
+<script>
+// Check for error from redirect
+if(location.search.includes('error')) document.getElementById('msg').className='msg error';
+document.getElementById('msg').textContent = location.search.includes('error') ? '密码错误，请重试' : '';
+</script>
+</body>
+</html>
