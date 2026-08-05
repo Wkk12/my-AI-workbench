@@ -107,6 +107,8 @@ export default function DailyReportPage() {
   const [branch, setBranch] = useState("dev_wkk");
   const [author, setAuthor] = useState("");
   const [repoCount, setRepoCount] = useState(0);
+  const [foundRepos, setFoundRepos] = useState<{ name: string }[]>([]);
+  const [selectedRepos, setSelectedRepos] = useState<Set<string>>(new Set());
 
   // 浏览器端保存用户选择的目录句柄
   const dirHandleRef = useRef<FileSystemDirectoryHandle | null>(null);
@@ -173,11 +175,12 @@ export default function DailyReportPage() {
       dirHandleRef.current = handle;
       setLocalRoot(handle.name);
       saveDefaults(handle.name, branch, author);
-      // 扫描有多少个 git 仓库
       const repos = await findGitRepos(handle);
       setRepoCount(repos.length);
+      setFoundRepos(repos.map(r => ({ name: r.name })));
+      setSelectedRepos(new Set(repos.map(r => r.name)));
     } catch (err: any) {
-      if (err.name === "AbortError") return; // 用户取消
+      if (err.name === "AbortError") return;
       console.error("选择目录失败:", err);
     }
   };
@@ -204,8 +207,11 @@ export default function DailyReportPage() {
       const since = new Date(`${sinceDate}T00:00:00`);
       const until = new Date(`${untilDate}T23:59:59`);
 
-      // 扫描仓库
-      const repos = await findGitRepos(handle);
+      // 扫描仓库（只保留用户勾选的）
+      const allRepos = await findGitRepos(handle);
+      const repos = selectedRepos.size > 0 
+        ? allRepos.filter(r => selectedRepos.has(r.name))
+        : allRepos;
 
       if (repos.length === 0) {
         const emptyContent = `# 📋 ${displayLabel} 工作日报
@@ -763,13 +769,52 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
                             : "选择本地目录"}
                         </Button>
                         {dirHandleRef.current && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Badge variant="secondary" className="gap-1">
-                              <FolderOpen className="h-3 w-3" />
-                              {localRoot}
-                            </Badge>
-                            {repoCount > 0 && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Badge variant="secondary" className="gap-1">
+                                <FolderOpen className="h-3 w-3" />
+                                {localRoot}
+                              </Badge>
                               <span>发现 {repoCount} 个仓库</span>
+                              {foundRepos.length > 0 && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="text-xs text-primary hover:underline"
+                                    onClick={() => setSelectedRepos(new Set(foundRepos.map(r => r.name)))}
+                                  >全选</button>
+                                  <button
+                                    type="button"
+                                    className="text-xs text-muted-foreground hover:underline"
+                                    onClick={() => setSelectedRepos(new Set())}
+                                  >取消</button>
+                                </>
+                              )}
+                            </div>
+                            {foundRepos.length > 0 && (
+                              <ScrollArea className="h-32 border rounded-md">
+                                <div className="p-2 space-y-1">
+                                  {foundRepos.map((repo) => (
+                                    <label
+                                      key={repo.name}
+                                      className="flex items-center gap-2 px-2 py-1 text-xs cursor-pointer rounded hover:bg-accent"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedRepos.has(repo.name)}
+                                        onChange={() => {
+                                          const next = new Set(selectedRepos);
+                                          next.has(repo.name) ? next.delete(repo.name) : next.add(repo.name);
+                                          setSelectedRepos(next);
+                                        }}
+                                        className="h-3.5 w-3.5"
+                                      />
+                                      <GitFork className="h-3 w-3 text-muted-foreground shrink-0" />
+                                      <span className="truncate">{repo.name}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              </ScrollArea>
                             )}
                           </div>
                         )}
