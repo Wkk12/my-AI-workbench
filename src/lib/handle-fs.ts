@@ -139,32 +139,40 @@ export function createHandleFS(rootHandle: FileSystemDirectoryHandle) {
   };
 }
 
-/** 扫描目录下的所有 git 仓库 */
+/** 递归扫描目录下的所有 git 仓库（含多层子目录） */
 export async function findGitRepos(
-  rootHandle: FileSystemDirectoryHandle
+  rootHandle: FileSystemDirectoryHandle,
+  maxDepth = 5
 ): Promise<
   { name: string; handle: FileSystemDirectoryHandle; branch: string }[]
 > {
   const repos: { name: string; handle: FileSystemDirectoryHandle; branch: string }[] = [];
 
-  for await (const [name, handle] of rootHandle) {
-    if (handle.kind !== "directory") continue;
-    // 检查是否有 .git 子目录
-    try {
-      const gitHandle = await handle.getDirectoryHandle(".git");
-      // 尝试读取 HEAD 来获取当前分支
-      let branch = "unknown";
+  const scanDir = async (handle: FileSystemDirectoryHandle, depth: number, parentPath: string) => {
+    if (depth > maxDepth) return;
+
+    for await (const [name, entryHandle] of handle) {
+      if (entryHandle.kind !== "directory") continue;
+      if (name.startsWith(".") || name === "node_modules") continue;
+
       try {
-        const headFile = await gitHandle.getFileHandle("HEAD");
-        const headContent = await (await headFile.getFile()).text();
-        const refMatch = headContent.match(/ref: refs\/heads\/(.+)/);
-        if (refMatch) branch = refMatch[1].trim();
-        else branch = headContent.trim().slice(0, 7); // detached HEAD hash
-      } catch { /* ignore */ }
-      repos.push({ name, handle, branch });
-    } catch {
-      // 没有 .git，跳过
+        const gitHandle = await entryHandle.getDirectoryHandle(".git");
+        let branch = "unknown";
+        try {
+          const headFile = await gitHandle.getFileHandle("HEAD");
+          const headContent = await (await headFile.getFile()).text();
+          const refMatch = headContent.match(/ref: refs\/heads\/(.+)/);
+          if (refMatch) branch = refMatch[1].trim();
+          else branch = headContent.trim().slice(0, 7);
+        } catch { /* ignore */ }
+        repos.push({ name: parentPath ? `${parentPath}/${name}` : name, handle: entryHandle, branch });
+      } catch {
+        // 没有 .git，继续深入子目录
+        await scanDir(entryHandle, depth + 1, parentPath ? `${parentPath}/${name}` : name);
+      }
     }
-  }
+  };
+
+  await scanDir(rootHandle, 0, "");
   return repos;
 }

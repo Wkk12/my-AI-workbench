@@ -7,20 +7,27 @@ import type { DailyReportMeta } from "@/lib/types";
 
 const execFileAsync = promisify(execFile);
 
-/** 扫描目录下的所有 git 仓库 */
+/** 递归扫描目录下的所有 git 仓库（含子目录） */
 function findGitRepos(rootDir: string): string[] {
   const repos: string[] = [];
-  try {
-    const entries = fs.readdirSync(rootDir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-      if (entry.name.startsWith(".") || entry.name === "node_modules") continue;
-      const gitDir = path.join(rootDir, entry.name, ".git");
-      if (fs.existsSync(gitDir)) {
-        repos.push(path.join(rootDir, entry.name));
+  const scanDir = (dir: string, depth: number) => {
+    if (depth > 5) return; // 最多深5层，避免扫太深
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isDirectory()) continue;
+        if (entry.name.startsWith(".") || entry.name === "node_modules") continue;
+        const fullPath = path.join(dir, entry.name);
+        const gitDir = path.join(fullPath, ".git");
+        if (fs.existsSync(gitDir)) {
+          repos.push(fullPath);
+        } else {
+          scanDir(fullPath, depth + 1);
+        }
       }
-    }
-  } catch { /* ignore */ }
+    } catch { /* ignore */ }
+  };
+  scanDir(rootDir, 0);
   return repos;
 }
 
