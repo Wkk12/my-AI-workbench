@@ -14,6 +14,7 @@ const PUBLIC_PREFIXES = [
   "/api/ips/image/",
   "/api/tunnel",
   "/api/notify-test",
+  "/api/deploy",
   "/login",
   "/_next/",
   "/favicon.ico",
