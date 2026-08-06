@@ -67,7 +67,7 @@ export default function NotificationBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0 flex flex-col max-h-[500px]">
+      <PopoverContent align="end" className="w-80 p-0 max-h-[500px] flex flex-col">
         {/* 头部 */}
         <div className="flex items-center justify-between px-4 py-2.5 shrink-0">
           <span className="text-sm font-medium flex items-center gap-1.5">
@@ -119,7 +119,7 @@ export default function NotificationBell() {
             <p className="text-xs mt-0.5">定时任务执行结果会出现在这里</p>
           </div>
         ) : (
-          <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="overflow-y-auto" style={{ maxHeight: 340 }}>
             <div className="divide-y divide-border/50">
               {notifications.map((n) => (
                 <div
