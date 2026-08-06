@@ -308,26 +308,51 @@ export default function NotificationProvider({ children }: { children: ReactNode
         return;
       }
 
-      // 发送本机原生通知（自动适配 Mac/Windows）
       const platform = navigator.platform || "";
       const isMac = /Mac|iPhone|iPad/.test(platform);
-      const sent = sendNativeNotification(
-        "🧪 测试通知",
-        isMac ? "来自喵站工作台 — 请在右上角通知中心查看" : "来自喵站工作台 — 请在右下角操作中心查看"
-      );
 
-      if (sent) {
+      // 方式1：直接发浏览器原生通知（最可靠，点击时已有用户手势）
+      let nativeOk = false;
+      try {
+        new window.Notification("🧪 测试通知", {
+          body: isMac ? "来自喵站工作台 — 右上角通知中心查看" : "来自喵站工作台 — 右下角操作中心查看",
+          icon: "/file.svg",
+          tag: "meow-test",
+        });
+        nativeOk = true;
+      } catch { nativeOk = false; }
+
+      // 方式2：如果直接通知失败，走 SW 通道
+      if (!nativeOk) {
+        nativeOk = sendNativeNotification(
+          "🧪 测试通知",
+          isMac ? "来自喵站工作台 — 请在右上角通知中心查看" : "来自喵站工作台 — 请在右下角操作中心查看"
+        );
+      }
+
+      // 方式3：服务端验证（快速超时）
+      let serverOk = false;
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 3000);
+        const resp = await fetch("/api/notify-test", { method: "POST", signal: ctrl.signal });
+        clearTimeout(t);
+        const data = await resp.json();
+        serverOk = data.success;
+      } catch { serverOk = false; }
+
+      if (nativeOk || serverOk) {
         addNotification({ 
           title: "✅ 通知已发送", 
-          body: isMac 
-            ? "请检查屏幕右上角通知中心" 
-            : "请检查屏幕右下角操作中心",
+          body: `${nativeOk ? "浏览器原生通知" : ""}${nativeOk && serverOk ? " + " : ""}${serverOk ? "服务端验证通过" : ""}\n${
+            isMac ? "请检查屏幕右上角通知中心" : "请检查屏幕右下角操作中心"
+          }`,
           type: "success" 
         });
       } else {
         addNotification({ 
           title: "❌ 发送失败", 
-          body: "Service Worker 未就绪，请刷新页面后重试", 
+          body: "请刷新页面后重试，或检查系统通知设置", 
           type: "error" 
         });
       }

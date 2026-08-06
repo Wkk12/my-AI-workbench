@@ -68,7 +68,7 @@ export default function NotificationBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0 flex flex-col">
+      <PopoverContent align="end" className="w-80 p-0 flex flex-col max-h-[500px]">
         {/* 头部 */}
         <div className="flex items-center justify-between px-4 py-2.5 shrink-0">
           <span className="text-sm font-medium flex items-center gap-1.5">
