@@ -539,13 +539,13 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
 
       <div className="grid gap-6 lg:grid-cols-5 h-[calc(100vh-180px)]">
         {/* 左侧：生成参数 */}
-        <div className="lg:col-span-2 space-y-4 overflow-y-auto h-full pr-1">
+        <div className="lg:col-span-2 h-full pr-1">
           {/* 生成参数 */}
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="h-full flex flex-col overflow-hidden">
+            <CardHeader className="pb-3 shrink-0">
               <CardTitle className="text-base">⚙️ 生成参数</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="flex-1 overflow-y-auto space-y-4">
               <div className="space-y-2">
                 <Label>日期类型</Label>
                 <Tabs
