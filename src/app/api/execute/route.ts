@@ -372,7 +372,7 @@ async function generateReport(params: {
       projectCount,
       commitCount,
       createdAt: new Date().toISOString(),
-      source: (source || "local") as "local" | "gitlab",
+      source: source,
     },
   };
 }
@@ -396,7 +396,7 @@ export async function POST(request: NextRequest) {
   } = await request.json();
 
   const isRange = dateType === "range" && fromDate && toDate;
-  const rootDir = localRoot || "F:\\RY";
+  const rootDir = localRoot || "";
   const gitAuthor = author || "";
   const srcType: SourceType = (source || "local") as SourceType;
 

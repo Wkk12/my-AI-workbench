@@ -25,7 +25,8 @@ export default function HomePage() {
 
       {/* 快捷统计卡片 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-md transition-shadow">
+        <Link href="/work/daily-report" className="block">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               今日日报
@@ -39,6 +40,7 @@ export default function HomePage() {
             </p>
           </CardContent>
         </Card>
+        </Link>
 
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2">

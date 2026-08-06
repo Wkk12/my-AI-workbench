@@ -510,6 +510,7 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
   };
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm("确定要删除这篇日报吗？删除后无法恢复。")) return;
     await fetch(`/api/daily-report/${id}`, { method: "DELETE" });
     if (selectedReportId === id) {
       setSelectedReportId(null);
@@ -625,9 +626,6 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
                     <TabsTrigger value="local" className="flex-1">
                       <HardDrive className="h-3.5 w-3.5 mr-1" />
                       本地仓库
-                    </TabsTrigger>
-                    <TabsTrigger value="gitlab" className="flex-1">
-                      🔗 GitLab
                     </TabsTrigger>
                   </TabsList>
                 </Tabs>
