@@ -6,14 +6,20 @@ const execAsync = promisify(exec);
 
 export async function POST() {
   try {
+    // 设置 PATH 包含 git 和 nodejs
+    const gitPath = "C:\\Program Files\\Git\\bin";
+    const nodePath = "C:\\Program Files\\nodejs";
+    const combinedPath = `${gitPath};${nodePath};%PATH%`;
+    const pathPrefix = `set PATH=${combinedPath} && `;
+
     // 1. Git pull
-    const pull = await execAsync("cd C:\\my-AI-workbench && git pull", { timeout: 30000 });
+    const pull = await execAsync(pathPrefix + "cd C:\\my-AI-workbench && git pull", { timeout: 30000 });
 
     // 2. Build
-    const build = await execAsync("cd C:\\my-AI-workbench && npm run build", { timeout: 180000, cwd: "C:\\my-AI-workbench" });
+    const build = await execAsync(pathPrefix + "cd C:\\my-AI-workbench && npm run build", { timeout: 180000, cwd: "C:\\my-AI-workbench" });
 
     // 3. 杀掉旧进程并重启（后台运行）
-    exec("taskkill /f /im node.exe 2>nul & cd C:\\my-AI-workbench && npm run start", { cwd: "C:\\my-AI-workbench" });
+    exec(pathPrefix + 'taskkill /f /im node.exe 2>nul & cd C:\\my-AI-workbench && npm run start', { cwd: "C:\\my-AI-workbench" });
 
     return NextResponse.json({ 
       ok: true, 
