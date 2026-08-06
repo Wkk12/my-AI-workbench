@@ -110,6 +110,12 @@ async function getGitHubCommits(
     const data = await resp.json();
     const commits: CommitEntry[] = [];
     for (const c of data) {
+      // 过滤 merge 提交
+      const parents = c.parents || [];
+      if (parents.length > 1) continue;
+      const msg = (c.commit?.message || "").trim();
+      if (/^Merge\b/i.test(msg)) continue;
+
       const lines = (c.commit?.message || "").split("\n");
       const title = lines[0]?.trim() || "";
       const body = lines.slice(1).join("\n").trim();

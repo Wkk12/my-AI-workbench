@@ -66,8 +66,19 @@ async function getRepoCommitsBrowser(
       since: since,
     });
 
+    // 过滤 merge 提交（有多个 parent）
+    const nonMerge = commits.filter((c) => {
+      const parents = c.commit.parent || [];
+      const isMerge = parents.length > 1;
+      if (isMerge) return false;
+      // 也过滤以 "Merge" 开头的消息
+      const msg = (c.commit.message || "").trim();
+      if (/^Merge\b/i.test(msg)) return false;
+      return true;
+    });
+
     // 过滤 author
-    const filtered = commits.filter((c) => {
+    const filtered = nonMerge.filter((c) => {
       const commitAuthor = c.commit.author.name;
       return (
         !author ||
@@ -526,9 +537,9 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
         description="从 Git 提交记录生成工作日报。本地模式在浏览器中读取，数据不上传服务器。"
       />
 
-      <div className="grid gap-6 lg:grid-cols-5">
+      <div className="grid gap-6 lg:grid-cols-5 h-[calc(100vh-180px)]">
         {/* 左侧：日报列表 + 生成参数 */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-4 overflow-y-auto h-full pr-1">
           {/* 生成参数 */}
           <Card>
             <CardHeader className="pb-3">
@@ -952,7 +963,7 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
         </div>
 
         {/* 右侧：预览区 */}
-        <Card className="lg:col-span-3">
+        <Card className="lg:col-span-3 h-full flex flex-col overflow-hidden">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
               {dailyReports.length > 1 && (
@@ -1018,13 +1029,13 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
               </div>
             )}
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 overflow-y-auto">
             {previewContent ? (
-              <div className="markdown-preview prose prose-sm max-w-none min-h-[400px]">
+              <div className="markdown-preview prose prose-sm max-w-none">
                 <ReactMarkdown>{previewContent}</ReactMarkdown>
               </div>
             ) : (
-              <div className="text-center py-16 text-muted-foreground min-h-[400px] flex flex-col items-center justify-center">
+              <div className="text-center py-16 text-muted-foreground flex flex-col items-center justify-center">
                 <FileText className="h-16 w-16 mb-3 opacity-20" />
                 <p className="text-sm">选择参数后点击「生成日报」</p>
                 <p className="text-xs mt-1">
