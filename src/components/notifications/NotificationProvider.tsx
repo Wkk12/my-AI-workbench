@@ -44,6 +44,7 @@ interface NotificationContextType {
   permission: NotificationPermission;
   requestPermission: () => void;
   testDesktopNotification: () => void;
+  isTesting: boolean;
   diagLog: DiagEntry[];
 }
 
@@ -58,6 +59,7 @@ const NotificationContext = createContext<NotificationContextType>({
   permission: "default",
   requestPermission: () => {},
   testDesktopNotification: () => {},
+  isTesting: false,
   diagLog: [],
 });
 
@@ -92,6 +94,7 @@ export default function NotificationProvider({ children }: { children: ReactNode
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [permission, setPermission] = useState<NotificationPermission>("default");
   const [diagLog, setDiagLog] = useState<DiagEntry[]>([]);
+  const [isTesting, setIsTesting] = useState(false);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const swRef = useRef<ServiceWorkerRegistration | null>(null);
   const swReadyRef = useRef(false);
@@ -292,18 +295,51 @@ export default function NotificationProvider({ children }: { children: ReactNode
   }, [sendNativeNotification, addNotification, diag]);
 
   const testDesktopNotification = useCallback(async () => {
+    if (isTesting) return;
+    setIsTesting(true);
     try {
-      const resp = await fetch("/api/notify-test", { method: "POST", credentials: "include" });
-      const data = await resp.json();
-      if (data.success) {
-        addNotification({ title: "✅ 通知已发送", body: "检查屏幕右上角（Mac）通知中心", type: "success" });
+      // 1. 发送本机原生通知（自动适配 Mac/Windows）
+      const platform = navigator.platform || "";
+      const isMac = /Mac|iPhone|iPad/.test(platform);
+      const sent = sendNativeNotification(
+        "🧪 测试通知",
+        isMac ? "来自喵站工作台 — 请在右上角通知中心查看" : "来自喵站工作台 — 请在右下角操作中心查看"
+      );
+      
+      // 2. 服务端验证（快速超时）
+      let serverOk = false;
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        const resp = await fetch("/api/notify-test", { 
+          method: "POST", 
+          credentials: "include",
+          signal: controller.signal
+        });
+        clearTimeout(timeout);
+        const data = await resp.json();
+        serverOk = data.success;
+      } catch {
+        serverOk = false;
+      }
+
+      if (sent || serverOk) {
+        addNotification({ 
+          title: "✅ 通知已发送", 
+          body: isMac 
+            ? "请检查屏幕右上角通知中心（可能需要展开）" 
+            : "请检查屏幕右下角操作中心",
+          type: "success" 
+        });
       } else {
-        addNotification({ title: "❌ 通知失败", body: data.error || "未知错误", type: "error" });
+        addNotification({ title: "❌ 通知失败", body: "请先开启桌面通知权限", type: "error" });
       }
     } catch {
       addNotification({ title: "❌ 请求失败", body: "无法连接到服务端", type: "error" });
+    } finally {
+      setIsTesting(false);
     }
-  }, [addNotification]);
+  }, [isTesting, sendNativeNotification, addNotification]);
 
   // 自动轮询
   useEffect(() => {
@@ -342,6 +378,7 @@ export default function NotificationProvider({ children }: { children: ReactNode
         permission,
         requestPermission,
         testDesktopNotification,
+        isTesting,
         diagLog,
       }}
     >

@@ -43,6 +43,7 @@ export default function NotificationBell() {
     permission,
     requestPermission,
     testDesktopNotification,
+    isTesting,
     diagLog,
   } = useNotifications();
 
@@ -179,8 +180,14 @@ export default function NotificationBell() {
                 : "桌面通知未开启"}
             </span>
             <div className="flex gap-1">
-              <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={testDesktopNotification}>
-                🧪 测试
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 text-[10px]" 
+                onClick={testDesktopNotification}
+                disabled={isTesting}
+              >
+                {isTesting ? "⏳ 测试中..." : "🧪 测试"}
               </Button>
               {permission !== "granted" && (
                 <Button variant="ghost" size="sm" className="h-6 text-[10px] text-amber-600" onClick={requestPermission}>

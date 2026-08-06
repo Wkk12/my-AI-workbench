@@ -538,7 +538,7 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
       />
 
       <div className="grid gap-6 lg:grid-cols-5 h-[calc(100vh-180px)]">
-        {/* 左侧：日报列表 + 生成参数 */}
+        {/* 左侧：生成参数 */}
         <div className="lg:col-span-2 space-y-4 overflow-y-auto h-full pr-1">
           {/* 生成参数 */}
           <Card>
@@ -962,8 +962,82 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
           </Card>
         </div>
 
-        {/* 右侧：预览区 */}
-        <Card className="lg:col-span-3 h-full flex flex-col overflow-hidden">
+        {/* 右侧 */}
+        <div className="lg:col-span-3 flex flex-col gap-4 h-full">
+          {/* 历史日报 (上 1/3) */}
+          <Card className="flex-[1] flex flex-col overflow-hidden min-h-0">
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <CardTitle className="text-base">📋 历史日报</CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={fetchReports}
+              >
+                <RefreshCw className="h-3 w-3" />
+              </Button>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto">
+              {loading ? (
+                <div className="text-center py-4 text-sm text-muted-foreground">
+                  加载中...
+                </div>
+              ) : reports.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  <FileText className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">还没有日报</p>
+                  <p className="text-xs mt-1">生成你的第一篇日报吧～</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {reports.map((r) => (
+                    <div
+                      key={r.id}
+                      className={`flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors ${
+                        selectedReportId === r.id
+                          ? "bg-accent text-accent-foreground"
+                          : "hover:bg-muted"
+                      }`}
+                      onClick={() => handleView(r.id)}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                        <span className="text-sm font-medium">
+                          {r.date}
+                        </span>
+                        {r.commitCount > 0 ? (
+                          <Badge variant="secondary" className="text-xs">
+                            {r.commitCount} commits
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant="outline"
+                            className="text-xs text-muted-foreground"
+                          >
+                            空
+                          </Badge>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 shrink-0 opacity-50 hover:opacity-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(r.id);
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 日报预览 (下 2/3) */}
+          <Card className="flex-[2] flex flex-col overflow-hidden min-h-0">
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
               {dailyReports.length > 1 && (
@@ -1045,6 +1119,7 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* 覆盖确认弹窗 */}
