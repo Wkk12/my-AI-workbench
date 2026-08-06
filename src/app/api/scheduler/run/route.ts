@@ -260,17 +260,17 @@ async function executeTask(task: ScheduledTask): Promise<string> {
       }
 
       try {
-        const { execSync } = await import("child_process");
+        const { exec } = await import("child_process");
+        const { promisify } = await import("util");
+        const execAsync = promisify(exec);
         const workerConfig = JSON.stringify({ targets, message: sparkMessage });
+        const cwd = process.env.WORKBENCH_ROOT || "C:\\my-AI-workbench";
 
-        const output = execSync(
+        const { stdout } = await execAsync(
           `node scripts/spark-renew-worker.cjs '${workerConfig.replace(/'/g, "'\\''")}' 2>&1`,
-          {
-          cwd: "/Users/wkk/Desktop/my-AI-workbench",
-          encoding: "utf-8",
-          timeout: 600_000,
-          maxBuffer: 10 * 1024 * 1024,
-        });
+          { cwd, encoding: "utf-8", timeout: 300_000, maxBuffer: 10 * 1024 * 1024 }
+        );
+        const output = stdout;
 
         const resultMatch = output.match(/SPARK_RESULT:(\[.*\])/);
         if (resultMatch) {
@@ -300,14 +300,15 @@ function getBaseUrl() {
 }
 
 /** 发送桌面原生通知（macOS: osascript / Windows: 写文件让心跳代理） */
-function sendDesktopNotification(title: string, subtitle: string) {
+async function sendDesktopNotification(title: string, subtitle: string) {
   try {
-    const { execSync } = require("child_process");
     if (process.platform === "darwin") {
-      // macOS: 直接弹
+      const { exec } = require("child_process");
+      const { promisify } = require("util");
+      const execAsync = promisify(exec);
       const safeTitle = title.replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
       const safeBody = subtitle.slice(0, 150).replace(/\\/g, "\\\\").replace(/"/g, "\\\"");
-      execSync(
+      await execAsync(
         `osascript -e 'display alert "${safeBody}" as critical message title "${safeTitle}" buttons {"知道了"} default button "知道了" giving up after 300'`,
         { timeout: 5000 }
       );
@@ -360,13 +361,15 @@ function handleLoginFailure(task: { name: string; actionType: string }) {
   const info = getLoginAction(task);
   if (!info) return;
   
-  // 打开浏览器到登录页
-  try {
-    const { execSync } = require("child_process");
-    execSync(`open "${info.url}"`, { timeout: 5000 });
-    console.log(`[scheduler] 已打开${info.platform}登录页: ${info.url}`);
-  } catch (e) {
-    console.error("[scheduler] 打开登录页失败:", e);
+  // 打开浏览器到登录页（仅 macOS）
+  if (process.platform === "darwin") {
+    try {
+      const { exec } = require("child_process");
+      exec(`open "${info.url}"`, { timeout: 5000 });
+      console.log(`[scheduler] 已打开${info.platform}登录页: ${info.url}`);
+    } catch (e) {
+      console.error("[scheduler] 打开登录页失败:", e);
+    }
   }
   
   // 写入提醒文件 → 下次心跳推送到微信

@@ -60,10 +60,16 @@ export default function IdeaLabPage() {
   const [source, setSource] = useState("");
 
   const fetchIdeas = async () => {
-    const res = await fetch("/api/idea");
-    const data = await res.json();
-    setIdeas(data.ideas || []);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/idea");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setIdeas(data.ideas || []);
+    } catch (e) {
+      console.error("Failed to fetch ideas:", e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

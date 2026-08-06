@@ -47,10 +47,16 @@ export default function ProjectsPage() {
   const [notes, setNotes] = useState("");
 
   const fetchProjects = async () => {
-    const res = await fetch("/api/project");
-    const data = await res.json();
-    setProjects(data.projects || []);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/project");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setProjects(data.projects || []);
+    } catch (e) {
+      console.error("Failed to fetch projects:", e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
