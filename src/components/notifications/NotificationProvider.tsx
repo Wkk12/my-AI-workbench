@@ -317,7 +317,7 @@ export default function NotificationProvider({ children }: { children: ReactNode
         new window.Notification("🧪 测试通知", {
           body: isMac ? "来自喵站工作台 — 右上角通知中心查看" : "来自喵站工作台 — 右下角操作中心查看",
           icon: "/file.svg",
-          tag: "meow-test",
+          // 不加 tag，允许重复弹窗
         });
         nativeOk = true;
       } catch { nativeOk = false; }

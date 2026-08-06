@@ -7,7 +7,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Bell, CheckCheck, Trash2, X } from "lucide-react";
@@ -120,7 +119,7 @@ export default function NotificationBell() {
             <p className="text-xs mt-0.5">定时任务执行结果会出现在这里</p>
           </div>
         ) : (
-          <ScrollArea className="flex-1" style={{ maxHeight: 320 }}>
+          <div className="flex-1 min-h-0 overflow-y-auto">
             <div className="divide-y divide-border/50">
               {notifications.map((n) => (
                 <div
@@ -166,7 +165,7 @@ export default function NotificationBell() {
                 </div>
               ))}
             </div>
-          </ScrollArea>
+          </div>
         )}
         {/* 权限状态 + 测试按钮 — 固定在底部 */}
         <div className="px-4 py-2 border-t shrink-0 space-y-1.5 bg-background">
