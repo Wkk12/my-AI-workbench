@@ -363,29 +363,8 @@ export default function NotificationProvider({ children }: { children: ReactNode
     }
   }, [isTesting, permission, sendNativeNotification, addNotification]);
 
-  // 自动轮询
-  useEffect(() => {
-    const poll = async () => {
-      try {
-        const res = await fetch("/api/scheduler/run", { credentials: "include" });
-        const data = await res.json();
-        if (data.executed > 0 && Array.isArray(data.results)) {
-          for (const r of data.results) {
-            const isFail = /失败|错误|未安装|未找到|异常/.test(r.result);
-            addNotification({
-              taskId: r.id,
-              title: r.name,
-              body: r.result.slice(0, 200),
-              type: isFail ? "error" : "success",
-            });
-          }
-        }
-      } catch { /* ignore */ }
-    };
-
-    pollingRef.current = setInterval(poll, 30_000);
-    return () => { if (pollingRef.current) clearInterval(pollingRef.current); };
-  }, [addNotification]);
+  // 不再通过客户端轮询触发调度器（避免每次打开页面都执行任务）
+  // 调度器由服务端 cron 或手动触发
 
   return (
     <NotificationContext.Provider

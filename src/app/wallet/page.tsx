@@ -97,20 +97,32 @@ export default function WalletPage() {
   };
 
   const handleSave = async () => {
-    const data: Record<string, unknown> = {
-      name: fName.trim(), category: fCategory, cycle: fCycle,
-      amount: Number(fAmount), startDate: fStartDate, expireDate: fExpireDate,
+    const name = fName.trim();
+    const expireDate = fExpireDate.trim();
+    const amount = Number(fAmount);
+
+    if (!name) { alert("请输入订阅名称"); return; }
+    if (!expireDate) { alert("请选择到期日期"); return; }
+    if (isNaN(amount) || amount <= 0) { alert("请输入有效金额"); return; }
+
+    const data = {
+      name, category: fCategory, cycle: fCycle,
+      amount, startDate: fStartDate, expireDate,
       autoRenew: fAutoRenew, provider: fProvider.trim(), notes: fNotes.trim(),
     };
-    if (!data.name || !data.expireDate) return;
 
-    const method = editingId ? "PUT" : "POST";
-    const url = editingId ? `/api/subscriptions/${editingId}` : "/api/subscriptions";
-    await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-
-    resetForm();
-    setDialogOpen(false);
-    load();
+    try {
+      const method = editingId ? "PUT" : "POST";
+      const url = editingId ? `/api/subscriptions/${editingId}` : "/api/subscriptions";
+      const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      resetForm();
+      setDialogOpen(false);
+      load();
+    } catch (e) {
+      alert("保存失败，请重试");
+      console.error("Save subscription failed:", e);
+    }
   };
 
   const handleRenew = async (id: string) => {

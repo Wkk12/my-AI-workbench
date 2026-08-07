@@ -136,13 +136,15 @@ export default function SchedulerPage() {
       return;
     }
 
+    if (!fName.trim()) { alert("请输入任务名称"); return; }
+    if (!fSchedule.trim()) { alert("请输入 cron 表达式"); return; }
+
     const now = new Date().toISOString();
     const config: Record<string, string> = {};
     if (fConfigTopic) config.topic = fConfigTopic;
     if (fConfigCity) config.city = fConfigCity;
     if (fConfigContentId && fConfigContentId !== "none") config.contentId = fConfigContentId;
     if (fActionType === "spark_renew") {
-      // 如果没选联系人，默认用配置中勾选的
       config.targets = JSON.stringify(fSparkTargets.length > 0 ? fSparkTargets : []);
       if (fSparkMessage && fSparkMessage !== "美少女珂来续火花啦~") {
         config.message = fSparkMessage;
@@ -151,10 +153,10 @@ export default function SchedulerPage() {
 
     const task: ScheduledTask = {
       id: editingId || uuidv4(),
-      name: fName || "未命名任务",
+      name: fName.trim(),
       enabled: fEnabled,
       actionType: fActionType,
-      schedule: fSchedule,
+      schedule: fSchedule.trim(),
       daysOfWeek: fDaysOfWeek,
       config,
       lastRun: editingId ? tasks.find((t) => t.id === editingId)?.lastRun : undefined,
@@ -163,15 +165,20 @@ export default function SchedulerPage() {
       updatedAt: now,
     };
 
-    await fetch("/api/scheduler", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(task),
-    });
-
-    resetForm();
-    setDialogOpen(false);
-    fetchTasks();
+    try {
+      const res = await fetch("/api/scheduler", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(task),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      resetForm();
+      setDialogOpen(false);
+      fetchTasks();
+    } catch (e) {
+      alert("保存失败，请重试");
+      console.error("Save task failed:", e);
+    }
   };
 
   const handleDelete = async (id: string) => {
