@@ -364,20 +364,6 @@ export default function SettingsPage() {
                 )}
               </Label>
               <Button
-                size="sm"
-                variant="outline"
-                className="gap-1 h-7 text-xs"
-                onClick={handleSyncContacts}
-                disabled={syncingContacts}
-              >
-                {syncingContacts ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-3 w-3" />
-                )}
-                同步联系人
-              </Button>
-              <Button
                 variant="outline"
                 size="sm"
                 className="gap-1 h-7 text-xs"
@@ -403,9 +389,27 @@ export default function SettingsPage() {
 
             {/* 联系人列表 */}
             {contacts.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-2">
-                还没有联系人，点击「同步联系人」从浏览器获取，或手动添加
-              </p>
+              <div className="bg-muted/30 rounded-lg p-4 space-y-4 text-sm">
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">1</span>
+                  <div className="flex-1 space-y-1.5">
+                    <p className="font-medium">从抖音提取好友昵称</p>
+                    <p className="text-xs text-muted-foreground">
+                      打开抖音创作者私信页 → 按 <kbd className="px-1 py-0.5 bg-muted rounded text-[10px]">F12</kbd> → 粘贴代码 → 回车
+                    </p>
+                    <code className="block text-[11px] bg-background border p-2.5 rounded select-all break-all">
+                      copy(Array.from(document.querySelectorAll('[class*=item-header-name]')).map(e=&gt;e.textContent.trim()).filter(n=&gt;n&amp;&amp;n.length&lt;20&amp;&amp;!n.includes('群')).join('\n'))
+                    </code>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">2</span>
+                  <div className="flex-1 space-y-1.5">
+                    <p className="font-medium">粘贴导入或手动添加</p>
+                    <p className="text-xs text-muted-foreground">上一步已复制昵称到剪贴板，Ctrl+V 粘贴</p>
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className="space-y-1">
                 <div className="flex items-center gap-2 mb-2">
