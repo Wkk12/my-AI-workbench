@@ -9,6 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Save, CheckCircle2, Plus, Trash2, RefreshCw, Loader2 } from "lucide-react";
 import { DEFAULT_SETTINGS } from "@/lib/constants";
 import type { SparkContact } from "@/lib/types";
@@ -28,6 +35,8 @@ export default function SettingsPage() {
   const [contacts, setContacts] = useState<SparkContact[]>([]);
   const [newContactName, setNewContactName] = useState("");
   const [syncingContacts, setSyncingContacts] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkText, setBulkText] = useState("");
 
   useEffect(() => {
     fetch("/api/settings")
@@ -134,6 +143,25 @@ export default function SettingsPage() {
   const handleSelectAll = () => {
     const allSelected = contacts.every((c) => c.selected);
     saveContacts(contacts.map((c) => ({ ...c, selected: !allSelected })));
+  };
+
+  const handleBulkImport = () => {
+    const names = bulkText.split("\n").map(s => s.trim()).filter(Boolean);
+    if (names.length === 0) { alert("请输入至少一个联系人名称"); return; }
+    const now = new Date().toISOString();
+    const newContacts: SparkContact[] = names.map((name, i) => ({
+      id: uuidv4(),
+      name,
+      douyinId: "",
+      avatar: "",
+      selected: false,
+      sortOrder: contacts.length + i,
+      createdAt: now,
+      updatedAt: now,
+    }));
+    saveContacts([...contacts, ...newContacts]);
+    setBulkText("");
+    setBulkOpen(false);
   };
 
   const handleSyncContacts = async () => {
@@ -349,6 +377,14 @@ export default function SettingsPage() {
                 )}
                 同步联系人
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1 h-7 text-xs"
+                onClick={() => setBulkOpen(true)}
+              >
+                <Plus className="h-3 w-3" /> 批量导入
+              </Button>
             </div>
 
             {/* 添加联系人 */}
@@ -435,6 +471,36 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* 批量导入弹窗 */}
+      <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>📋 批量导入联系人</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              每行一个联系人名称，从抖音私信页面复制好友昵称粘贴到这里
+            </p>
+            <Textarea
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              placeholder={"张三\n李四\n王五"}
+              className="min-h-[160px] text-sm"
+            />
+            <p className="text-[10px] text-muted-foreground">
+              💡 在抖音创作者私信页面，按 F12 打开控制台，粘贴以下代码可一键提取好友昵称：
+            </p>
+            <code className="block text-[10px] bg-muted p-2 rounded select-all whitespace-pre-wrap break-all">
+              {`copy(JSON.stringify(Array.from(document.querySelectorAll('[class*=item-header-name]')).map(e=>e.textContent.trim()).filter(n=>n&&n.length<20&&!n.includes('群')),null,2))`}
+            </code>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setBulkOpen(false)}>取消</Button>
+              <Button size="sm" onClick={handleBulkImport}>导入 {bulkText.trim() ? `(${bulkText.split("\\n").filter(Boolean).length}人)` : ""}</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
