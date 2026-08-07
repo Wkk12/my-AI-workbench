@@ -95,7 +95,7 @@ export default function SettingsPage() {
   }, []);
 
   const handleAddContact = () => {
-    if (!newContactName.trim()) return;
+    if (!newContactName.trim()) { alert("请输入联系人名称"); return; }
     const now = new Date().toISOString();
     const contact: SparkContact = {
       id: uuidv4(),
