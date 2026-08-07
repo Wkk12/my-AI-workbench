@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,9 +11,27 @@ import {
   ArrowRight,
   Plus,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 
 export default function HomePage() {
+  const [stats, setStats] = useState({ reports: 0, contents: 0, projects: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/daily-report").then(r => r.json()).catch(() => ({ reports: [] })),
+      fetch("/api/content").then(r => r.json()).catch(() => ({ contents: [] })),
+      fetch("/api/project").then(r => r.json()).catch(() => ({ projects: [] })),
+    ]).then(([reportData, contentData, projectData]) => {
+      setStats({
+        reports: (reportData.reports || []).length,
+        contents: (contentData.contents || []).length,
+        projects: (projectData.projects || []).length,
+      });
+    }).finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* 欢迎区 */}
@@ -34,7 +55,9 @@ export default function HomePage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">未生成</div>
+            <div className="text-2xl font-bold">
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : stats.reports > 0 ? `${stats.reports} 篇` : "未生成"}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               点击生成今日工作日报
             </p>
@@ -50,7 +73,7 @@ export default function HomePage() {
             <PencilRuler className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0 篇</div>
+            <div className="text-2xl font-bold">{loading ? <Loader2 className="h-5 w-5 animate-spin" /> : `${stats.contents} 篇`}</div>
             <p className="text-xs text-muted-foreground mt-1">本月已发布内容</p>
           </CardContent>
         </Card>
@@ -63,7 +86,7 @@ export default function HomePage() {
             <Lightbulb className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0 个</div>
+            <div className="text-2xl font-bold">{loading ? <Loader2 className="h-5 w-5 animate-spin" /> : `${stats.projects} 个`}</div>
             <p className="text-xs text-muted-foreground mt-1">
               进行中的 side project
             </p>

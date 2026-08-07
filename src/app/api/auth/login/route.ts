@@ -49,8 +49,11 @@ export async function POST(request: NextRequest) {
       }
 
       // JS fetch → 返回 JSON
+      // 读取 from 参数（中间件重定向时附加）
+      const url = new URL(request.url);
+      const from = url.searchParams.get("from") || "/";
       await setAuthCookie(token);
-      return NextResponse.json({ success: true, redirect: "/" });
+      return NextResponse.json({ success: true, redirect: from });
     }
 
     const now = Date.now();

@@ -455,33 +455,29 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
   };
 
   const handleSave = async () => {
-    if (dailyReports.length > 0) {
-      // 每日日报模式：保存全部
-      for (const report of dailyReports) {
+    try {
+      if (dailyReports.length > 0) {
+        for (const report of dailyReports) {
+          await fetch("/api/daily-report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ meta: report.meta, content: report.content }),
+          });
+        }
+      } else if (previewContent && previewMeta) {
         await fetch("/api/daily-report", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            meta: report.meta,
-            content: report.content,
-          }),
+          body: JSON.stringify({ meta: previewMeta, content: previewContent }),
         });
+      } else {
+        return;
       }
-    } else if (previewContent && previewMeta) {
-      // 单天/汇总模式
-      await fetch("/api/daily-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          meta: previewMeta,
-          content: previewContent,
-        }),
-      });
-    } else {
-      return;
+      fetchReports();
+    } catch (e) {
+      alert("保存失败，请重试");
+      console.error("Save failed:", e);
     }
-
-    fetchReports();
   };
 
   /** 切换每日日报预览 */
@@ -1011,11 +1007,7 @@ ${isRange ? "该时间段内" : "今天"}没有新的 Git 提交记录，去写�
                   size="sm"
                   className="gap-1"
                   onClick={handleSave}
-                  disabled={
-                    !previewMeta ||
-                    (dailyReports.length === 0 &&
-                      reports.some((r) => r.id === previewMeta?.id))
-                  }
+                  disabled={!previewContent}
                 >
                   {dailyReports.length > 1 ? (
                     <>
